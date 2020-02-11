@@ -2,12 +2,13 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "igclib/util.hpp"
 
-Flight::Flight(std::string filename) {
+Flight::Flight(const std::string& filename) {
   std::ifstream f;
   f.open(filename);
   if (!f.is_open()) {
-    std::string error = "Could not open file '" + filename + "'";
+    const std::string error = "Could not open file '" + filename + "'";
     throw std::runtime_error(error);
   }
 
@@ -26,7 +27,15 @@ Flight::Flight(std::string filename) {
 }
 
 void Flight::process_H_record(const std::string& record){
-  std::cout << record << std::endl;
+  const std::string record_code = record.substr(2, 3);
+  if (record_code == "PLT"){
+    size_t delim = record.find(':') + 1;
+    this->pilot_name = record.substr(delim);
+    util::trim(this->pilot_name);
+  } else if (record_code == "TZO"){
+    size_t delim = record.find(':') + 1;
+    this->time_zone_offset = std::stoi(record.substr(delim));
+  }
 }
 
 void Flight::to_JSON() {

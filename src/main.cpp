@@ -1,5 +1,6 @@
 #include <iostream>
 #include "igclib/flight.hpp"
+#include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
 
@@ -7,7 +8,7 @@ void usage(){
   std::cerr << "igclib command-line tool" << std::endl;
 }
 
-void command_xc(std::string flight_file, std::string airspace_file){
+void command_xc(const std::string& flight_file, const std::string& airspace_file){
   if (flight_file.empty()){
     std::cerr << "No flight file provided" << std::endl;
     exit(EXIT_FAILURE);
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]){
   std::string airspace_file;
   std::string command;
 
-  for (uint8_t i = 2; i < argc-1; i++){
+  for (int i = 2; i < argc-1; i++){
     if (!strcmp(argv[i], "--flight")){
       flight_file = argv[++i];
     }
