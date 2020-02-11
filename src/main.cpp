@@ -18,7 +18,7 @@ void command_xc(std::string flight_file, std::string airspace_file){
 
   try {
     Flight f(flight_file);
-    f.json();
+    f.to_JSON();
   } catch (std::runtime_error& e){
     std::cout << e.what() << std::endl;
   }
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
   std::string airspace_file;
   std::string command;
 
-  for (int i = 2; i < argc-1; i++){
+  for (uint8_t i = 2; i < argc-1; i++){
     if (!strcmp(argv[i], "--flight")){
       flight_file = argv[++i];
     }

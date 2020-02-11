@@ -4,16 +4,31 @@
 #include <string>
 
 Flight::Flight(std::string filename) {
-  std::ifstream igc;
-  igc.open(filename);
-  if (!igc.is_open()) {
+  std::ifstream f;
+  f.open(filename);
+  if (!f.is_open()) {
     std::string error = "Could not open file '" + filename + "'";
     throw std::runtime_error(error);
   }
-  std::cerr << "Opened file " << filename << std::endl;
-  igc.close();
+
+  std::string line;
+  while (std::getline(f, line)) {
+    switch (line[0]){
+    case 'H':
+      process_H_record(line);
+      break;
+    default:
+      break;
+    }
+  }
+
+  f.close();
 }
 
-void Flight::json() {
-  std::cerr << "json serialization of flight" << std::endl;
+void Flight::process_H_record(const std::string& record){
+  std::cout << record << std::endl;
+}
+
+void Flight::to_JSON() {
+  std::cerr << "JSON serialization of flight" << std::endl;
 }
