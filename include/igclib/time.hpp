@@ -18,7 +18,6 @@ private:
 };
 
 namespace std {
-
 // specialize hash function to insert Time in unordered map
 template <> struct hash<Time> {
   std::size_t operator()(const Time &t) const { return t.hash(); }

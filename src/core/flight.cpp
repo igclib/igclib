@@ -59,9 +59,12 @@ Flight::Flight(const std::string &flight_file) {
     }
   }
 
-  std::cout << min_lat << " : " << max_lat << " - " << min_lon << " : "
-            << max_lon <<" - " << min_alt << " : "
-            << max_alt << std::endl;
+#ifndef NDEBUG
+  std::cerr << this->points.size() << " points in flight" << std::endl;
+  std::cerr << min_lat << " : " << max_lat << " - " << min_lon << " : "
+            << max_lon << " - " << min_alt << " : " << max_alt << std::endl;
+#endif
+
   f.close();
 }
 
@@ -83,8 +86,6 @@ void Flight::process_B_record(const std::string &record) {
   this->points.emplace(t, p);
 }
 
-void Flight::to_JSON() const {
-  std::cerr << this->points.size() << " points in map" << std::endl;
-}
+void Flight::to_JSON() const {}
 
 void Flight::validate(const Airspace &airspace) {}

@@ -17,7 +17,6 @@ void command_xc(const std::string &flight_file,
   try {
     Flight flight(flight_file);
     if (!airspace_file.empty()) {
-      std::cout << "Airspace : " << airspace_file << std::endl;
       Airspace airspace(airspace_file);
       flight.validate(airspace);
     }

@@ -10,3 +10,7 @@ public:
   double lon;
   double alt;
 };
+
+class Geometry {
+  
+};
