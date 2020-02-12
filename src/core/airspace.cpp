@@ -13,7 +13,6 @@ Airspace::Airspace(const std::string &airspace_file) {
     throw std::runtime_error(error);
   }
 
-  bool current_airspace = false;
   std::string line;
   std::vector<std::string> record;
   while (std::getline(f, line)) {

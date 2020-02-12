@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include "boost/geometry.hpp"
 
 Flight::Flight(const std::string &flight_file) {
   // read and parse igc file
@@ -15,6 +16,8 @@ Flight::Flight(const std::string &flight_file) {
     const std::string error = "Could not open file '" + flight_file + "'";
     throw std::runtime_error(error);
   }
+
+  this->linestring = linestring_t();
 
   std::string line;
   while (std::getline(f, line)) {
@@ -63,6 +66,7 @@ Flight::Flight(const std::string &flight_file) {
   std::cerr << this->points.size() << " points in flight" << std::endl;
   std::cerr << min_lat << " : " << max_lat << " - " << min_lon << " : "
             << max_lon << " - " << min_alt << " : " << max_alt << std::endl;
+  std::cerr << "Linestring of length " << boost::geometry::length(this->linestring) << std::endl;
 #endif
 
   f.close();
@@ -84,8 +88,11 @@ void Flight::process_B_record(const std::string &record) {
   Time t(record.substr(1, 6), this->time_zone_offset);
   GeoPoint p(record.substr(7));
   this->points.emplace(t, p);
+  boost::geometry::append(this->linestring, p);
 }
 
 void Flight::to_JSON() const {}
 
-void Flight::validate(const Airspace &airspace) {}
+void Flight::validate(const Airspace &airspace) {
+  std::cerr << "Validating " << sizeof(airspace) << std::endl;
+}

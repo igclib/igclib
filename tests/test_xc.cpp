@@ -2,7 +2,7 @@
 #include "assert.h"
 #include <iostream>
 
-int main(int argc, char *argv[]){
+int main(){
   Flight f("data/flights/xc_col_agnel.igc");
   if (f.pilot_name != "Téo Bouvard"){
     std::cerr << "Test failed" << std::endl;

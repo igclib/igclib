@@ -29,3 +29,15 @@ GeoPoint::GeoPoint(const std::string &str) {
   double gps_alt = std::stoi(str.substr(23, 5));
   this->alt = gps_alt;
 }
+
+GeoPoint::GeoPoint(const GeoPoint& g){
+  this->lat = g.lat;
+  this->lon = g.lon;
+  this->alt = g.alt;
+}
+
+GeoPoint::GeoPoint(){
+  this->lat = 0;
+  this->lon = 0;
+  this->alt = -1;
+}

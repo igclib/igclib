@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
+typedef boost::geometry::model::linestring<GeoPoint> linestring_t;
+
 class Flight {
 
 public:
@@ -22,5 +24,6 @@ private:
 
   int time_zone_offset = 0;
   std::unordered_map<Time, GeoPoint> points;
+  linestring_t linestring;
   std::vector<GeoPoint> infractions;
 };
