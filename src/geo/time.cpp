@@ -28,3 +28,7 @@ Time::Time(const std::string &str, int offset /* = 0 */) {
 bool Time::operator<(const Time &t) const {
   return this->sec_from_midnight < t.sec_from_midnight;
 }
+
+bool Time::operator==(const Time &t) const {
+  return this->sec_from_midnight == t.sec_from_midnight;
+}
