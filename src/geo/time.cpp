@@ -21,8 +21,9 @@ Time::Time(const std::string &str, int offset /* = 0 */) {
   if ((this->second < 0) || (this->second > 59)) {
     throw std::runtime_error("Second must be between 0 and 59");
   }
-  
-  this->sec_from_midnight = (3600 * this->hour) + (60 * this->minute) + this->second;
+
+  this->sec_from_midnight =
+      (3600 * this->hour) + (60 * this->minute) + this->second;
 }
 
 bool Time::operator<(const Time &t) const {

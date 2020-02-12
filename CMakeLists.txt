@@ -10,4 +10,4 @@ include_directories(include)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-#include(CTest)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wextra -g")

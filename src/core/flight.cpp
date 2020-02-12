@@ -29,7 +29,6 @@ Flight::Flight(const std::string &filename) {
     }
   }
 
-
   f.close();
 }
 
@@ -45,12 +44,12 @@ void Flight::process_H_record(const std::string &record) {
   }
 }
 
-void Flight::process_B_record(const std::string &record){
+void Flight::process_B_record(const std::string &record) {
   Time t(record.substr(1, 6), this->time_zone_offset);
   GeoPoint p(record.substr(7));
   this->points.emplace(t, p);
 }
 
-void Flight::to_JSON() const{
+void Flight::to_JSON() const {
   std::cerr << this->points.size() << " points in map" << std::endl;
 }
