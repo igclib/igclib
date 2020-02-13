@@ -1,6 +1,7 @@
 #pragma once
 
 #include "igclib/geopoint.hpp"
+#include <string>
 
 class Geometry {
 public:
@@ -8,16 +9,19 @@ public:
 };
 
 class Cylinder : public Geometry {
-  public:
+public:
+  Cylinder(GeoPoint &center, double radius);
   bool contains(const GeoPoint &point) const;
+private:
+  GeoPoint center;
+  double radius;
 };
 
-class Polygon : public Geometry {
-  public:
-  bool contains(const GeoPoint &point) const;
+private:
+  GeoPoint center;
+  double radius;
 };
 
-class Sector : public Geometry {
-  public:
-  bool contains(const GeoPoint &point) const;
-};
+class Polygon : public Geometry {};
+
+class Sector : public Geometry {};

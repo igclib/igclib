@@ -6,9 +6,7 @@
 
 class GeoPoint {
 public:
-  GeoPoint(const std::string &str);
-  GeoPoint();
-  
+  GeoPoint() : lat(0), lon(0), alt(0) {};
 
   double lat;
   double lon;
@@ -16,3 +14,8 @@ public:
 };
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(GeoPoint, double, cs::cartesian, lat, lon);
+
+class IGCPoint : public GeoPoint {
+public:
+  IGCPoint(const std::string &str);
+};

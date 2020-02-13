@@ -1,7 +1,7 @@
 #pragma once
 
-#include "igclib/geopoint.hpp"
 #include "igclib/geometry.hpp"
+#include "igclib/geopoint.hpp"
 #include "igclib/pointcollection.hpp"
 #include <ostream>
 #include <string>
@@ -12,7 +12,7 @@ class Zone {
 
 public:
   Zone(const std::vector<std::string> &openair_record);
-  std::vector<GeoPoint> contained_points(const PointCollection& points) const;
+  std::vector<GeoPoint> contained_points(const PointCollection &points) const;
   friend std::ostream &operator<<(std::ostream &os, const Zone &z);
 
 private:
@@ -22,8 +22,10 @@ private:
   int ceiling;
   int floor;
 
-  bool ceiling_ground_relative;
-  bool floor_ground_relative;
+  bool ceiling_is_ground_relative;
+  bool floor_is_ground_relative;
 
-  std::vector<Geometry> geometries;
+  // we have to store pointers to geometries to be able to call overloaded
+  // virtual methods of derived classes
+  std::vector<std::shared_ptr<Geometry>> geometries;
 };

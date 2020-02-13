@@ -1,7 +1,8 @@
 #include "igclib/geopoint.hpp"
 #include <stdexcept>
+#include <iostream>
 
-GeoPoint::GeoPoint(const std::string &str) {
+IGCPoint::IGCPoint(const std::string &str) {
   // decode latitude
   double d = std::stod(str.substr(0, 2));
   double m = std::stod(str.substr(2, 6)) / 1000.0;
@@ -24,14 +25,18 @@ GeoPoint::GeoPoint(const std::string &str) {
   }
   this->lon = (hemisphere == 'E') ? l : -l;
 
-  //decode altitude
-  //double baro_alt = std::stoi(str.substr(18, 5));
+  // decode altitude
+  // double baro_alt = std::stoi(str.substr(18, 5));
   double gps_alt = std::stoi(str.substr(23, 5));
   this->alt = gps_alt;
+<<<<<<< HEAD
+=======
 }
 
-GeoPoint::GeoPoint(){
+GeoPoint::GeoPoint() {
+  std::cerr << " WTF " << std::endl;
   this->lat = 0;
   this->lon = 0;
   this->alt = -1;
+>>>>>>> a949842... TO SQUASH
 }

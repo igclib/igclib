@@ -18,7 +18,7 @@ if(Boost_FOUND)
     include_directories(include)
     
     add_subdirectory(src)
-    add_subdirectory(tests)
+    #add_subdirectory(tests)
 else()
   message( FATAL_ERROR "Boost libraries are required. Install them and try again." )
 endif()
