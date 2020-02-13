@@ -17,11 +17,6 @@ private:
   double radius;
 };
 
-private:
-  GeoPoint center;
-  double radius;
-};
-
 class Polygon : public Geometry {};
 
 class Sector : public Geometry {};

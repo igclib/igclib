@@ -29,14 +29,4 @@ IGCPoint::IGCPoint(const std::string &str) {
   // double baro_alt = std::stoi(str.substr(18, 5));
   double gps_alt = std::stoi(str.substr(23, 5));
   this->alt = gps_alt;
-<<<<<<< HEAD
-=======
-}
-
-GeoPoint::GeoPoint() {
-  std::cerr << " WTF " << std::endl;
-  this->lat = 0;
-  this->lon = 0;
-  this->alt = -1;
->>>>>>> a949842... TO SQUASH
 }

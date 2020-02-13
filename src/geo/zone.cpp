@@ -11,11 +11,7 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   GeoPoint center_variable;
   bool center_is_set = false;
 
-<<<<<<< HEAD
   //bool clockwise = true;
-=======
-  bool clockwise = true;
->>>>>>> a949842... TO SQUASH
 
   for (std::string r : openair_record) {
     std::string line_code = r.substr(0, 2);
@@ -45,13 +41,8 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       // circle
       double radius = std::stod(r.substr(3));
       if (center_is_set) {
-<<<<<<< HEAD
         std::shared_ptr<Geometry> p = std::make_shared<Cylinder>(center_variable, radius);
         this->geometries.push_back(p);
-=======
-        Cylinder c(center_variable, radius);
-        this->geometries.push_back(c);
->>>>>>> a949842... TO SQUASH
         center_is_set = false;
       }
     } else if (line_code == "DY") {
