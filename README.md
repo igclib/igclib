@@ -14,4 +14,4 @@ cmake --build build
 ```
 
 ## Requirements
-* Boost 
+* [Boost](https://www.boost.org/)

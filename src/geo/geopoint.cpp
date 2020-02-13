@@ -1,4 +1,4 @@
-#include "igclib/geo.hpp"
+#include "igclib/geopoint.hpp"
 #include <stdexcept>
 
 GeoPoint::GeoPoint(const std::string &str) {
@@ -28,12 +28,6 @@ GeoPoint::GeoPoint(const std::string &str) {
   //double baro_alt = std::stoi(str.substr(18, 5));
   double gps_alt = std::stoi(str.substr(23, 5));
   this->alt = gps_alt;
-}
-
-GeoPoint::GeoPoint(const GeoPoint& g){
-  this->lat = g.lat;
-  this->lon = g.lon;
-  this->alt = g.alt;
 }
 
 GeoPoint::GeoPoint(){

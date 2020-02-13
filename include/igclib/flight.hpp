@@ -1,13 +1,9 @@
 #pragma once
 
 #include "igclib/airspace.hpp"
-#include "igclib/geo.hpp"
-#include "igclib/time.hpp"
+#include "igclib/geopoint.hpp"
 #include <string>
-#include <unordered_map>
 #include <vector>
-
-typedef boost::geometry::model::linestring<GeoPoint> linestring_t;
 
 class Flight {
 
@@ -23,7 +19,6 @@ private:
   void process_B_record(const std::string &record);
 
   int time_zone_offset = 0;
-  std::unordered_map<Time, GeoPoint> points;
-  linestring_t linestring;
+  PointCollection points;
   std::vector<GeoPoint> infractions;
 };

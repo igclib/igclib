@@ -1,12 +1,12 @@
 #include "igclib/flight.hpp"
 #include "igclib/airspace.hpp"
+#include "igclib/geopoint.hpp"
 #include "igclib/time.hpp"
 #include "igclib/util.hpp"
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include "boost/geometry.hpp"
 
 Flight::Flight(const std::string &flight_file) {
   // read and parse igc file
@@ -17,7 +17,7 @@ Flight::Flight(const std::string &flight_file) {
     throw std::runtime_error(error);
   }
 
-  this->linestring = linestring_t();
+  this->points = PointCollection();
 
   std::string line;
   while (std::getline(f, line)) {
@@ -34,40 +34,7 @@ Flight::Flight(const std::string &flight_file) {
     }
   }
 
-  // compute geometry
-  double min_lat = 90.0;
-  double max_lat = -90.0;
-  double min_lon = 180.0;
-  double max_lon = -180.0;
-  double min_alt = 10000; // this is arbitrary
-  double max_alt = 0;
-  for (auto &it : this->points) {
-    if (it.second.lat < min_lat) {
-      min_lat = it.second.lat;
-    }
-    if (it.second.lat > max_lat) {
-      max_lat = it.second.lat;
-    }
-    if (it.second.lon < min_lon) {
-      min_lon = it.second.lon;
-    }
-    if (it.second.lon > max_lon) {
-      max_lon = it.second.lon;
-    }
-    if (it.second.alt < min_alt) {
-      min_alt = it.second.alt;
-    }
-    if (it.second.alt > max_alt) {
-      max_alt = it.second.alt;
-    }
-  }
-
-#ifndef NDEBUG
-  std::cerr << this->points.size() << " points in flight" << std::endl;
-  std::cerr << min_lat << " : " << max_lat << " - " << min_lon << " : "
-            << max_lon << " - " << min_alt << " : " << max_alt << std::endl;
-  std::cerr << "Linestring of length " << boost::geometry::length(this->linestring) << std::endl;
-#endif
+  this->points.box();
 
   f.close();
 }
@@ -87,12 +54,11 @@ void Flight::process_H_record(const std::string &record) {
 void Flight::process_B_record(const std::string &record) {
   Time t(record.substr(1, 6), this->time_zone_offset);
   GeoPoint p(record.substr(7));
-  this->points.emplace(t, p);
-  boost::geometry::append(this->linestring, p);
+  this->points.insert(t, p);
 }
 
 void Flight::to_JSON() const {}
 
 void Flight::validate(const Airspace &airspace) {
-  std::cerr << "Validating " << sizeof(airspace) << std::endl;
+  this->infractions = airspace.infractions(this->points);
 }

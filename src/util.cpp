@@ -23,7 +23,7 @@ int level2meters(const int FL) { return feets2meters(100 * FL); }
 std::pair<bool, int> str2alt(const std::string &s) {
   bool ground_relative = false;
   int altitude;
-  if ((s == "SFC") || (s == "GND")) {
+  if (s.find("SFC") != std::string::npos || s.find("GND") != std::string::npos) {
     altitude = 0;
   } else if (s == "UNL") {
     altitude = std::numeric_limits<int>::max();

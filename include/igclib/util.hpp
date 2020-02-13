@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <limits>
 #include <string>
+
 namespace util {
 
 // trim left whitespace in string (in place)
