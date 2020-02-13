@@ -16,7 +16,7 @@ foreach(file ${TEST_SOURCES})
 		PASS_REGULAR_EXPRESSION "Test passed")
 	set_tests_properties(${file_without_ext}
 		PROPERTIES
-		FAIL_REGULAR_EXPRESSION "(Exception|Test failed)")
+		FAIL_REGULAR_EXPRESSION "(Exception|Test.*failed)")
 	set_tests_properties(${file_without_ext}
 		PROPERTIES
 		TIMEOUT 120)

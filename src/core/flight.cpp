@@ -53,8 +53,8 @@ void Flight::process_H_record(const std::string &record) {
 }
 
 void Flight::process_B_record(const std::string &record) {
-  Time t(record.substr(1, 6), this->time_zone_offset);
-  IGCPoint p(record.substr(7));
+  Time t(record, this->time_zone_offset);
+  IGCPoint p(record);
   this->points.insert(t, p);
 }
 
