@@ -23,9 +23,10 @@ int level2meters(const int FL) { return feets2meters(100 * FL); }
 std::pair<bool, int> str2alt(const std::string &s) {
   bool ground_relative = false;
   int altitude;
-  if (s.find("SFC") != std::string::npos || s.find("GND") != std::string::npos) {
+  if (s.find("SFC") != std::string::npos ||
+      s.find("GND") != std::string::npos) {
     altitude = 0;
-  } else if (s == "UNL") {
+  } else if (s.find("UNL") != std::string::npos) {
     altitude = std::numeric_limits<int>::max();
   } else if (s.find("FL") != std::string::npos) {
     altitude = level2meters(strtoi(s));
@@ -38,11 +39,14 @@ std::pair<bool, int> str2alt(const std::string &s) {
   } else if (s.find("ASFC") != std::string::npos ||
              s.find("AGL") != std::string::npos) {
     ground_relative = true;
-    if (s.find("FT")) {
+    if (s.find("FT") != std::string::npos) {
       altitude = feets2meters(strtoi(s));
     } else {
       altitude = strtoi(s);
     }
+  } else {
+    // defaults to meters if FT not found !
+    altitude = feets2meters(strtoi(s));
   }
   return std::pair<bool, int>(ground_relative, altitude);
 }

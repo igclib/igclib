@@ -2,6 +2,7 @@
 
 #include "igclib/geopoint.hpp"
 #include <string>
+#include <vector>
 
 class Geometry {
 public:
@@ -12,11 +13,16 @@ class Cylinder : public Geometry {
 public:
   Cylinder(GeoPoint &center, double radius);
   bool contains(const GeoPoint &point) const;
+
 private:
   GeoPoint center;
   double radius;
 };
 
-class Polygon : public Geometry {};
+class Polygon : public Geometry {
+public:
+  Polygon(std::vector<GeoPoint> &vertices);
+  bool contains(const GeoPoint &point) const;
+};
 
 class Sector : public Geometry {};

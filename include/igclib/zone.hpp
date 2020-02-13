@@ -16,6 +16,8 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const Zone &z);
 
 private:
+  bool in_altitude_range(const GeoPoint &p) const;
+  
   std::string name;
   std::string cls;
 

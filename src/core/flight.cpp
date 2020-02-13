@@ -34,6 +34,7 @@ Flight::Flight(const std::string &flight_file) {
     }
   }
 
+  this->points.close();
   this->points.box();
 
   f.close();
