@@ -1,20 +1,23 @@
 #pragma once
 
 #include "igclib/geopoint.hpp"
-#include <vector>
+#include "igclib/geometry.hpp"
+#include "igclib/pointcollection.hpp"
 #include <ostream>
 #include <string>
+#include <vector>
 
 class Zone {
+  friend class Airspace;
+
 public:
   Zone(const std::vector<std::string> &openair_record);
-  bool contains(const GeoPoint &point) const;
+  std::vector<GeoPoint> contained_points(const PointCollection& points) const;
   friend std::ostream &operator<<(std::ostream &os, const Zone &z);
 
 private:
   std::string name;
   std::string cls;
-  std::string comment;
 
   int ceiling;
   int floor;
@@ -22,5 +25,5 @@ private:
   bool ceiling_ground_relative;
   bool floor_ground_relative;
 
-  std::vector<GeoPoint> polygon;
+  std::vector<Geometry> geometries;
 };

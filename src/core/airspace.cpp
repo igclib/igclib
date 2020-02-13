@@ -39,14 +39,16 @@ Airspace::Airspace(const std::string &airspace_file) {
   f.close();
 }
 
-const std::vector<GeoPoint>
+const std::map<std::string, std::vector<GeoPoint>>
 Airspace::infractions(const PointCollection &points) const {
-#ifndef NDEBUG
-  std::cerr << sizeof(points);
-#endif
-  std::vector<GeoPoint> v;
-  for (const Zone &z : this->zones) {
-    std::cerr << z << std::endl;
+  std::vector<GeoPoint> zone_infractions;
+  std::map<std::string, std::vector<GeoPoint>> infractions;
+  for (const Zone &zone : this->zones) {
+    zone_infractions = zone.contained_points(points);
+    if (!zone_infractions.empty()) {
+      std::cerr << zone << std::endl;
+      infractions[zone.name] = zone_infractions;
+    }
   }
-  return v;
+  return infractions;
 }

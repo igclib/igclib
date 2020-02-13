@@ -1,5 +1,7 @@
 #include "igclib/zone.hpp"
 #include "igclib/geopoint.hpp"
+#include "igclib/pointcollection.hpp"
+#include "igclib/time.hpp"
 #include "igclib/util.hpp"
 #include <string>
 #include <vector>
@@ -24,8 +26,7 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       this->floor_ground_relative = alt.first;
       this->floor = alt.second;
     } else if (line_code == "DP") {
-      // polygon point
-      //this->polygon.push_back(r.substr(3));
+      // this->polygon.push_back(r.substr(3));
     } else if (line_code == "DA") {
       // arc defined by angles
     } else if (line_code == "DB") {
@@ -40,7 +41,20 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const Zone& z){
+std::vector<GeoPoint>
+Zone::contained_points(const PointCollection &points) const {
+  std::vector<GeoPoint> contained_points;
+  for (const Geometry &g : this->geometries) {
+    for (const std::pair<Time, GeoPoint> &pair : points) {
+      if (g.contains(pair.second)) {
+        contained_points.push_back(pair.second);
+      }
+    }
+  }
+  return contained_points;
+}
+
+std::ostream &operator<<(std::ostream &os, const Zone &z) {
   os << z.name;
   return os;
 }

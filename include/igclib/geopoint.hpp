@@ -8,6 +8,7 @@ class GeoPoint {
 public:
   GeoPoint(const std::string &str);
   GeoPoint();
+  
 
   double lat;
   double lon;

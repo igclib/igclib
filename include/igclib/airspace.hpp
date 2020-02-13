@@ -9,7 +9,9 @@
 class Airspace {
 public:
   Airspace(const std::string &airspace_file);
-  const std::vector<GeoPoint> infractions(const PointCollection &points) const;
+  
+  const std::map<std::string, std::vector<GeoPoint>>
+  infractions(const PointCollection &points) const;
 
 private:
   std::vector<Zone> zones;

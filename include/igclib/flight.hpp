@@ -4,6 +4,7 @@
 #include "igclib/geopoint.hpp"
 #include <string>
 #include <vector>
+#include <map>
 
 class Flight {
 
@@ -20,5 +21,5 @@ private:
 
   int time_zone_offset = 0;
   PointCollection points;
-  std::vector<GeoPoint> infractions;
+  std::map<std::string, std::vector<GeoPoint>> infractions;
 };
