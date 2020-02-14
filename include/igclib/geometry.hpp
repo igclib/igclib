@@ -11,7 +11,7 @@ class Geometry {
 public:
   virtual bool contains(const GeoPoint &point) const = 0;
 
-  polygon_t bounding_box;
+  box_t bounding_box;
 };
 
 class Cylinder : public Geometry {
@@ -26,8 +26,11 @@ private:
 
 class Polygon : public Geometry {
 public:
-  Polygon(std::vector<GeoPoint> &vertices);
+  Polygon(const std::vector<GeoPoint> &vertices);
   bool contains(const GeoPoint &point) const;
+
+private:
+  polygon_t polygon;
 };
 
 class Sector : public Geometry {};

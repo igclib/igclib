@@ -1,4 +1,5 @@
 #include "igclib/geometry.hpp"
+#include "boost/geometry.hpp"
 #include "igclib/geopoint.hpp"
 #include <string>
 #include <vector>
@@ -15,9 +16,11 @@ bool Cylinder::contains(const GeoPoint &point) const {
   return true;
 }
 
-Polygon::Polygon(std::vector<GeoPoint> &vertices) { (void)vertices; }
+Polygon::Polygon(const std::vector<GeoPoint> &vertices) {
+  boost::geometry::assign_points(this->polygon, vertices);
+  boost::geometry::envelope(this->polygon, this->bounding_box);
+}
 
 bool Polygon::contains(const GeoPoint &point) const {
-  (void)point;
-  return true;
+  return boost::geometry::within(point, this->polygon);
 }

@@ -20,6 +20,7 @@ Airspace::Airspace(const std::string &airspace_file) {
   std::vector<std::string> record;
   while (std::getline(f, line)) {
     util::trim(line);
+    // discard comments and empty lines
     if (line[0] != '*' && !line.empty()) {
       boost::to_upper(line);
       if (line.substr(0, 2) == "AC") {

@@ -37,17 +37,19 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       OpenAirPoint p(r.substr(3));
       polygon_vertices.push_back(p);
     } else if (line_code == "DA") {
-      (void)clockwise;
       // arc defined by angles
+      // NOT IMPLEMENTED
+      (void)clockwise;
     } else if (line_code == "DB") {
       // arc defined by coordinates
+      // NOT IMPLEMENTED
     } else if (line_code == "DC") {
       // circle
       double radius = std::stod(r.substr(3));
       if (center_is_set) {
-        std::shared_ptr<Geometry> p =
-            std::make_shared<Cylinder>(center_variable, radius);
-        this->geometries.push_back(p);
+        // std::shared_ptr<Geometry> p =
+        std::make_shared<Cylinder>(center_variable, radius);
+        // this->geometries.push_back(p);
         center_is_set = false;
       }
     } else if (line_code == "DY") {
@@ -72,7 +74,9 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   // Precompute bounding box for spatial indexing
   mpolygon_t bboxes;
   for (const std::shared_ptr<Geometry> g : this->geometries) {
-    bboxes.push_back(g->bounding_box);
+    polygon_t bbox;
+    boost::geometry::convert(g->bounding_box, bbox);
+    bboxes.push_back(bbox);
   }
   boost::geometry::envelope(bboxes, this->bounding_box);
 }
