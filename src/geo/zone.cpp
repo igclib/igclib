@@ -1,4 +1,5 @@
 #include "igclib/zone.hpp"
+#include "boost/geometry.hpp"
 #include "igclib/geometry.hpp"
 #include "igclib/geopoint.hpp"
 #include "igclib/pointcollection.hpp"
@@ -36,7 +37,7 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       OpenAirPoint p(r.substr(3));
       polygon_vertices.push_back(p);
     } else if (line_code == "DA") {
-      (void) clockwise;
+      (void)clockwise;
       // arc defined by angles
     } else if (line_code == "DB") {
       // arc defined by coordinates
@@ -67,6 +68,13 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
     std::shared_ptr<Geometry> p = std::make_shared<Polygon>(polygon_vertices);
     this->geometries.push_back(p);
   }
+
+  // Precompute bounding box for spatial indexing
+  mpolygon_t bboxes;
+  for (const std::shared_ptr<Geometry> g : this->geometries) {
+    bboxes.push_back(g->bounding_box);
+  }
+  boost::geometry::envelope(bboxes, this->bounding_box);
 }
 
 std::vector<GeoPoint>

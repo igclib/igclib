@@ -24,17 +24,22 @@ Airspace::Airspace(const std::string &airspace_file) {
       boost::to_upper(line);
       if (line.substr(0, 2) == "AC") {
         if (!record.empty()) {
-          this->zones.push_back(record);
+          Zone zone(record);
+          box_mapping value =
+              std::make_pair(zone.bounding_box, this->zones.size());
+          this->index.insert(value);
+          this->zones.push_back(zone);
           record.clear();
         }
       }
       record.push_back(line);
     }
   }
+
+  // Insert last zone
+  Zone zone(record);
+  this->index.insert(std::make_pair(zone.bounding_box, this->zones.size()));
   this->zones.push_back(record);
-#ifndef NDEBUG
-  std::cerr << this->zones.size() << " zones in airspace" << std::endl;
-#endif
 
   f.close();
 }

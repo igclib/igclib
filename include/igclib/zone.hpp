@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+typedef boost::geometry::model::box<GeoPoint> box_t;
+typedef boost::geometry::model::polygon<GeoPoint> polygon_t;
+typedef boost::geometry::model::multi_polygon<polygon_t> mpolygon_t;
+
 class Zone {
   friend class Airspace;
 
@@ -15,9 +19,11 @@ public:
   std::vector<GeoPoint> contained_points(const PointCollection &points) const;
   friend std::ostream &operator<<(std::ostream &os, const Zone &z);
 
+  box_t bounding_box;
+
 private:
   bool in_altitude_range(const GeoPoint &p) const;
-  
+
   std::string name;
   std::string cls;
 
