@@ -1,11 +1,12 @@
 #include "igclib/airspace.hpp"
+#include "igclib/config.hpp"
 #include "igclib/flight.hpp"
 #include "stdio.h"
 #include "stdlib.h"
-#include "string.h"
 #include <iostream>
+#include <string>
 
-void usage() { std::cerr << "igclib command-line tool" << std::endl; }
+void usage() { std::cerr << HEADER << std::endl; }
 
 void command_xc(const std::string &flight_file,
                 const std::string &airspace_file) {
@@ -44,8 +45,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // parse command
   if (!strcmp(argv[1], "xc")) {
     command_xc(flight_file, airspace_file);
+  } else {
+    std::cerr << "Unkown command : " << argv[1] << std::endl;
   }
 
   return EXIT_SUCCESS;
