@@ -45,11 +45,12 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       // NOT IMPLEMENTED
     } else if (line_code == "DC") {
       // circle
-      double radius = std::stod(r.substr(3));
+      // WARNING THIS
+      double radius = convert::nm2meters(std::stod(r.substr(3)));
       if (center_is_set) {
-        // std::shared_ptr<Geometry> p =
-        std::make_shared<Cylinder>(center_variable, radius);
-        // this->geometries.push_back(p);
+        std::shared_ptr<Geometry> p =
+            std::make_shared<Cylinder>(center_variable, radius);
+        this->geometries.push_back(p);
         center_is_set = false;
       }
     } else if (line_code == "DY") {
@@ -63,9 +64,11 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
     } else if (r.substr(0, 4) == "V X=") {
       // center assignemnt for DA, DB, and DC records
       center_variable = OpenAirPoint(r.substr(4));
+      center_is_set = true;
     }
   }
 
+  // Create polygon with all DP vertices found
   if (!polygon_vertices.empty()) {
     std::shared_ptr<Geometry> p = std::make_shared<Polygon>(polygon_vertices);
     this->geometries.push_back(p);

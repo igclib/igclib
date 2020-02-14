@@ -1,6 +1,6 @@
 # igclib
-A library for paragliding competitions and XC
 
+A library for paragliding competitions and XC
 
 ## Get started
 
@@ -14,4 +14,6 @@ cmake --build build
 ```
 
 ## Requirements
-* [Boost](https://www.boost.org/)
+
+- [Boost](https://www.boost.org/)
+- [GeographicLib](https://geographiclib.sourceforge.io/html/index.html)

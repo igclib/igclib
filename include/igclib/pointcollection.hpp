@@ -19,9 +19,9 @@ public:
   void box() const;
   timepoints_t::const_iterator begin() const { return this->points.begin(); };
   timepoints_t::const_iterator end() const { return this->points.end(); };
+  linestring_t linestring;
 
 private:
   timepoints_t points;
-  linestring_t linestring;
   box_t bounding_box;
 };

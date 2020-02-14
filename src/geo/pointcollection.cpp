@@ -2,10 +2,7 @@
 #include "boost/geometry.hpp"
 #include <iostream>
 
-PointCollection::PointCollection() {
-  this->linestring = linestring_t();
-  // this->bounding_box = box_t();
-}
+PointCollection::PointCollection() { this->linestring = linestring_t(); }
 
 void PointCollection::insert(const Time &t, const GeoPoint &p) {
   this->points.emplace(t, p);
@@ -21,5 +18,5 @@ void PointCollection::box() const {
   std::cerr << this->points.size() << " points in flight" << std::endl;
   std::cerr << "Bbox " << boost::geometry::dsv(bounding_box) << std::endl;
 #endif
-  //return this->bounding_box;
+  // return this->bounding_box;
 }

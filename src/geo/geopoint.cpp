@@ -1,9 +1,12 @@
 #include "igclib/geopoint.hpp"
+#include "GeographicLib/Geodesic.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 #include <iostream>
 #include <stdexcept>
 
 IGCPoint::IGCPoint(const std::string &str) {
+  // http://vali.fai-civl.org/documents/IGC-Spec_v1.00.pdf
   double DD;
   double dd;
   double lat;
@@ -13,7 +16,6 @@ IGCPoint::IGCPoint(const std::string &str) {
                           str.substr(18, 5), str.substr(23, 1),
                           str.substr(25, 5), str.substr(30, 5)};
 
-  
   // decode latitude
   DD = std::stod(tokens[0]);
   dd = std::stod(tokens[1]) / 1000.0;
@@ -42,20 +44,25 @@ IGCPoint::IGCPoint(const std::string &str) {
 }
 
 OpenAirPoint::OpenAirPoint(const std::string &str) {
+  // http://www.winpilot.com/UsersGuide/UserAirspace.asp
+  // spec seems really flexible
   double deg;
   double min;
   double sec;
   double lat;
   double lon;
-  std::vector<std::string> tokens;
+  std::string tokens[4];
   std::vector<std::string> dms;
 
-  boost::split(tokens, str, [](char c) { return std::isspace(c); });
-  if (tokens.size() < 4) {
-    throw std::runtime_error("Invalid OpenAir record" + str);
-  }
+  size_t lat_delim = str.find_first_of("NS");
+  size_t lon_delim = str.find_first_of("EW");
+  tokens[0] = str.substr(0, lat_delim);
+  tokens[1] = str.substr(lat_delim, 1);
+  tokens[2] = str.substr(lat_delim + 1, lon_delim - (lat_delim + 1));
+  tokens[3] = str.substr(lon_delim, 1);
 
-  boost::split(dms, tokens[0], [](char c) { return !std::isdigit(c); });
+  boost::split(dms, tokens[0],
+               [](char c) { return (!std::isdigit(c) && !std::isspace(c)); });
   if (dms.size() != 3) {
     throw std::runtime_error("Invalid OpenAir record" + str);
   }
@@ -65,7 +72,8 @@ OpenAirPoint::OpenAirPoint(const std::string &str) {
   lat = deg + min / 60 + sec / 3600;
   this->lat = tokens[1] == "N" ? lat : -lat;
 
-  boost::split(dms, tokens[2], [](char c) { return !std::isdigit(c); });
+  boost::split(dms, tokens[2],
+               [](char c) { return (!std::isdigit(c) && !std::isspace(c)); });
   if (dms.size() != 3) {
     throw std::runtime_error("Invalid OpenAir record" + str);
   }
@@ -79,9 +87,16 @@ OpenAirPoint::OpenAirPoint(const std::string &str) {
   this->ground_alt = 0;
 }
 
-GeoPoint::GeoPoint(double lat, double lon, int alt, int ground_alt){
+GeoPoint::GeoPoint(double lat, double lon, int alt, int ground_alt) {
   this->lat = lat;
   this->lon = lon;
   this->alt = alt;
   this->ground_alt = ground_alt;
+}
+
+double GeoPoint::distance(const GeoPoint &p) const {
+  const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
+  double distance;
+  geod.Inverse(this->lat, this->lon, p.lat, p.lon, distance);
+  return distance;
 }

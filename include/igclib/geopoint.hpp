@@ -6,8 +6,9 @@
 
 class GeoPoint {
 public:
-  GeoPoint(){};
+  GeoPoint() : lat(0), lon(0), alt(0), ground_alt(0){};
   GeoPoint(double lat, double lon, int alt, int ground_alt);
+  double distance(const GeoPoint &p) const;
 
   double lat;
   double lon;

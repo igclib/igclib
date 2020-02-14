@@ -17,6 +17,8 @@ class Zone {
 public:
   Zone(const std::vector<std::string> &openair_record);
   std::vector<GeoPoint> contained_points(const PointCollection &points) const;
+  bool empty() const { return this->geometries.empty(); };
+
   friend std::ostream &operator<<(std::ostream &os, const Zone &z);
 
   box_t bounding_box;

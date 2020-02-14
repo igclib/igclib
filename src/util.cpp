@@ -14,11 +14,16 @@ int strtoi(const std::string &s) {
 }
 
 int feets2meters(const int f) {
-  // http://www.sfei.org/it/gis/map-interpretation/conversion-constants
+  // https://www.nist.gov/pml/special-publication-811/nist-guide-si-appendix-b-conversion-factors/nist-guide-si-appendix-b8
   return int(0.3048 * f);
 }
 
 int level2meters(const int FL) { return feets2meters(100 * FL); }
+
+int nm2meters(const double nm) {
+  // https://www.bipm.org/utils/common/pdf/si_brochure_8_en.pdf
+  return 1852 * nm;
+}
 
 std::pair<bool, int> str2alt(const std::string &s) {
   bool ground_relative = false;

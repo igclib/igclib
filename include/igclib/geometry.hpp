@@ -10,7 +10,6 @@ typedef boost::geometry::model::polygon<GeoPoint> polygon_t;
 class Geometry {
 public:
   virtual bool contains(const GeoPoint &point) const = 0;
-
   box_t bounding_box;
 };
 

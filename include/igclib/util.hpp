@@ -32,4 +32,5 @@ namespace convert {
 std::pair<bool, int> str2alt(const std::string &s);
 int level2meters(const int FL);
 int feets2meters(const int f);
+int nm2meters(const double nm);
 } // namespace convert

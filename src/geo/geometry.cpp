@@ -1,19 +1,28 @@
 #include "igclib/geometry.hpp"
+#include "GeographicLib/Geodesic.hpp"
 #include "boost/geometry.hpp"
 #include "igclib/geopoint.hpp"
 #include <string>
 #include <vector>
 
-// TODO : initialize bounding_box attribute in each derived class ctor
-// TODO : implement contains for each derived class
 Cylinder::Cylinder(GeoPoint &center, double radius) {
   this->center = center;
   this->radius = radius;
+  polygon_t edges;
+  const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
+  for (int i = 0; i < 4; i++) {
+    double lat;
+    double lon;
+    geod.Direct(this->center.lat, this->center.lon, i * 90, this->radius, lat,
+                lon);
+    boost::geometry::append(edges, GeoPoint(lat, lon, 0, 0));
+  }
+  boost::geometry::envelope(edges, this->bounding_box);
 }
 
 bool Cylinder::contains(const GeoPoint &point) const {
-  (void)point;
-  return true;
+  double distance_to_center = this->center.distance(point);
+  return distance_to_center <= this->radius;
 }
 
 Polygon::Polygon(const std::vector<GeoPoint> &vertices) {
