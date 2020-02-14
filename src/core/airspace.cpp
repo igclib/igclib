@@ -31,7 +31,7 @@ Airspace::Airspace(const std::string &airspace_file) {
       record.push_back(line);
     }
   }
-
+  this->zones.push_back(record);
 #ifndef NDEBUG
   std::cerr << this->zones.size() << " zones in airspace" << std::endl;
 #endif

@@ -1,6 +1,7 @@
 * Sample airspace taken from winpilot
 * http://www.winpilot.com/UsersGuide/UserAirspace.asp
 
+* 1
 * Reno Class C
 AC C
 AN RENO-C
@@ -9,6 +10,7 @@ AH 8400 ft
 V X=39:29.9 N 119:46.1 W
 DC 5
 
+* 2
 * Reno Class C
 AC C
 AN RENO
@@ -25,7 +27,7 @@ DA 10,320,200
 V D=-
 DA 5,200,270
 
-
+* 3
 AC C
 AN BEALE AFB
 AL SFC
@@ -33,6 +35,7 @@ AH 4100 ft
 V X=39:08.2 N 121:26.2 W
 DC 5
 
+* 4
 AC C
 AN BEALE AFB
 AL 2600ft
@@ -42,6 +45,7 @@ DA 10,9,130
 V D=-
 DA 5,130,9
 
+* 5
 AC C
 AN BEALE AFB
 AL 1600ft
@@ -51,7 +55,7 @@ DA 10,130,9
 V D=-5
 DA 5,9,130
 
-
+* 6
 AC C
 AN SACRAMENTO/MCCLEAN
 AL 1600 ft
@@ -63,7 +67,7 @@ DA 10,344,219
 
 ******************* RESTRICTED ********************
 
-
+* 7
 AC R
 AN R 4812 4804
 AL 0
@@ -74,6 +78,7 @@ V D=-
 V X=39:10:20 N 118:37:00 W
 DA 5,175,355
 
+* 8
 AC R
 AN R-4803 S
 AL 0
@@ -83,6 +88,7 @@ DA 3,27,270
 DP 39:35:00 N 118:59:20 W
 DP 39:36:00 N 118:53:30 W
 
+* 9
 AC R
 AN R-4806 W
 AL 0
@@ -100,7 +106,7 @@ DP 36:35:00 N 115:37:00 W    c38
 DP 36:35:00 N 115:53:00 W    c39
 DP 36:35:45 N 115:56:10 W    c40
 
-
+* 10
 AC R
 AN R-4806 E
 AL 100 Agl
@@ -112,7 +118,7 @@ DP 36:47:40 N 115:07:00 W    c41
 DP 37:11:45 N 115:07:00 W    c42
 DP 37:16:55 N 115:11:00 W    c43
 
-
+* 11
 AC R
 AN R-4807 A
 AL 0
@@ -147,7 +153,7 @@ DP 37:26:25 N 117:04:45 W    c23
 DP 37:32:30 N 117:05:55 W    c24
 DP 37:53:00 N 117:06:00 W    c25
 
-
+* 12
 AC R
 AN R-4807 B
 AL 0
@@ -160,7 +166,7 @@ DP 37:21:00 N 116:27:00 W    c16
 DP 37:21:00 N 116:34:10 W    c17
 DP 37:16:00 N 116:31:00 W    c18
 
-
+* 13
 AC R
 AN R-4808 N
 AL 0
@@ -184,7 +190,7 @@ DP 37:06:00 N 115:35:00 W    c31
 DP 37:16:55 N 115:35:00 W    c32
 DP 37:28:00 N 115:35:00 W    c33
 
-
+* 14
 AC R
 AN R-4808 S
 AL 0
@@ -193,7 +199,7 @@ DP 36:46:00 N 116:26:45 W    c27
 DP 36:41:00 N 116:15:00 W    c28
 DP 36:41:00 N 116:26:45 W   
 
-
+* 15
 AC R
 AN R-4809
 AL 0
@@ -204,7 +210,7 @@ DP 37:33:00 N 116:43:20 W    c3
 DP 37:33:00 N 116:26:20 W    c4
 DP 37:53:00 N 116:26:20 W    c5
 
-
+* 16
 AC R
 AN R-4810
 AL 0
@@ -214,6 +220,7 @@ DA 5,293,215
 V X=39:09:00 N 118:42:00 W
 DA 3,159,347
 
+* 17
 AC R
 AN R-4811
 AL 0
@@ -221,6 +228,7 @@ AH 15000ft (Mo-Fri)
 V X=38:14:40 N 118:38:40 W
 DC 1.5
 
+* 18
 AC R
 AN R-4813
 AL 0
@@ -232,6 +240,7 @@ DP 40:01:20 N 118:15:00 W
 DP 40:01:20 N 118:00:55 W
 DP 39:58:20 N 118:00:55 W
 
+* 19
 AC R
 AN R-4816S
 AL 500 ft agl
@@ -247,7 +256,7 @@ DP 39:34:00 N 117:41:20 W
 DP 39:34:00 N 118:12:30 W
 DP 39:30:00 N 118:15:18 W
 
-
+* 20
 AC R
 AN R-4816N
 AL 1500 ft agl
@@ -260,6 +269,7 @@ DP 39:34:00 N 117:40:00 W
 
 
 ************* ALERT ************
+* 21
 AC R
 AN A-481
 AL 7000ft
@@ -272,7 +282,7 @@ DA 30,274,307
 
 
 ************* CLASS D ***********
-
+* 22
 AC D
 AN NAS-FALLON
 AL 0
@@ -280,6 +290,7 @@ AH 6400ft
 V X=39:25.0 N 118:42.0 W
 DC 6
 
+* 23
 AC D
 AN LAKE TAHOE
 AL 0
@@ -289,6 +300,7 @@ DC 5
 
 
 ************* Wave Windows ***********
+* 24
 AC W
 AN Minden West
 AH Ask on 122.8
