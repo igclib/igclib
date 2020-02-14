@@ -2,12 +2,12 @@
 #include <stdexcept>
 #include <string>
 
-Time::Time(const std::string &str, int offset /* = 0 */) {
+IGCTime::IGCTime(const std::string &str, int offset /* = 0 */) {
   this->hour = std::stoi(str.substr(1, 2)) + offset;
   this->minute = std::stoi(str.substr(3, 2));
   this->second = std::stoi(str.substr(5, 2));
   this->sec_from_midnight =
-      (3600 * this->hour) + (60 * this->minute) + this->second;
+      3600 * this->hour + 60 * this->minute + this->second;
 
   if ((this->hour < 0) || (this->hour > 23)) {
     throw std::runtime_error("Hour must be between 0 and 23");
@@ -22,4 +22,12 @@ Time::Time(const std::string &str, int offset /* = 0 */) {
 
 bool Time::operator==(const Time &t) const {
   return this->sec_from_midnight == t.sec_from_midnight;
+}
+
+Time::Time(int hour, int minute, int second, int offset /* = 0*/) {
+  this->hour = hour + offset;
+  this->minute = minute;
+  this->second = second;
+  this->sec_from_midnight =
+      3600 * this->hour + 60 * this->minute + this->second;
 }

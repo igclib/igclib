@@ -3,14 +3,13 @@
 #include <string>
 
 class Time {
-
 public:
-  Time(const std::string &str, int offset = 0);
+  Time(){};
+  Time(int hour, int minute, int second, int offset = 0);
   size_t hash(void) const { return this->sec_from_midnight; };
-  bool operator<(const Time &t) const;
   bool operator==(const Time &t) const;
 
-private:
+protected:
   int hour = 0;
   int minute = 0;
   int second = 0;
@@ -24,3 +23,9 @@ template <> struct hash<Time> {
 };
 
 } // namespace std
+
+class IGCTime : public Time {
+
+public:
+  IGCTime(const std::string &str, int offset = 0);
+};

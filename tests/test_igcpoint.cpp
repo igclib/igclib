@@ -1,6 +1,7 @@
 #include "igclib/geopoint.hpp"
 #include <assert.h>
 #include <iostream>
+#include <vector>
 
 #define PRECISION 0.1
 
@@ -42,7 +43,7 @@ int main() {
   }
 
   if (!failures.empty()) {
-    for (int i : failures){
+    for (int i : failures) {
       std::cerr << "Test " << i << " failed" << std::endl;
     }
   } else {
