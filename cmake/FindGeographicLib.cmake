@@ -1,6 +1,6 @@
 # Look for GeographicLib
 #
-# Set
+#  Set
 #  GeographicLib_FOUND = GEOGRAPHICLIB_FOUND = TRUE
 #  GeographicLib_INCLUDE_DIRS = /usr/local/include
 #  GeographicLib_LIBRARIES = /usr/local/lib/libGeographic.so

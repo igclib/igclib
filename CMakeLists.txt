@@ -18,10 +18,7 @@ find_package(Boost REQUIRED)
 find_package (GeographicLib REQUIRED)
 
 include_directories(include)
-include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${GeographicLib_LIBRARIES})   
 
 add_subdirectory(src)
 add_subdirectory(tests)
-
-
