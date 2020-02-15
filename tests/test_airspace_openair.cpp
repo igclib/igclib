@@ -10,8 +10,8 @@ int main() {
 
   Airspace airspace("data/airspace/reno.txt");
 
-  // Number of airspaces in file
-  if (airspace.size() != 24) {
+  // Number of airspaces in file (24 - 2 unsupported)
+  if (airspace.size() != 22) {
     failures.push_back("Wrong number of zones in Airspace. Expected 24, got " +
                        airspace.size());
   }

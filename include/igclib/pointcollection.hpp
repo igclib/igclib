@@ -14,7 +14,7 @@ class PointCollection {
 public:
   PointCollection();
   void insert(const Time &t, const GeoPoint &p);
-  int size() const { return this->points.size(); };
+  size_t size() const { return this->points.size(); };
   void close();
   void box() const;
   timepoints_t::const_iterator begin() const { return this->points.begin(); };

@@ -4,8 +4,10 @@
 #include <igclib/geopoint.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
+#include <igclib/xcscore.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <queue>
 #include <stdexcept>
 #include <string>
 
@@ -38,7 +40,7 @@ Flight::Flight(const std::string &flight_file) {
   }
 
   this->points.close();
-  this->points.box();
+  compute_score();
 
   f.close();
 }
@@ -70,6 +72,9 @@ json Flight::serialize() const {
       j["infractions"][infraction.first].push_back(p.serialize());
     }
   }
+
+  j["xc_info"] = this->score.serialize();
+
   return j;
 }
 
@@ -92,4 +97,22 @@ void Flight::save(const std::string &out) const {
 
 void Flight::validate(const Airspace &airspace) {
   this->infractions = airspace.infractions(this->points);
+}
+
+void Flight::compute_score() {
+  // Algorithm designed by Ondrej Palkovsky
+  // http://www.penguin.cz/~ondrap/algorithm.pdf
+
+  std::priority_queue<Candidate> candidates;
+  Candidate initial_guess = Candidate(this->points.linestring);
+  candidates.push(initial_guess);
+
+  while (!candidates.top().is_solution()) {
+    std::pair<Candidate, Candidate> branches = candidates.top().branch();
+    candidates.pop();
+    candidates.push(branches.first);
+    candidates.push(branches.second);
+  }
+
+  this->score = candidates.top().score;
 }

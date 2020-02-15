@@ -2,7 +2,10 @@
 #include "boost/geometry.hpp"
 #include <iostream>
 
-PointCollection::PointCollection() { this->linestring = linestring_t(); }
+PointCollection::PointCollection() {
+  // why is  this necessary ?
+  this->linestring = linestring_t();
+}
 
 void PointCollection::insert(const Time &t, const GeoPoint &p) {
   this->points.emplace(t, p);

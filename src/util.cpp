@@ -1,4 +1,5 @@
-#include "igclib/util.hpp"
+#include <igclib/geopoint.hpp>
+#include <igclib/util.hpp>
 #include <string>
 
 namespace convert {

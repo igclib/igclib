@@ -10,6 +10,8 @@ public:
   GeoPoint() : lat(0), lon(0), alt(0), agl(0){};
   GeoPoint(double lat, double lon, int alt, int agl);
   double distance(const GeoPoint &p) const;
+  double heading(const GeoPoint &p) const;
+  GeoPoint project(double distance, double heading) const;
   nlohmann::json serialize() const;
 
   double lat;
@@ -18,7 +20,7 @@ public:
   int agl;
 };
 
-BOOST_GEOMETRY_REGISTER_POINT_2D(GeoPoint, double, cs::cartesian, lat, lon);
+BOOST_GEOMETRY_REGISTER_POINT_2D(GeoPoint, double, cs::cartesian, lat, lon)
 
 class IGCPoint : public GeoPoint {
 public:

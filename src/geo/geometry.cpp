@@ -9,13 +9,8 @@ Cylinder::Cylinder(const GeoPoint &center, double radius) {
   this->center = center;
   this->radius = radius;
   polygon_t edges;
-  const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
   for (int i = 0; i < 4; i++) {
-    double lat;
-    double lon;
-    geod.Direct(this->center.lat, this->center.lon, i * 90, this->radius, lat,
-                lon);
-    boost::geometry::append(edges, GeoPoint(lat, lon, 0, 0));
+    boost::geometry::append(edges, center.project(90 * i, radius));
   }
   boost::geometry::envelope(edges, this->bbox);
 }
@@ -62,13 +57,11 @@ Sector::Sector(const GeoPoint &center, const GeoPoint &p1, const GeoPoint &p2) {
 bool Sector::contains(const GeoPoint &point) const {
   const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
   double angle_from_center;
+  double distance_from_center;
   double angle_at_point;
   geod.Inverse(this->center.lat, this->center.lon, point.lat, point.lon,
-               angle_from_center, angle_at_point);
-  if (angle_from_center >= this->angle_start &&
-      angle_from_center <= this->angle_end) {
-    double distance_to_center = this->center.distance(point);
-    return distance_to_center <= this->radius;
-  }
-  return false;
+               distance_from_center, angle_from_center, angle_at_point);
+  return (angle_from_center >= this->angle_start &&
+          angle_from_center <= this->angle_end &&
+          distance_from_center <= this->radius);
 }

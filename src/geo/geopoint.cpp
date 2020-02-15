@@ -96,10 +96,26 @@ GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {
 }
 
 double GeoPoint::distance(const GeoPoint &p) const {
-  const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
+  GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
   double distance;
   geod.Inverse(this->lat, this->lon, p.lat, p.lon, distance);
   return distance;
+}
+
+double GeoPoint::heading(const GeoPoint &p) const {
+  GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
+  double heading;
+  double unused;
+  geod.Inverse(this->lat, this->lon, p.lat, p.lon, heading, unused);
+  return heading;
+}
+
+GeoPoint GeoPoint::project(double heading, double distance) const {
+  GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
+  double lat;
+  double lon;
+  geod.Direct(this->lat, this->lon, heading, distance, lat, lon);
+  return GeoPoint(lat, lon, this->alt, this->alt);
 }
 
 json GeoPoint::serialize() const {
