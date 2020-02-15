@@ -5,14 +5,12 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-using json = nlohmann::json;
-
 class GeoPoint {
 public:
   GeoPoint() : lat(0), lon(0), alt(0), agl(0){};
   GeoPoint(double lat, double lon, int alt, int agl);
   double distance(const GeoPoint &p) const;
-  json serialize() const;
+  nlohmann::json serialize() const;
 
   double lat;
   double lon;

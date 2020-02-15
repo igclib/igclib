@@ -1,5 +1,3 @@
-set(LIB_NAME lib_${CMAKE_PROJECT_NAME})
-
 file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false test_*.cpp)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -8,8 +6,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_CURRENT_BINARY_DI
 foreach(file ${TEST_SOURCES})
 	string(REGEX REPLACE "(^.*/|\\.[^.]*$)" "" file_without_ext ${file})
 	add_executable(${file_without_ext} ${file})
-	target_link_libraries(${file_without_ext} ${LIB_NAME})
+	target_link_libraries(${file_without_ext} lib_${PROJECT_NAME})
 	add_test(${file_without_ext} ${file_without_ext})
+
 	set_tests_properties(${file_without_ext}
 		PROPERTIES
 		PASS_REGULAR_EXPRESSION "Test passed")

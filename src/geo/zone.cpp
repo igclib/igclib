@@ -6,15 +6,19 @@
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
 #include <igclib/zone.hpp>
+#include <iostream>
 #include <string>
 #include <vector>
 
 Zone::Zone(const std::vector<std::string> &openair_record) {
-  GeoPoint center_variable;
-  bool center_is_set = false;
+  // http://www.winpilot.com/UsersGuide/UserAirspace.asp
 
-  std::vector<GeoPoint> polygon_vertices;
-  bool clockwise = true;
+  bool center_is_set = false; // set to true when parsing a "V X="
+  bool width_is_set = false;  // set to true when parsing a "V W="
+  bool clockwise = true;      // arc angle direction (defaults to true)
+  double airway_width;        // width of DY records
+  GeoPoint center_variable;   // center of  DA, DB,  and DC records
+  std::vector<GeoPoint> polygon_vertices; // accumulator of DP records
 
   for (std::string r : openair_record) {
     std::string line_code = r.substr(0, 2);
@@ -56,7 +60,15 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       }
     } else if (line_code == "DB") {
       // arc defined by coordinates
-      // NOT IMPLEMENTED
+      if (center_is_set) {
+        size_t start = r.find(' ');
+        size_t delim = r.find(',');
+        OpenAirPoint p1(r.substr(start, delim - start));
+        OpenAirPoint p2(r.substr(delim + 1));
+        std::shared_ptr<Geometry> p =
+            std::make_shared<Sector>(center_variable, p1, p2);
+        this->geometries.push_back(p);
+      }
     } else if (line_code == "DC") {
       // circle
       double radius = convert::nm2meters(std::stod(r.substr(3)));
@@ -68,8 +80,12 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
         // center_is_set = false;
       }
     } else if (line_code == "DY") {
-      // airway (how to handle airways?)
-      // NOT IMPLEMENTED
+      // airway
+      if (width_is_set) {
+        (void)airway_width;
+      }
+      std::cerr << "Airways are not yet supported. DY record of zone "
+                << this->name << " is discarded." << std::endl;
     } else if (r.substr(0, 4) == "V D=") {
       // direction assignement for DA and DB records
       if (r.find('-' != std::string::npos)) {
@@ -79,11 +95,22 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       // center assignemnt for DA, DB, and DC records
       center_variable = OpenAirPoint(r.substr(4));
       center_is_set = true;
+    } else if (r.substr(0, 4) == "V W=") {
+      // width assignement for DY records
+      airway_width = convert::strtoi(r.substr(4));
+      width_is_set = true;
     }
   }
 
   // Create polygon with all DP vertices found
-  if (!polygon_vertices.empty()) {
+  // TODO : when only two DP were set, try to define polygon with rest of
+  // geometries ?
+  if (!polygon_vertices.empty() && polygon_vertices.size() <= 2) {
+    std::cerr
+        << "Automatic closing of 2 DP is not supported. DP records of zone "
+        << this->name << " are discarded." << std::endl;
+  }
+  if (polygon_vertices.size() > 2) {
     std::shared_ptr<Geometry> p = std::make_shared<Polygon>(polygon_vertices);
     this->geometries.push_back(p);
   }

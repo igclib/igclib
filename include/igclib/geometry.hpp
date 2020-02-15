@@ -39,6 +39,7 @@ class Sector : public Geometry {
 public:
   Sector(const GeoPoint &center, int radius, double angle_start,
          double angle_end);
+  Sector(const GeoPoint &center, const GeoPoint &p1, const GeoPoint &p2);
   bool contains(const GeoPoint &point) const;
 
 private:

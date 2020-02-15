@@ -45,6 +45,20 @@ Sector::Sector(const GeoPoint &center, int radius, double angle_start,
   this->bbox = Cylinder(center, radius).bounding_box();
 }
 
+Sector::Sector(const GeoPoint &center, const GeoPoint &p1, const GeoPoint &p2) {
+  const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
+  double angle_at_point; // not used but necessary for required constructor
+  double distance_p1;
+  double distance_p2;
+  geod.Inverse(center.lat, center.lon, p1.lat, p1.lon, distance_p1,
+               this->angle_start, angle_at_point);
+  geod.Inverse(center.lat, center.lon, p2.lat, p2.lon, distance_p2,
+               this->angle_end, angle_at_point);
+  // radius is set to furthest point
+  this->radius = distance_p1 > distance_p2 ? distance_p1 : distance_p2;
+  this->bbox = Cylinder(this->center, this->radius).bounding_box();
+}
+
 bool Sector::contains(const GeoPoint &point) const {
   const GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
   double angle_from_center;
