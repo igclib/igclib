@@ -1,10 +1,10 @@
-#include "igclib/flight.hpp"
 #include "assert.h"
+#include "igclib/flight.hpp"
 #include <iostream>
 
-int main(){
+int main() {
   Flight f("data/flights/xc_col_agnel.igc");
-  if (f.pilot_name != "Téo Bouvard"){
+  if (f.pilot() != "Téo Bouvard") {
     std::cerr << "Test failed" << std::endl;
   }
 

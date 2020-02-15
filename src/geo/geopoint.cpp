@@ -1,7 +1,6 @@
 #include "igclib/geopoint.hpp"
 #include "GeographicLib/Geodesic.hpp"
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+
 #include <iostream>
 #include <stdexcept>
 
@@ -99,4 +98,8 @@ double GeoPoint::distance(const GeoPoint &p) const {
   double distance;
   geod.Inverse(this->lat, this->lon, p.lat, p.lon, distance);
   return distance;
+}
+
+bool GeoPoint::operator==(const GeoPoint &p) const {
+  return (this->lat == p.lat && this->lon == p.lon && this->alt == p.alt);
 }

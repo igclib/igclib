@@ -1,15 +1,16 @@
-#include "igclib/airspace.hpp"
-#include "igclib/config.hpp"
-#include "igclib/flight.hpp"
-#include "stdio.h"
-#include "stdlib.h"
+#include <igclib/airspace.hpp>
+#include <igclib/config.hpp>
+#include <igclib/flight.hpp>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string>
+#include <vector>
 
 void usage() { std::cerr << HEADER << std::endl; }
 
 void command_xc(const std::string &flight_file,
-                const std::string &airspace_file) {
+                const std::string &airspace_file, const std::string &output) {
   if (flight_file.empty()) {
     std::cerr << "No flight file provided" << std::endl;
     exit(EXIT_FAILURE);
@@ -21,7 +22,7 @@ void command_xc(const std::string &flight_file,
       Airspace airspace(airspace_file);
       flight.validate(airspace);
     }
-    flight.to_JSON();
+    flight.to_JSON(output);
   } catch (std::runtime_error &e) {
     std::cout << e.what() << std::endl;
   }
@@ -36,18 +37,21 @@ int main(int argc, char *argv[]) {
   std::string flight_file;
   std::string airspace_file;
   std::string command;
+  std::string output;
 
   for (int i = 2; i < argc - 1; i++) {
     if (!strcmp(argv[i], "--flight")) {
       flight_file = argv[++i];
     } else if (!strcmp(argv[i], "--airspace")) {
       airspace_file = argv[++i];
+    } else if (!strcmp(argv[i], "--output")) {
+      output = argv[++i];
     }
   }
 
   // parse command
   if (!strcmp(argv[1], "xc")) {
-    command_xc(flight_file, airspace_file);
+    command_xc(flight_file, airspace_file, output);
   } else {
     std::cerr << "Unkown command : " << argv[1] << std::endl;
   }

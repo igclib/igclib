@@ -19,10 +19,6 @@ public:
   std::vector<GeoPoint> contained_points(const PointCollection &points) const;
   bool empty() const { return this->geometries.empty(); };
 
-  friend std::ostream &operator<<(std::ostream &os, const Zone &z);
-
-  box_t bounding_box;
-
 private:
   bool in_altitude_range(const GeoPoint &p) const;
 
@@ -38,4 +34,5 @@ private:
   // we have to store pointers to geometries to be able to call overloaded
   // virtual methods of derived classes
   std::vector<std::shared_ptr<Geometry>> geometries;
+  box_t bounding_box;
 };

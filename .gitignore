@@ -31,9 +31,6 @@
 *.out
 *.app
 
-# Editor
-.vscode
-
 # Build directory
 build
 

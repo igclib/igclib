@@ -10,6 +10,8 @@ public:
   GeoPoint(double lat, double lon, int alt, int ground_alt);
   double distance(const GeoPoint &p) const;
 
+  bool operator==(const GeoPoint &p) const;
+
   double lat;
   double lon;
   int alt;

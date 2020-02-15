@@ -1,12 +1,15 @@
-#include "igclib/flight.hpp"
-#include "igclib/airspace.hpp"
-#include "igclib/geopoint.hpp"
-#include "igclib/time.hpp"
-#include "igclib/util.hpp"
 #include <fstream>
+#include <igclib/airspace.hpp>
+#include <igclib/flight.hpp>
+#include <igclib/geopoint.hpp>
+#include <igclib/time.hpp>
+#include <igclib/util.hpp>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <string>
+
+using json = nlohmann::json;
 
 Flight::Flight(const std::string &flight_file) {
   // read and parse igc file
@@ -58,7 +61,29 @@ void Flight::process_B_record(const std::string &record) {
   this->points.insert(t, p);
 }
 
-void Flight::to_JSON() const {}
+void Flight::to_JSON(const std::string &out) const {
+  json j;
+  j["pilot"] = this->pilot_name;
+  for (auto &infraction : this->infractions) {
+    j["infractions"][infraction.first];
+    for (auto &p : infraction.second) {
+      j["infractions"][infraction.first].push_back(p.alt);
+    }
+  }
+
+  if (out == "-" || out.empty()) {
+    std::cout << j;
+  } else {
+    std::ofstream f;
+    f.open(out);
+    if (!f.is_open()) {
+      const std::string error = "Could not open file '" + out + "'";
+      throw std::runtime_error(error);
+    }
+    f << j;
+    f.close();
+  }
+}
 
 void Flight::validate(const Airspace &airspace) {
   this->infractions = airspace.infractions(this->points);

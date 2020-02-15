@@ -1,10 +1,11 @@
-#include "igclib/zone.hpp"
-#include "boost/geometry.hpp"
-#include "igclib/geometry.hpp"
-#include "igclib/geopoint.hpp"
-#include "igclib/pointcollection.hpp"
-#include "igclib/time.hpp"
-#include "igclib/util.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/geometry.hpp>
+#include <igclib/geometry.hpp>
+#include <igclib/geopoint.hpp>
+#include <igclib/pointcollection.hpp>
+#include <igclib/time.hpp>
+#include <igclib/util.hpp>
+#include <igclib/zone.hpp>
 #include <string>
 #include <vector>
 
@@ -38,20 +39,33 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       polygon_vertices.push_back(p);
     } else if (line_code == "DA") {
       // arc defined by angles
-      // NOT IMPLEMENTED
-      (void)clockwise;
+      if (center_is_set) {
+        std::vector<std::string> tokens;
+        boost::split(tokens, r, [](char c) { return c == ','; });
+        int radius = convert::nm2meters(convert::strtoi(tokens[0]));
+        double angle_start = convert::strtoi(tokens[1]);
+        double angle_end = convert::strtoi(tokens[2]);
+        if (!clockwise) {
+          double tmp = angle_end;
+          angle_end = angle_start;
+          angle_start = tmp;
+        }
+        std::shared_ptr<Geometry> p = std::make_shared<Sector>(
+            center_variable, radius, angle_start, angle_end);
+        this->geometries.push_back(p);
+      }
     } else if (line_code == "DB") {
       // arc defined by coordinates
       // NOT IMPLEMENTED
     } else if (line_code == "DC") {
       // circle
-      // WARNING THIS
       double radius = convert::nm2meters(std::stod(r.substr(3)));
       if (center_is_set) {
         std::shared_ptr<Geometry> p =
             std::make_shared<Cylinder>(center_variable, radius);
         this->geometries.push_back(p);
-        center_is_set = false;
+        // should center variable be invalidated after adding a circle ?
+        // center_is_set = false;
       }
     } else if (line_code == "DY") {
       // airway (how to handle airways?)
@@ -77,9 +91,9 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   // Precompute bounding box for spatial indexing
   mpolygon_t bboxes;
   for (const std::shared_ptr<Geometry> g : this->geometries) {
-    polygon_t bbox;
-    boost::geometry::convert(g->bounding_box, bbox);
-    bboxes.push_back(bbox);
+    polygon_t poly;
+    boost::geometry::convert(g->bounding_box(), poly);
+    bboxes.push_back(poly);
   }
   boost::geometry::envelope(bboxes, this->bounding_box);
 }
@@ -114,9 +128,4 @@ bool Zone::in_altitude_range(const GeoPoint &p) const {
   }
 
   return (higher_than_floor && lower_than_ceiling);
-}
-
-std::ostream &operator<<(std::ostream &os, const Zone &z) {
-  os << z.name;
-  return os;
 }

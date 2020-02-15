@@ -10,12 +10,15 @@ typedef boost::geometry::model::polygon<GeoPoint> polygon_t;
 class Geometry {
 public:
   virtual bool contains(const GeoPoint &point) const = 0;
-  box_t bounding_box;
+  const box_t &bounding_box() const { return this->bbox; };
+
+protected:
+  box_t bbox;
 };
 
 class Cylinder : public Geometry {
 public:
-  Cylinder(GeoPoint &center, double radius);
+  Cylinder(const GeoPoint &center, double radius);
   bool contains(const GeoPoint &point) const;
 
 private:
@@ -32,4 +35,15 @@ private:
   polygon_t polygon;
 };
 
-class Sector : public Geometry {};
+class Sector : public Geometry {
+public:
+  Sector(const GeoPoint &center, int radius, double angle_start,
+         double angle_end);
+  bool contains(const GeoPoint &point) const;
+
+private:
+  GeoPoint center;
+  int radius;
+  double angle_start;
+  double angle_end;
+};
