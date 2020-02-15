@@ -117,12 +117,12 @@ bool Zone::in_altitude_range(const GeoPoint &p) const {
   bool higher_than_floor = false;
   bool lower_than_ceiling = false;
 
-  if (((this->floor_is_ground_relative) && (p.ground_alt > this->floor)) ||
+  if (((this->floor_is_ground_relative) && (p.agl > this->floor)) ||
       ((!this->floor_is_ground_relative) && (p.alt > this->floor))) {
     higher_than_floor = true;
   }
 
-  if (((this->ceiling_is_ground_relative) && (p.ground_alt < this->ceiling)) ||
+  if (((this->ceiling_is_ground_relative) && (p.agl < this->ceiling)) ||
       ((!this->floor_is_ground_relative) && (p.alt < this->ceiling))) {
     lower_than_ceiling = true;
   }

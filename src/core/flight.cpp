@@ -61,15 +61,20 @@ void Flight::process_B_record(const std::string &record) {
   this->points.insert(t, p);
 }
 
-void Flight::to_JSON(const std::string &out) const {
-  json j;
-  j["pilot"] = this->pilot_name;
+json Flight::serialize() const {
+  json j = {{"pilot", this->pilot_name}};
+
   for (auto &infraction : this->infractions) {
     j["infractions"][infraction.first];
     for (auto &p : infraction.second) {
-      j["infractions"][infraction.first].push_back(p.alt);
+      j["infractions"][infraction.first].push_back(p.serialize());
     }
   }
+  return j;
+}
+
+void Flight::save(const std::string &out) const {
+  json j = this->serialize();
 
   if (out == "-" || out.empty()) {
     std::cout << j;

@@ -22,7 +22,7 @@ void command_xc(const std::string &flight_file,
       Airspace airspace(airspace_file);
       flight.validate(airspace);
     }
-    flight.to_JSON(output);
+    flight.save(output);
   } catch (std::runtime_error &e) {
     std::cout << e.what() << std::endl;
   }

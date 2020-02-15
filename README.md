@@ -12,20 +12,14 @@ A library for paragliding competitions and XC
 - Task validation
 - Race scoring
 
-## Get started
+## Install
 
-Before building the project, make sure you have installed all the [requirements](#requirements).
+See the [install wiki](https://github.com/igclib/igclib/wiki/Install)
 
-```
-https://github.com/igclib/igclib.git
-cd igclib
-mkdir build
+## Acknowledgements
 
-cmake -S . -B build
-cmake --build build
-```
-
-## Requirements
+This project uses the following libraries.
 
 - [Boost](https://www.boost.org/)
 - [GeographicLib](https://geographiclib.sourceforge.io/html/index.html)
+- [nlohmann/json](https://github.com/nlohmann/json.git)

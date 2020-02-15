@@ -1,19 +1,21 @@
 #pragma once
 
-#include "igclib/airspace.hpp"
-#include "igclib/geopoint.hpp"
+#include <igclib/airspace.hpp>
+#include <igclib/geopoint.hpp>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+
+using json = nlohmann::json;
 
 class Flight {
 
 public:
   Flight(const std::string &flight_file);
-  void to_JSON(const std::string &out) const;
+  void save(const std::string &out) const;
   void validate(const Airspace &airspace);
-
-  const std::string &pilot() const { return this->pilot_name; };
+  json serialize() const;
 
 private:
   std::string pilot_name = "Unknown pilot";

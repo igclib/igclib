@@ -1,8 +1,10 @@
-#include "igclib/geopoint.hpp"
-#include "GeographicLib/Geodesic.hpp"
-
+#include <GeographicLib/Geodesic.hpp>
+#include <igclib/geopoint.hpp>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <stdexcept>
+
+using json = nlohmann::json;
 
 IGCPoint::IGCPoint(const std::string &str) {
   // http://vali.fai-civl.org/documents/IGC-Spec_v1.00.pdf
@@ -30,7 +32,7 @@ IGCPoint::IGCPoint(const std::string &str) {
   // decode altitude
   this->alt = std::stoi(tokens[7]);
   // all ground altitudes should be set in a batch request to the elevation API
-  this->ground_alt = 0;
+  this->agl = 0;
 
   if ((this->lon < -180.0) || (lon > 180.0)) {
     throw std::runtime_error("Longitude must be between -180 and 180");
@@ -83,14 +85,14 @@ OpenAirPoint::OpenAirPoint(const std::string &str) {
   this->lon = tokens[3] == "E" ? lon : -lon;
 
   this->alt = 0;
-  this->ground_alt = 0;
+  this->agl = 0;
 }
 
-GeoPoint::GeoPoint(double lat, double lon, int alt, int ground_alt) {
+GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {
   this->lat = lat;
   this->lon = lon;
   this->alt = alt;
-  this->ground_alt = ground_alt;
+  this->agl = agl;
 }
 
 double GeoPoint::distance(const GeoPoint &p) const {
@@ -100,6 +102,12 @@ double GeoPoint::distance(const GeoPoint &p) const {
   return distance;
 }
 
-bool GeoPoint::operator==(const GeoPoint &p) const {
-  return (this->lat == p.lat && this->lon == p.lon && this->alt == p.alt);
+json GeoPoint::serialize() const {
+  json j = {
+      {"lat", this->lat},
+      {"lon", this->lon},
+      {"alt", this->alt},
+      {"agl", this->agl},
+  };
+  return j;
 }
