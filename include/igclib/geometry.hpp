@@ -4,16 +4,15 @@
 #include <string>
 #include <vector>
 
-typedef boost::geometry::model::box<GeoPoint> box_t;
-typedef boost::geometry::model::polygon<GeoPoint> polygon_t;
-
 class Geometry {
 public:
   virtual bool contains(const GeoPoint &point) const = 0;
-  const box_t &bounding_box() const { return this->bbox; };
+  const boost::geometry::model::box<GeoPoint> &bounding_box() const {
+    return this->bbox;
+  };
 
 protected:
-  box_t bbox;
+  boost::geometry::model::box<GeoPoint> bbox;
 };
 
 class Cylinder : public Geometry {
@@ -32,7 +31,7 @@ public:
   bool contains(const GeoPoint &point) const;
 
 private:
-  polygon_t polygon;
+  boost::geometry::model::polygon<GeoPoint> polygon;
 };
 
 class Sector : public Geometry {

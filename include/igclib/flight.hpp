@@ -8,24 +8,24 @@
 #include <string>
 #include <vector>
 
-using json = nlohmann::json;
-
 class Flight {
+  typedef std::vector<GeoPoint> geopoints_t;
+  typedef std::map<std::string, geopoints_t> infractions_t;
 
 public:
   Flight(const std::string &flight_file);
   void save(const std::string &out) const;
   void validate(const Airspace &airspace);
-  json serialize() const;
+  nlohmann::json serialize() const;
 
 private:
   void process_H_record(const std::string &record);
   void process_B_record(const std::string &record);
   void compute_score();
 
-  XCScore score;
-  std::string pilot_name = "Unknown pilot";
   int time_zone_offset = 0;
+  std::string pilot_name = "Unknown pilot";
+  XCScore score;
   PointCollection points;
-  std::map<std::string, std::vector<GeoPoint>> infractions;
+  infractions_t infractions;
 };

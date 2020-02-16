@@ -2,6 +2,7 @@
 #include <igclib/airspace.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
 #include <igclib/xcscore.hpp>
@@ -22,8 +23,6 @@ Flight::Flight(const std::string &flight_file) {
     throw std::runtime_error(error);
   }
 
-  this->points = PointCollection();
-
   std::string line;
   while (std::getline(f, line)) {
     switch (line[0]) {
@@ -39,7 +38,6 @@ Flight::Flight(const std::string &flight_file) {
     }
   }
 
-  this->points.close();
   compute_score();
 
   f.close();
@@ -63,6 +61,7 @@ void Flight::process_B_record(const std::string &record) {
   this->points.insert(t, p);
 }
 
+// Returns the JSON serialization of a Flight
 json Flight::serialize() const {
   json j = {{"pilot", this->pilot_name}};
 
@@ -79,7 +78,7 @@ json Flight::serialize() const {
 }
 
 void Flight::save(const std::string &out) const {
-  json j = this->serialize();
+  json j = serialize();
 
   if (out == "-" || out.empty()) {
     std::cout << j;
@@ -96,7 +95,7 @@ void Flight::save(const std::string &out) const {
 }
 
 void Flight::validate(const Airspace &airspace) {
-  this->infractions = airspace.infractions(this->points);
+  airspace.infractions(this->points, this->infractions);
 }
 
 void Flight::compute_score() {
@@ -104,7 +103,7 @@ void Flight::compute_score() {
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
   std::priority_queue<Candidate> candidates;
-  Candidate initial_guess = Candidate(this->points.linestring);
+  Candidate initial_guess(this->points);
   candidates.push(initial_guess);
 
   while (!candidates.top().is_solution()) {

@@ -6,43 +6,37 @@
 #include <string>
 #include <vector>
 
+enum class xc_style { UNDEFINED, THREE_POINTS, FLAT_TRIANGLE, FAI_TRIANGLE };
+
 class XCScore {
+
 public:
+  XCScore();
+  XCScore(xc_style &style, double distance, double score);
   nlohmann::json serialize() const;
 
+  xc_style style;
   double distance;
-  std::string style;
   double score;
 };
 
-class PointGroup {
-
-public:
-  PointGroup();
-  PointGroup(const linestring_t &points);
-  std::pair<PointGroup, PointGroup> split() const;
-  linestring_t::const_iterator begin() const {
-    return this->linestring.begin();
-  };
-  linestring_t::const_iterator end() const { return this->linestring.end(); };
-  size_t size() const { return this->linestring.size(); };
-  linestring_t linestring;
-};
-
 class Candidate {
+
 public:
-  Candidate(const linestring_t &points);
-  Candidate(std::vector<PointGroup> groups, std::vector<GeoPoint> before,
-            std::vector<GeoPoint> after);
+  Candidate(const PointCollection &points);
+  Candidate(std::vector<PointCollection> groups, std::vector<GeoPoint> before,
+            std::vector<GeoPoint> after, bool already_closed);
   bool operator<(const Candidate &c) const;
   std::pair<Candidate, Candidate> branch() const;
-  XCScore max_score() const;
-
   bool is_solution() const;
+  bool is_closed(double tolerance) const;
+
   XCScore score;
 
 private:
-  std::vector<PointGroup> groups;
+  XCScore max_score() const;
+  bool closed;
+  std::vector<PointCollection> groups;
   std::vector<GeoPoint> before;
   std::vector<GeoPoint> after;
 };

@@ -7,17 +7,16 @@
 #include <string>
 #include <vector>
 
-typedef boost::geometry::model::box<GeoPoint> box_t;
-typedef boost::geometry::model::polygon<GeoPoint> polygon_t;
-typedef boost::geometry::model::multi_polygon<polygon_t> mpolygon_t;
-
 class Zone {
+  typedef boost::geometry::model::box<GeoPoint> box_t;
+  typedef boost::geometry::model::polygon<GeoPoint> polygon_t;
+  typedef boost::geometry::model::multi_polygon<polygon_t> mpolygon_t;
   friend class Airspace;
 
 public:
   Zone(const std::vector<std::string> &openair_record);
   std::vector<GeoPoint> contained_points(const PointCollection &points) const;
-  bool empty() const { return this->geometries.empty(); };
+  bool empty() const { return geometries.empty(); };
 
 private:
   bool in_altitude_range(const GeoPoint &p) const;

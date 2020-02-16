@@ -10,18 +10,21 @@
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
 
-typedef boost::geometry::model::box<GeoPoint> box_t;
-typedef std::pair<box_t, unsigned int> box_mapping;
-
 class Airspace {
+  typedef bg::model::linestring<GeoPoint> linestring_t;
+  typedef bg::model::box<GeoPoint> box_t;
+  typedef std::pair<bg::model::box<GeoPoint>, size_t> box_mapping_t;
+  typedef std::vector<GeoPoint> geopoints_t;
+  typedef std::map<std::string, geopoints_t> infractions_t;
+
 public:
   Airspace(const std::string &airspace_file);
-  std::size_t size() const { return this->zones.size(); };
+  std::size_t size() const { return zones.size(); };
 
-  const std::map<std::string, std::vector<GeoPoint>>
-  infractions(const PointCollection &points) const;
+  void infractions(const PointCollection &points,
+                   infractions_t &infractions) const;
 
 private:
   std::vector<Zone> zones;
-  bgi::rtree<box_mapping, bgi::quadratic<8>> index;
+  bgi::rtree<box_mapping_t, bgi::quadratic<8>> index;
 };

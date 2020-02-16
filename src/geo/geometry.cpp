@@ -8,7 +8,7 @@
 Cylinder::Cylinder(const GeoPoint &center, double radius) {
   this->center = center;
   this->radius = radius;
-  polygon_t edges;
+  boost::geometry::model::polygon<GeoPoint> edges;
   for (int i = 0; i < 4; i++) {
     boost::geometry::append(edges, center.project(90 * i, radius));
   }

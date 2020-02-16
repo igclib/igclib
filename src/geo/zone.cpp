@@ -122,17 +122,17 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
     boost::geometry::convert(g->bounding_box(), poly);
     bboxes.push_back(poly);
   }
-  boost::geometry::envelope(bboxes, this->bounding_box);
+  boost::geometry::envelope(bboxes, bounding_box);
 }
 
 std::vector<GeoPoint>
 Zone::contained_points(const PointCollection &points) const {
   std::vector<GeoPoint> contained_points;
-  for (const std::shared_ptr<Geometry> g : this->geometries) {
-    for (const std::pair<Time, GeoPoint> &pair : points) {
-      if (this->in_altitude_range(pair.second)) {
-        if (g->contains(pair.second)) {
-          contained_points.push_back(pair.second);
+  for (const std::shared_ptr<Geometry> g : geometries) {
+    for (const GeoPoint &p : points) {
+      if (this->in_altitude_range(p)) {
+        if (g->contains(p)) {
+          contained_points.push_back(p);
         }
       }
     }
@@ -144,13 +144,13 @@ bool Zone::in_altitude_range(const GeoPoint &p) const {
   bool higher_than_floor = false;
   bool lower_than_ceiling = false;
 
-  if (((this->floor_is_ground_relative) && (p.agl > this->floor)) ||
-      ((!this->floor_is_ground_relative) && (p.alt > this->floor))) {
+  if (((floor_is_ground_relative) && (p.agl > floor)) ||
+      ((!floor_is_ground_relative) && (p.alt > floor))) {
     higher_than_floor = true;
   }
 
-  if (((this->ceiling_is_ground_relative) && (p.agl < this->ceiling)) ||
-      ((!this->floor_is_ground_relative) && (p.alt < this->ceiling))) {
+  if (((ceiling_is_ground_relative) && (p.agl < ceiling)) ||
+      ((!floor_is_ground_relative) && (p.alt < ceiling))) {
     lower_than_ceiling = true;
   }
 

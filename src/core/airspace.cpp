@@ -30,8 +30,8 @@ Airspace::Airspace(const std::string &airspace_file) {
           // in this case, do not add it to the index, but clear the record
           // anyway
           if (!zone.empty()) {
-            box_mapping value =
-                std::make_pair(zone.bounding_box, this->zones.size());
+            box_mapping_t value =
+                std::make_pair(zone.bounding_box, zones.size());
             this->index.insert(value);
             this->zones.push_back(zone);
           }
@@ -45,29 +45,27 @@ Airspace::Airspace(const std::string &airspace_file) {
   // Insert last zone
   Zone zone(record);
   if (!zone.empty()) {
-    this->index.insert(std::make_pair(zone.bounding_box, this->zones.size()));
-    this->zones.push_back(record);
+    index.insert(std::make_pair(zone.bounding_box, zones.size()));
+    zones.push_back(record);
   }
 
   f.close();
 }
 
-const std::map<std::string, std::vector<GeoPoint>>
-Airspace::infractions(const PointCollection &points) const {
-  std::map<std::string, std::vector<GeoPoint>> infractions;
-  std::vector<box_mapping> first_pass;
-  std::vector<GeoPoint> zone_infractions;
+void Airspace::infractions(const PointCollection &points,
+                           infractions_t &infractions) const {
+  std::vector<box_mapping_t> first_pass;
+  geopoints_t zone_infractions;
 
-  this->index.query(bgi::intersects(points.linestring),
+  linestring_t flight_track(points.begin(), points.end());
+  this->index.query(bgi::intersects(flight_track),
                     std::back_inserter(first_pass));
 
-  for (const box_mapping &zone_index : first_pass) {
+  for (const box_mapping_t &zone_index : first_pass) {
     zone_infractions = this->zones[zone_index.second].contained_points(points);
     if (!zone_infractions.empty()) {
       std::cerr << this->zones[zone_index.second].name << std::endl;
-      infractions[this->zones[zone_index.second].name] = zone_infractions;
+      infractions[zones[zone_index.second].name] = zone_infractions;
     }
   }
-
-  return infractions;
 }

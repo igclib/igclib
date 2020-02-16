@@ -1,27 +1,31 @@
 #pragma once
 
-#include "boost/geometry.hpp"
-#include "igclib/geopoint.hpp"
-#include "igclib/time.hpp"
+#include <igclib/geopoint.hpp>
+#include <igclib/time.hpp>
 #include <iterator>
 #include <unordered_map>
-
-typedef boost::geometry::model::linestring<GeoPoint> linestring_t;
-typedef boost::geometry::model::box<GeoPoint> box_t;
-typedef std::unordered_map<Time, GeoPoint> timepoints_t;
+#include <vector>
 
 class PointCollection {
+  typedef std::vector<GeoPoint> geopoints_t;
+  typedef std::unordered_map<Time, size_t> timepoints_t;
+
 public:
   PointCollection();
+  PointCollection(geopoints_t::const_iterator start,
+                  geopoints_t::const_iterator end);
   void insert(const Time &t, const GeoPoint &p);
-  size_t size() const { return this->points.size(); };
-  void close();
-  void box() const;
-  timepoints_t::const_iterator begin() const { return this->points.begin(); };
-  timepoints_t::const_iterator end() const { return this->points.end(); };
-  linestring_t linestring;
+  const GeoPoint &operator[](const Time &t) const;
+  size_t size() const { return geopoints.size(); };
+  geopoints_t bbox() const;
+  double bbox_area() const;
+  std::pair<PointCollection, PointCollection> split() const;
+
+  // this allows to range iterate over PointCollection
+  geopoints_t::const_iterator begin() const { return geopoints.begin(); };
+  geopoints_t::const_iterator end() const { return geopoints.end(); };
 
 private:
-  timepoints_t points;
-  box_t bounding_box;
+  geopoints_t geopoints;
+  timepoints_t timepoints;
 };
