@@ -5,10 +5,10 @@ A command-line tool for paragliding competitions and XC.
 ## Features
 
 - Efficient airspace checking against OpenAir files
+- XC score computation
 
 ## Future features
 
-- XC score computation
 - Task validation
 - Race scoring
 

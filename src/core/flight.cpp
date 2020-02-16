@@ -81,7 +81,7 @@ void Flight::save(const std::string &out) const {
   json j = serialize();
 
   if (out == "-" || out.empty()) {
-    std::cout << j;
+    std::cout << j.dump(4) << std::endl;
   } else {
     std::ofstream f;
     f.open(out);
@@ -89,7 +89,7 @@ void Flight::save(const std::string &out) const {
       const std::string error = "Could not open file '" + out + "'";
       throw std::runtime_error(error);
     }
-    f << j;
+    f << j.dump(4);
     f.close();
   }
 }
