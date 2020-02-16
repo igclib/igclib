@@ -1,6 +1,6 @@
 ![igclib banner](https://cdn.jsdelivr.net/gh/igclib/assets@master/img/banner/igclib_banner.svg)
 
-A library for paragliding competitions and XC
+A tool for paragliding competitions and XC
 
 ## Features
 

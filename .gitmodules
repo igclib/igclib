@@ -1,6 +1,6 @@
 [submodule "geographiclib"]
-	path = geographiclib
+	path = include/geographiclib
 	url = git://git.code.sourceforge.net/p/geographiclib/code
 [submodule "json"]
-	path = json
+	path = include/json
 	url = https://github.com/nlohmann/json.git

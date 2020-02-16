@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 message("-- CMAKE_CXX_FLAGS_DEBUG : ${CMAKE_CXX_FLAGS_DEBUG}")
 message("-- CMAKE_CXX_FLAGS_RELEASE : ${CMAKE_CXX_FLAGS_RELEASE}")
 
+# enable testing
 include(CTest)
 
 # find boost libraries
@@ -24,8 +25,8 @@ find_package(Boost REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 # add libraries
-add_subdirectory(geographiclib)
-add_subdirectory(json)
+add_subdirectory(include/geographiclib)
+add_subdirectory(include/json)
 
 # add subdirectories
 add_subdirectory(src)
