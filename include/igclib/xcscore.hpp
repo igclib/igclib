@@ -29,12 +29,13 @@ public:
   bool operator<(const Candidate &c) const;
   std::pair<Candidate, Candidate> branch() const;
   bool is_solution() const;
-  bool is_closed(double tolerance) const;
 
   XCScore score;
 
 private:
   XCScore max_score() const;
+  bool is_closed(double tolerance) const;
+
   bool closed;
   std::vector<PointCollection> groups;
   std::vector<GeoPoint> before;

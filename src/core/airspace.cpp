@@ -31,12 +31,12 @@ Airspace::Airspace(const std::string &airspace_file) {
           // anyway
           if (!zone.empty()) {
             box_mapping_t value =
-                std::make_pair(zone.bounding_box, zones.size());
+                std::make_pair(zone.bounding_box, this->zones.size());
             this->index.insert(value);
             this->zones.push_back(zone);
           }
-          record.clear();
         }
+        record.clear();
       }
       record.push_back(line);
     }

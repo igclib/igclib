@@ -16,7 +16,24 @@ XCScore::XCScore(xc_style &style, double distance, double score) {
 
 // Returns the JSON serialization of an XCScore
 nlohmann::json XCScore::serialize() const {
-  return {{"style", style}, {"distance", distance}, {"score", score}};
+  std::string xc_style;
+  switch (this->style) {
+  case xc_style::THREE_POINTS:
+    xc_style = "Free distance over three points";
+    break;
+  case xc_style::FLAT_TRIANGLE:
+    xc_style = "Flat triangle";
+    break;
+  case xc_style::FAI_TRIANGLE:
+    xc_style = "FAI Triangle";
+    break;
+  default:
+    xc_style = "Undefined";
+    break;
+  }
+  return {{"style", xc_style},
+          {"distance", this->distance},
+          {"score", this->score}};
 }
 
 // Compares two candidates based on their score

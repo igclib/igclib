@@ -1,4 +1,4 @@
-![igclib banner](https://raw.githubusercontent.com/igclib/assets/master/img/banner/igclib_banner.svg?sanitize=true)
+![igclib banner](https://cdn.jsdelivr.net/gh/igclib/assets@master/img/banner/igclib_banner.svg)
 
 A library for paragliding competitions and XC
 
