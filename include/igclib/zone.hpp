@@ -15,12 +15,13 @@ class Zone {
 
 public:
   Zone(const std::vector<std::string> &openair_record);
-  std::vector<GeoPoint> contained_points(const PointCollection &points) const;
+  std::vector<GeoPoint> contained_points(const PointCollection &points,
+                                         bool with_agl) const;
   bool empty() const { return geometries.empty(); };
-  bool needs_agl_checking();
+  bool needs_agl_checking() const;
 
 private:
-  bool in_altitude_range(const GeoPoint &p) const;
+  bool in_altitude_range(const GeoPoint &p, bool with_agl) const;
 
   std::string name;
   std::string cls;

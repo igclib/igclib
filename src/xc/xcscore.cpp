@@ -53,7 +53,8 @@ bool Candidate::is_solution() const {
 }
 
 // Initial constructor creates the groups by splitting the points in three
-// thirds. Before and after are empty as the groups represent all the points.
+// thirds. Before and after only contain the first and the last point as the
+// groups represent all the remaining points.
 Candidate::Candidate(const PointCollection &p) {
   size_t group_size = p.size() / 3;
   for (int i = 0; i < 3; ++i) {
@@ -65,7 +66,8 @@ Candidate::Candidate(const PointCollection &p) {
 
   this->before = std::vector<GeoPoint>{*p.begin()};
   this->after = std::vector<GeoPoint>{*(p.end() - 1)};
-  this->closed = is_closed(2000); // TODO check closed condition
+  this->closed = false; // to prevent use of undefined value in is_closed()
+  this->closed = is_closed(2000); // TODO check closed condition FAI
   this->score = max_score();
 }
 

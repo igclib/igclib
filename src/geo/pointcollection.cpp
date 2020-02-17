@@ -69,7 +69,7 @@ bool PointCollection::set_agl(const std::vector<double> &altitudes) {
     return false;
   }
   for (std::size_t i = 0; i < altitudes.size(); ++i) {
-    this->geopoints[i].agl = altitudes[i];
+    this->geopoints[i].agl = this->geopoints[i].alt - altitudes[i];
   }
   return true;
 }

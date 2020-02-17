@@ -41,9 +41,6 @@ Flight::Flight(const std::string &flight_file) {
 
   compute_score();
 
-  // set to false until agl is actually retrieved
-  this->agl_validable = false;
-
   f.close();
 }
 
@@ -99,6 +96,8 @@ void Flight::save(const std::string &out) const {
 }
 
 void Flight::validate(const Airspace &airspace) {
+  bool is_agl_validable = false;
+
   // retrieve the ground altitude for each point of the flight
   if (airspace.need_agl_checking) {
     if (getenv("ELEVATION_API_KEY")) {
@@ -115,7 +114,7 @@ void Flight::validate(const Airspace &airspace) {
         data = json::parse(r.text);
         std::vector<double> altitudes = data.get<std::vector<double>>();
         if (this->points.set_agl(altitudes)) {
-          this->agl_validable = true;
+          is_agl_validable = true;
         }
       } else if (r.status_code == 400) {
         std::cerr << "Missing or invalid API key for the elevation service."
@@ -133,8 +132,7 @@ void Flight::validate(const Airspace &airspace) {
   }
 
   // then validate intersections
-  // TODO pass this->agl_validable !
-  airspace.infractions(this->points, this->infractions);
+  airspace.infractions(this->points, this->infractions, is_agl_validable);
 }
 
 void Flight::compute_score() {

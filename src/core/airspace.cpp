@@ -64,7 +64,11 @@ Airspace::Airspace(const std::string &airspace_file) {
 }
 
 void Airspace::infractions(const PointCollection &points,
-                           infractions_t &infractions) const {
+                           infractions_t &infractions, bool with_agl) const {
+
+  // TODO try to do this more efficiently with union of predicates (in_range
+  // altitude predicate)
+  // https://www.boost.org/doc/libs/1_66_0/libs/geometry/doc/html/geometry/spatial_indexes/queries.html
   std::vector<box_mapping_t> first_pass;
   geopoints_t zone_infractions;
 
@@ -73,7 +77,8 @@ void Airspace::infractions(const PointCollection &points,
                     std::back_inserter(first_pass));
 
   for (const box_mapping_t &zone_index : first_pass) {
-    zone_infractions = this->zones[zone_index.second].contained_points(points);
+    zone_infractions =
+        this->zones[zone_index.second].contained_points(points, with_agl);
     if (!zone_infractions.empty()) {
       std::cerr << this->zones[zone_index.second].name << std::endl;
       infractions[zones[zone_index.second].name] = zone_infractions;

@@ -122,15 +122,15 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
     boost::geometry::convert(g->bounding_box(), poly);
     bboxes.push_back(poly);
   }
-  boost::geometry::envelope(bboxes, bounding_box);
+  boost::geometry::envelope(bboxes, this->bounding_box);
 }
 
-std::vector<GeoPoint>
-Zone::contained_points(const PointCollection &points) const {
+std::vector<GeoPoint> Zone::contained_points(const PointCollection &points,
+                                             bool with_agl) const {
   std::vector<GeoPoint> contained_points;
   for (const std::shared_ptr<Geometry> g : geometries) {
     for (const GeoPoint &p : points) {
-      if (this->in_altitude_range(p)) {
+      if (this->in_altitude_range(p, with_agl)) {
         if (g->contains(p)) {
           contained_points.push_back(p);
         }
@@ -140,23 +140,35 @@ Zone::contained_points(const PointCollection &points) const {
   return contained_points;
 }
 
-bool Zone::in_altitude_range(const GeoPoint &p) const {
+bool Zone::in_altitude_range(const GeoPoint &p, bool with_agl) const {
+  // 3 boolean variables -> 8 possible cases
+  // number of outcomes covered in parentheses
+
+  // handle the case when agl data is not available
+  if (this->needs_agl_checking() && (!with_agl)) {
+    // this situation is dangerous but triggers a warning in the
+    // Flight.validate
+    return false;
+  }
+
   bool higher_than_floor = false;
   bool lower_than_ceiling = false;
 
-  if (((floor_is_ground_relative) && (p.agl > floor)) ||
-      ((!floor_is_ground_relative) && (p.alt > floor))) {
+  // check floor
+  if (((!this->floor_is_ground_relative) && (p.alt > this->floor)) ||
+      ((this->floor_is_ground_relative) && (p.agl > this->floor))) {
     higher_than_floor = true;
   }
 
-  if (((ceiling_is_ground_relative) && (p.agl < ceiling)) ||
-      ((!floor_is_ground_relative) && (p.alt < ceiling))) {
+  // check ceiling
+  if (((!this->ceiling_is_ground_relative) && (p.alt < this->ceiling)) ||
+      ((this->ceiling_is_ground_relative) && (p.agl < this->ceiling))) {
     lower_than_ceiling = true;
   }
 
   return (higher_than_floor && lower_than_ceiling);
 }
 
-bool Zone::needs_agl_checking() {
-  return this->ceiling_is_ground_relative || this->floor_is_ground_relative;
+bool Zone::needs_agl_checking() const {
+  return this->floor_is_ground_relative || this->ceiling_is_ground_relative;
 }

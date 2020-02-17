@@ -21,12 +21,12 @@ public:
   Airspace(const std::string &airspace_file);
   std::size_t size() const { return this->zones.size(); };
 
-  void infractions(const PointCollection &points,
-                   infractions_t &infractions) const;
+  void infractions(const PointCollection &points, infractions_t &infractions,
+                   bool with_agl) const;
 
   bool need_agl_checking;
 
 private:
   std::vector<Zone> zones;
-  bgi::rtree<box_mapping_t, bgi::quadratic<8>> index;
+  bgi::rtree<box_mapping_t, bgi::quadratic<16>> index;
 };
