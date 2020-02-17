@@ -2,8 +2,11 @@
 
 #include <string>
 
-const std::string HEADER =
-    "${PROJECT_NAME} v${PROJECT_VERSION}\nusage : ${PROJECT_NAME} "
+const std::string VERSION = "${PROJECT_NAME} version ${PROJECT_VERSION}";
+
+const std::string USAGE =
+    VERSION +
+    "\nusage : ${PROJECT_NAME} "
     "[xc] args [options]\n\nxc\n\t--flight "
     "<path/to/igc/file>\n\t--airspace <path/to/openair/file>\n\noptions : "
     "\n";

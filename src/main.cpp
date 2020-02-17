@@ -7,7 +7,9 @@
 #include <string>
 #include <vector>
 
-void usage() { std::cerr << HEADER << std::endl; }
+void usage() { std::cerr << USAGE << std::endl; }
+
+void print_version() { std::cerr << VERSION << std::endl; }
 
 void command_xc(const std::string &flight_file,
                 const std::string &airspace_file, const std::string &output) {
@@ -52,6 +54,8 @@ int main(int argc, char *argv[]) {
   // parse command
   if (!strcmp(argv[1], "xc")) {
     command_xc(flight_file, airspace_file, output);
+  } else if (!strcmp(argv[1], "version")) {
+    print_version();
   } else {
     std::cerr << "Unkown command : " << argv[1] << std::endl;
   }

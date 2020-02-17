@@ -25,8 +25,9 @@ find_package(Boost REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 # add libraries
-add_subdirectory(include/geographiclib)
-add_subdirectory(include/json)
+add_subdirectory(include/geographiclib EXCLUDE_FROM_ALL)
+add_subdirectory(include/json EXCLUDE_FROM_ALL)
+add_subdirectory(include/cpr EXCLUDE_FROM_ALL)
 
 # add subdirectories
 add_subdirectory(src)

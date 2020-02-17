@@ -19,7 +19,7 @@ class Airspace {
 
 public:
   Airspace(const std::string &airspace_file);
-  std::size_t size() const { return zones.size(); };
+  size_t size() const { return zones.size(); };
 
   void infractions(const PointCollection &points,
                    infractions_t &infractions) const;

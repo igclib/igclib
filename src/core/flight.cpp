@@ -1,3 +1,4 @@
+#include <cpr/cpr.h>
 #include <fstream>
 #include <igclib/airspace.hpp>
 #include <igclib/flight.hpp>
@@ -39,6 +40,8 @@ Flight::Flight(const std::string &flight_file) {
   }
 
   compute_score();
+  // set to false until agl is actually retrieved
+  this->agl_validable = false;
 
   f.close();
 }
@@ -95,6 +98,10 @@ void Flight::save(const std::string &out) const {
 }
 
 void Flight::validate(const Airspace &airspace) {
+  // first, retrieve the ground altitude for each point of the flight
+  // auto r = cpr::Get(cpr::Url{"http://www.httpbin.org/get"});
+
+  // then we can validate
   airspace.infractions(this->points, this->infractions);
 }
 

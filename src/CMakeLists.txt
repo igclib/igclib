@@ -6,9 +6,11 @@ file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.cpp)
 add_executable(${BINARY} ${SOURCES})
 target_link_libraries(${BINARY} GeographicLib)
 target_link_libraries(${BINARY} nlohmann_json::nlohmann_json)
+target_link_libraries(${BINARY} ${CPR_LIBRARIES})
 
 add_library(lib_${BINARY} STATIC ${SOURCES})
 target_link_libraries(lib_${BINARY} GeographicLib)
 target_link_libraries(lib_${BINARY} nlohmann_json::nlohmann_json)
+target_link_libraries(${BINARY} ${CPR_LIBRARIES})
 
 install(TARGETS ${BINARY} DESTINATION bin)
