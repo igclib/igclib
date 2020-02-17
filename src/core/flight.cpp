@@ -117,6 +117,9 @@ void Flight::validate(const Airspace &airspace) {
         if (this->points.set_agl(altitudes)) {
           this->agl_validable = true;
         }
+      } else if (r.status_code == 400) {
+        std::cerr << "Missing or invalid API key for the elevation service."
+                  << std::endl;
       } else {
         std::cerr << "Elevation service could not be reached." << std::endl;
       }
