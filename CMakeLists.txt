@@ -16,7 +16,7 @@ message("-- CMAKE_CXX_FLAGS_DEBUG : ${CMAKE_CXX_FLAGS_DEBUG}")
 message("-- CMAKE_CXX_FLAGS_RELEASE : ${CMAKE_CXX_FLAGS_RELEASE}")
 
 # enable testing
-include(CTest)
+enable_testing()
 
 # find boost libraries
 find_package(Boost REQUIRED)

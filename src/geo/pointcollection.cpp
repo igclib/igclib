@@ -20,7 +20,7 @@ void PointCollection::insert(const Time &t, const GeoPoint &p) {
 }
 
 const GeoPoint &PointCollection::operator[](const Time &t) const {
-  size_t index = timepoints.at(t);
+  std::size_t index = timepoints.at(t);
   return geopoints.at(index);
 }
 
@@ -54,4 +54,22 @@ std::pair<PointCollection, PointCollection> PointCollection::split() const {
   PointCollection p1(this->begin(), this->begin() + half_size);
   PointCollection p2(this->begin() + half_size, this->end());
   return std::make_pair(p1, p2);
+}
+
+std::vector<std::pair<double, double>> PointCollection::latlon() const {
+  std::vector<std::pair<double, double>> latlon;
+  for (const GeoPoint &p : this->geopoints) {
+    latlon.push_back(std::make_pair(p.lat, p.lon));
+  }
+  return latlon;
+}
+
+bool PointCollection::set_agl(const std::vector<double> &altitudes) {
+  if (altitudes.size() != this->size()) {
+    return false;
+  }
+  for (std::size_t i = 0; i < altitudes.size(); ++i) {
+    this->geopoints[i].agl = altitudes[i];
+  }
+  return true;
 }

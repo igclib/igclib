@@ -20,6 +20,8 @@ public:
   geopoints_t bbox() const;
   double bbox_area() const;
   std::pair<PointCollection, PointCollection> split() const;
+  std::vector<std::pair<double, double>> latlon() const;
+  bool set_agl(const std::vector<double> &altitudes);
 
   // this allows to range iterate over PointCollection
   geopoints_t::const_iterator begin() const { return geopoints.begin(); };

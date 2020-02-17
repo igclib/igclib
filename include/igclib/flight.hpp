@@ -17,6 +17,7 @@ public:
   void save(const std::string &out) const;
   void validate(const Airspace &airspace);
   nlohmann::json serialize() const;
+  bool agl_validable;
 
 private:
   void process_H_record(const std::string &record);

@@ -17,6 +17,7 @@ public:
   Zone(const std::vector<std::string> &openair_record);
   std::vector<GeoPoint> contained_points(const PointCollection &points) const;
   bool empty() const { return geometries.empty(); };
+  bool needs_agl_checking();
 
 private:
   bool in_altitude_range(const GeoPoint &p) const;

@@ -40,6 +40,7 @@ Flight::Flight(const std::string &flight_file) {
   }
 
   compute_score();
+
   // set to false until agl is actually retrieved
   this->agl_validable = false;
 
@@ -98,10 +99,38 @@ void Flight::save(const std::string &out) const {
 }
 
 void Flight::validate(const Airspace &airspace) {
-  // first, retrieve the ground altitude for each point of the flight
-  // auto r = cpr::Get(cpr::Url{"http://www.httpbin.org/get"});
+  // retrieve the ground altitude for each point of the flight
+  if (airspace.need_agl_checking) {
+    if (getenv("ELEVATION_API_KEY")) {
+      std::string key = getenv("ELEVATION_API_KEY");
+      std::string api = "https://geolocalisation.ffvl.fr/elevation?key=" + key;
+      json data = this->points.latlon();
+      cpr::Session session;
+      cpr::Body body(data.dump());
+      session.SetVerifySsl(false);
+      session.SetUrl(api);
+      session.SetBody(body);
+      cpr::Response r = session.Post();
+      if (r.status_code == 200) {
+        data = json::parse(r.text);
+        std::vector<double> altitudes = data.get<std::vector<double>>();
+        if (this->points.set_agl(altitudes)) {
+          this->agl_validable = true;
+        }
+      } else {
+        std::cerr << "Elevation service could not be reached." << std::endl;
+      }
+    } else {
+      std::cerr << "This airspace file contains zones which need to be checked "
+                   "against ground altitude of the flight, but the environment "
+                   "variable 'ELEVATION_API_KEY' is not set. These zones will "
+                   "not be considered."
+                << std::endl;
+    }
+  }
 
-  // then we can validate
+  // then validate intersections
+  // TODO pass this->agl_validable !
   airspace.infractions(this->points, this->infractions);
 }
 

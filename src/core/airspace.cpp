@@ -9,6 +9,12 @@
 #include <vector>
 
 Airspace::Airspace(const std::string &airspace_file) {
+  // needs_agl_checking is set to false until a zone in the airspace file
+  // explicitly needs to be checked against ground altitude. this is to prevent
+  // having to ask the elevation service for altitudes if they aren't needed for
+  // airspace validation
+  this->need_agl_checking = false;
+
   std::ifstream f;
   f.open(airspace_file);
   if (!f.is_open()) {
@@ -22,6 +28,7 @@ Airspace::Airspace(const std::string &airspace_file) {
     util::trim(line);
     // discard comments and empty lines
     if (line[0] != '*' && !line.empty()) {
+      // normalize all lines to uppercase for parsing
       boost::to_upper(line);
       if (line.substr(0, 2) == "AC") {
         if (!record.empty()) {
@@ -34,9 +41,13 @@ Airspace::Airspace(const std::string &airspace_file) {
                 std::make_pair(zone.bounding_box, this->zones.size());
             this->index.insert(value);
             this->zones.push_back(zone);
+
+            if (zone.needs_agl_checking()) {
+              this->need_agl_checking = true;
+            }
           }
+          record.clear();
         }
-        record.clear();
       }
       record.push_back(line);
     }

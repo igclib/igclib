@@ -156,3 +156,7 @@ bool Zone::in_altitude_range(const GeoPoint &p) const {
 
   return (higher_than_floor && lower_than_ceiling);
 }
+
+bool Zone::needs_agl_checking() {
+  return this->ceiling_is_ground_relative || this->floor_is_ground_relative;
+}

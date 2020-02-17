@@ -19,10 +19,12 @@ class Airspace {
 
 public:
   Airspace(const std::string &airspace_file);
-  size_t size() const { return zones.size(); };
+  std::size_t size() const { return this->zones.size(); };
 
   void infractions(const PointCollection &points,
                    infractions_t &infractions) const;
+
+  bool need_agl_checking;
 
 private:
   std::vector<Zone> zones;
