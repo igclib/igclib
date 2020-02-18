@@ -110,7 +110,7 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
         << "Automatic closing of 2 DP is not supported. DP records of zone "
         << this->name << " are discarded." << std::endl;
   }
-  if (polygon_vertices.size() > 2) {
+  else if (polygon_vertices.size() > 2) {
     std::shared_ptr<Geometry> p = std::make_shared<Polygon>(polygon_vertices);
     this->geometries.push_back(p);
   }

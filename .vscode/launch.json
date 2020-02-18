@@ -9,7 +9,7 @@
       "args": [
         "xc",
         "--flight",
-        "tests/data/flights/xc_col_agnel.igc",
+        "$HOME/Downloads/igcfile.igc",
         "--airspace",
         "tests/data/airspace/france_airspace.txt"
       ],

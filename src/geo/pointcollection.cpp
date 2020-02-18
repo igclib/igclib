@@ -24,6 +24,10 @@ const GeoPoint &PointCollection::operator[](const Time &t) const {
   return geopoints.at(index);
 }
 
+const GeoPoint &PointCollection::operator[](std::size_t index) const {
+  return geopoints.at(index);
+}
+
 std::vector<GeoPoint> PointCollection::bbox() const {
   double min_lat = 90.0;
   double max_lat = -90.0;

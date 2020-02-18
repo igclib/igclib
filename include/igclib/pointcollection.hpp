@@ -16,6 +16,7 @@ public:
                   geopoints_t::const_iterator end);
   void insert(const Time &t, const GeoPoint &p);
   const GeoPoint &operator[](const Time &t) const;
+  const GeoPoint &operator[](std::size_t index) const;
   size_t size() const { return geopoints.size(); };
   geopoints_t bbox() const;
   double bbox_area() const;

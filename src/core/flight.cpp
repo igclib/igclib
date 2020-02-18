@@ -1,6 +1,7 @@
 #include <cpr/cpr.h>
 #include <fstream>
 #include <igclib/airspace.hpp>
+#include <igclib/candidate.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/geopoint.hpp>
 #include <igclib/pointcollection.hpp>
@@ -140,6 +141,9 @@ void Flight::compute_score() {
   // Algorithm designed by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
+  // TODO implement cutoff heuristic
+  HeuristicCandidate cutoff(this->points);
+
   std::priority_queue<Candidate> candidates;
   Candidate initial_guess(this->points);
   candidates.push(initial_guess);
@@ -147,8 +151,12 @@ void Flight::compute_score() {
   while (!candidates.top().is_solution()) {
     std::pair<Candidate, Candidate> branches = candidates.top().branch();
     candidates.pop();
-    candidates.push(branches.first);
-    candidates.push(branches.second);
+    if (branches.first > cutoff) {
+      candidates.push(branches.first);
+    }
+    if (branches.second > cutoff) {
+      candidates.push(branches.second);
+    }
   }
 
   this->score = candidates.top().score;
