@@ -66,9 +66,10 @@ void Flight::process_B_record(const std::string &record) {
 json Flight::serialize() const {
   json j = {{"pilot", this->pilot_name}};
 
-  for (auto &infraction : this->infractions) {
+  j["infractions"] = json::array();
+  for (const auto &infraction : this->infractions) {
     j["infractions"][infraction.first];
-    for (auto &p : infraction.second) {
+    for (const GeoPoint &p : infraction.second) {
       j["infractions"][infraction.first].push_back(p.serialize());
     }
   }
