@@ -8,10 +8,6 @@ bool Candidate::operator<(const Candidate &c) const {
   return this->score.score < c.score.score;
 }
 
-bool Candidate::operator>(const HeuristicCandidate &c) const {
-  return this->score.score > c.score.score;
-}
-
 // A candidate is solution only if its three groups contains at most one
 // GeoPoint
 bool Candidate::is_solution() const {
@@ -66,16 +62,16 @@ Candidate::Candidate(const Candidate &c) {
 
 std::size_t Candidate::find_split() const {
   // find the group with the largest area
-  size_t index_largest_group = 0;
-  double max_size = 0;
+  size_t best_group = 0;
+  double best_group_diagnal = 0;
   for (int i = 0; i < 3; ++i) {
-    double group_area = this->groups[i].bbox_area();
-    if (group_area > max_size) {
-      index_largest_group = i;
-      max_size = group_area;
+    double group_diagonal = this->groups[i].max_diagonal();
+    if (group_diagonal > best_group_diagnal) {
+      best_group = i;
+      best_group_diagnal = group_diagonal;
     }
   }
-  return index_largest_group;
+  return best_group;
 }
 
 std::pair<Candidate, Candidate> Candidate::branch() const {
@@ -110,10 +106,6 @@ std::pair<Candidate, Candidate> Candidate::branch() const {
   Candidate c2(*this);
 
   return std::make_pair(c1, c2);
-}
-HeuristicCandidate::HeuristicCandidate(const PointCollection &points) {
-  (void)points;
-  this->score = XCScore();
 }
 
 XCScore Candidate::max_score() const {

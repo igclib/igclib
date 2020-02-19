@@ -5,19 +5,12 @@
 #include <igclib/xcscore.hpp>
 #include <vector>
 
-class HeuristicCandidate {
-public:
-  HeuristicCandidate(const PointCollection &points);
-  XCScore score;
-};
-
 class Candidate {
 
 public:
   Candidate(const PointCollection &points);
   Candidate(const Candidate &c);
   bool operator<(const Candidate &c) const;
-  bool operator>(const HeuristicCandidate &c) const;
   std::pair<Candidate, Candidate> branch() const;
   bool is_solution() const;
 

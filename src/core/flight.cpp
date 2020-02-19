@@ -7,6 +7,7 @@
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
+#include <igclib/xc_optimization.hpp>
 #include <igclib/xcscore.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -141,8 +142,8 @@ void Flight::compute_score() {
   // Algorithm designed by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
-  // TODO implement cutoff heuristic
-  HeuristicCandidate cutoff(this->points);
+  // HeuristicCandidate cutoff(this->points);
+  double cutoff = heuristic::broken_line(this->points);
 
   std::priority_queue<Candidate> candidates;
   Candidate initial_guess(this->points);
@@ -151,10 +152,10 @@ void Flight::compute_score() {
   while (!candidates.top().is_solution()) {
     std::pair<Candidate, Candidate> branches = candidates.top().branch();
     candidates.pop();
-    if (branches.first > cutoff) {
+    if (branches.first.score.score > cutoff) {
       candidates.push(branches.first);
     }
-    if (branches.second > cutoff) {
+    if (branches.second.score.score > cutoff) {
       candidates.push(branches.second);
     }
   }

@@ -19,7 +19,7 @@ public:
   const GeoPoint &operator[](std::size_t index) const;
   size_t size() const { return geopoints.size(); };
   geopoints_t bbox() const;
-  double bbox_area() const;
+  double max_diagonal() const;
   std::pair<PointCollection, PointCollection> split() const;
   std::vector<std::pair<double, double>> latlon() const;
   bool set_agl(const std::vector<double> &altitudes);

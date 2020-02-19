@@ -48,9 +48,9 @@ std::vector<GeoPoint> PointCollection::bbox() const {
   return bbox;
 }
 
-double PointCollection::bbox_area() const {
+double PointCollection::max_diagonal() const {
   std::vector<GeoPoint> bbox = this->bbox();
-  return bbox[0].distance(bbox[3]);
+  return std::max(bbox[0].distance(bbox[3]), bbox[1].distance(bbox[2]));
 }
 
 std::pair<PointCollection, PointCollection> PointCollection::split() const {
