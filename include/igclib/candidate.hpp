@@ -2,29 +2,24 @@
 
 #include <igclib/geopoint.hpp>
 #include <igclib/pointcollection.hpp>
+#include <igclib/pointset.hpp>
 #include <igclib/xcscore.hpp>
 #include <vector>
 
 class Candidate {
-
 public:
-  Candidate(const PointCollection &points);
-  Candidate(const Candidate &c);
-  bool operator<(const Candidate &c) const;
-  std::pair<Candidate, Candidate> branch() const;
+  Candidate(const PointCollection &tracklog);
+
+  bool operator>(double min_score) const;
+  bool operator<(const Candidate& c) const;
+
+  std::vector<Candidate> branch(const PointCollection &tracklog) const;
   bool is_solution() const;
 
   XCScore score;
 
 private:
-  XCScore max_score() const;
-  bool is_closed(double tolerance) const;
-  std::size_t find_split() const;
-
-  bool closed;
-  std::vector<PointCollection> groups;
-  GeoPoint first_point;
-  GeoPoint last_point;
-  std::vector<GeoPoint> points_before;
-  std::vector<GeoPoint> points_after;
+  std::vector<PointSet> sets;
+  GeoPoint takeoff;
+  GeoPoint landing;
 };

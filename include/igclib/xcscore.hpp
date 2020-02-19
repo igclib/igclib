@@ -10,6 +10,7 @@ public:
   XCScore();
   XCScore(xc_style &style, double distance, double score);
   nlohmann::json serialize() const;
+  bool operator<(const XCScore &x) const;
 
   xc_style style;
   double distance;

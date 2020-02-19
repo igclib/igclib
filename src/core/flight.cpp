@@ -142,7 +142,6 @@ void Flight::compute_score() {
   // Algorithm designed by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
-  // HeuristicCandidate cutoff(this->points);
   double cutoff = heuristic::broken_line(this->points);
 
   std::priority_queue<Candidate> candidates;
@@ -150,15 +149,13 @@ void Flight::compute_score() {
   candidates.push(initial_guess);
 
   while (!candidates.top().is_solution()) {
-    std::pair<Candidate, Candidate> branches = candidates.top().branch();
+    std::vector<Candidate> branches = candidates.top().branch(this->points);
     candidates.pop();
-    if (branches.first.score.score > cutoff) {
-      candidates.push(branches.first);
-    }
-    if (branches.second.score.score > cutoff) {
-      candidates.push(branches.second);
+    for (const Candidate &c : branches) {
+      if (c > cutoff) {
+        candidates.push(c);
+      }
     }
   }
-
   this->score = candidates.top().score;
 }

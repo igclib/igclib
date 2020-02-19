@@ -9,6 +9,10 @@ XCScore::XCScore() {
   this->score = 0;
 }
 
+bool XCScore::operator<(const XCScore &x) const {
+  return (this->score < x.score);
+}
+
 XCScore::XCScore(xc_style &style, double distance, double score) {
   this->style = style;
   this->distance = distance;
