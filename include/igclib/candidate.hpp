@@ -11,7 +11,7 @@ public:
   Candidate(const PointCollection &tracklog);
 
   bool operator>(double min_score) const;
-  bool operator<(const Candidate& c) const;
+  bool operator<(const Candidate &c) const;
 
   std::vector<Candidate> branch(const PointCollection &tracklog) const;
   bool is_solution() const;
@@ -19,6 +19,8 @@ public:
   XCScore score;
 
 private:
+  XCScore score_function();
+
   std::vector<PointSet> sets;
   GeoPoint takeoff;
   GeoPoint landing;
