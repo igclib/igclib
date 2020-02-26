@@ -42,5 +42,5 @@ nlohmann::json XCScore::serialize() const {
   }
   return {{"style", xc_style},
           {"distance", this->distance / 1000},
-          {"score", this->score}};
+          {"score", this->score / 1000}};
 }

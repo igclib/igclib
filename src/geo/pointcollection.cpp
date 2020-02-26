@@ -1,20 +1,22 @@
 #include <igclib/pointcollection.hpp>
+#include <igclib/pointset.hpp>
 #include <iostream>
 #include <iterator>
 #include <vector>
 
 PointCollection::PointCollection() {
-  geopoints = {};
-  timepoints = {};
+  this->geopoints = {};
+  this->timepoints = {};
 }
 
 PointCollection ::PointCollection(geopoints_t::const_iterator start,
                                   geopoints_t::const_iterator end) {
-  geopoints = geopoints_t(start, end);
+  this->geopoints = geopoints_t(start, end);
 }
 
 void PointCollection::insert(const Time &t, const GeoPoint &p) {
   // is this really safe ? do some testing
+  // TODO shared pointers rather than index
   timepoints.emplace(t, geopoints.size());
   geopoints.push_back(p);
 }
@@ -48,16 +50,34 @@ std::vector<GeoPoint> PointCollection::bbox() const {
   return bbox;
 }
 
-double PointCollection::max_diagonal() const {
-  std::vector<GeoPoint> bbox = this->bbox();
+std::vector<GeoPoint> PointCollection::bbox(int start, int end) const {
+  double min_lat = 90.0;
+  double max_lat = -90.0;
+  double min_lon = 180.0;
+  double max_lon = -180;
+  for (auto it = this->begin() + start; it < this->begin() + end; ++it) {
+    min_lat = std::min(it->lat, min_lat);
+    max_lat = std::max(it->lat, max_lat);
+    min_lon = std::min(it->lon, min_lon);
+    max_lon = std::max(it->lon, max_lon);
+  }
+  std::vector<GeoPoint> bbox = {
+      GeoPoint(min_lat, min_lon, 0, 0),
+      GeoPoint(min_lat, max_lon, 0, 0),
+      GeoPoint(max_lat, min_lon, 0, 0),
+      GeoPoint(max_lat, max_lon, 0, 0),
+  };
+  return bbox;
+}
+
+double PointCollection::max_diagonal(int start, int end) const {
+  std::vector<GeoPoint> bbox = this->bbox(start, end);
   return std::max(bbox[0].distance(bbox[3]), bbox[1].distance(bbox[2]));
 }
 
-std::pair<PointCollection, PointCollection> PointCollection::split() const {
-  size_t half_size = this->size() / 2;
-  PointCollection p1(this->begin(), this->begin() + half_size);
-  PointCollection p2(this->begin() + half_size, this->end());
-  return std::make_pair(p1, p2);
+double PointCollection::max_diagonal() const {
+  std::vector<GeoPoint> bbox = this->bbox();
+  return std::max(bbox[0].distance(bbox[3]), bbox[1].distance(bbox[2]));
 }
 
 std::vector<std::pair<double, double>> PointCollection::latlon() const {

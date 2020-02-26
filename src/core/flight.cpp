@@ -144,18 +144,20 @@ void Flight::compute_score() {
 
   double cutoff = heuristic::broken_line(this->points);
 
-  std::priority_queue<Candidate> candidates;
-  Candidate initial_guess(this->points);
-  candidates.push(initial_guess);
+  std::priority_queue<LineCandidate> line_candidates;
+  LineCandidate initial_guess(this->points);
+  line_candidates.push(initial_guess);
 
-  while (!candidates.top().is_solution()) {
-    std::vector<Candidate> branches = candidates.top().branch(this->points);
-    candidates.pop();
-    for (const Candidate &c : branches) {
+  while (!line_candidates.top().is_solution()) {
+    std::vector<LineCandidate> branches =
+        line_candidates.top().branch(this->points);
+    line_candidates.pop();
+    for (const LineCandidate &c : branches) {
       if (c > cutoff) {
-        candidates.push(c);
+        line_candidates.push(c);
       }
     }
   }
-  this->score = candidates.top().score;
+
+  this->score = line_candidates.top().score;
 }
