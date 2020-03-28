@@ -1,14 +1,11 @@
 #include <cpr/cpr.h>
 #include <fstream>
 #include <igclib/airspace.hpp>
-#include <igclib/candidate.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/geopoint.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
-#include <igclib/xc_optimization.hpp>
-#include <igclib/xcscore.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <queue>
@@ -40,8 +37,6 @@ Flight::Flight(const std::string &flight_file) {
       break;
     }
   }
-
-  compute_score();
 
   f.close();
 }
@@ -76,7 +71,11 @@ json Flight::serialize() const {
     }
   }
 
-  j["xc_info"] = this->score.serialize();
+  if (this->score) {
+    j["xc_info"] = this->score; //.serialize();
+  } else {
+    j["xc_info"] = "Not computed";
+  }
 
   return j;
 }
@@ -142,22 +141,85 @@ void Flight::compute_score() {
   // Algorithm designed by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
-  double cutoff = heuristic::broken_line(this->points);
+  this->score = this->heuristic_score();
+  this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
 
-  std::priority_queue<LineCandidate> line_candidates;
-  LineCandidate initial_guess(this->points);
-  line_candidates.push(initial_guess);
+  std::cout << this->score << std::endl;
+}
 
-  while (!line_candidates.top().is_solution()) {
-    std::vector<LineCandidate> branches =
-        line_candidates.top().branch(this->points);
-    line_candidates.pop();
-    for (const LineCandidate &c : branches) {
-      if (c > cutoff) {
-        line_candidates.push(c);
+double Flight::heuristic_score() {
+  const int n_approx = 100; // number of points used for tracklog approximation
+  const int step_ratio = this->points.size() / n_approx;
+
+  std::vector<int> previous_distances(n_approx);
+  std::vector<int> next_distances(n_approx);
+
+  for (int step = 0; step < 5; ++step) {
+    for (std::size_t i = 0; i < n_approx; ++i) {
+      int max_distance = 0;
+      for (std::size_t j = 0; j < i; ++j) {
+        int candidate =
+            previous_distances[j] +
+            this->points[i * step_ratio].distance(this->points[j * step_ratio]);
+        if (candidate > max_distance) {
+          max_distance = candidate;
+        }
+      }
+      next_distances[i] = max_distance;
+    }
+    previous_distances = next_distances;
+  }
+
+  return *std::max_element(next_distances.begin(), next_distances.end());
+}
+
+void Flight::optimize(const ObjectiveFunction &objective_function,
+                      const BoundingFunction &bound_function) {
+  double current_score = 0;
+
+  std::priority_queue<CandidateTree> candidates;
+  candidates.emplace();
+
+  while (!candidates.empty()) {
+    CandidateTree node = candidates.top();
+    candidates.pop();
+
+    if (node.is_single_candidate()) {
+      current_score = objective_function(node);
+      if (current_score > this->score) {
+        this->score = current_score;
+      }
+    } else {
+      for (auto &&child : node.branch()) {
+        if (bound_function(child) >= this->score) {
+          candidates.push(child);
+        }
       }
     }
   }
+}
 
-  this->score = line_candidates.top().score;
+/* CandidateTree */
+
+CandidateTree::CandidateTree() { std::cout << "yelp" << std::endl; }
+
+bool CandidateTree::is_single_candidate() { return false; }
+
+std::vector<CandidateTree> CandidateTree::branch() {
+  std::vector<CandidateTree> branches = {};
+  return branches;
+}
+
+/* FreeObjectiveFunction */
+
+double FreeObjectiveFunction::operator()(const CandidateTree &node) const {
+  (void)node;
+  return 0;
+}
+
+/* FreeBoundingFunction */
+
+double FreeBoundingFunction::operator()(const CandidateTree &node) const {
+  (void)node;
+  return 0;
 }

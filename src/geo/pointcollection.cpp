@@ -1,5 +1,4 @@
 #include <igclib/pointcollection.hpp>
-#include <igclib/pointset.hpp>
 #include <iostream>
 #include <iterator>
 #include <vector>
