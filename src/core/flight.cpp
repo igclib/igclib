@@ -14,12 +14,12 @@
 
 using json = nlohmann::json;
 
-Flight::Flight(const std::string &flight_file) {
+Flight::Flight(const std::string &igc_file) {
   // read and parse igc file
   std::ifstream f;
-  f.open(flight_file);
+  f.open(igc_file);
   if (!f.is_open()) {
-    const std::string error = "Could not open file '" + flight_file + "'";
+    const std::string error = "Could not open file '" + igc_file + "'";
     throw std::runtime_error(error);
   }
 
@@ -138,27 +138,27 @@ void Flight::validate(const Airspace &airspace) {
 }
 
 void Flight::compute_score() {
-  // Algorithm designed by Ondrej Palkovsky
+  // Inspired by by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
   this->score = this->heuristic_score();
   this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
-
-  std::cout << this->score << std::endl;
 }
 
 double Flight::heuristic_score() {
   const int n_approx = 100; // number of points used for tracklog approximation
   const int step_ratio = this->points.size() / n_approx;
 
-  std::vector<int> previous_distances(n_approx);
-  std::vector<int> next_distances(n_approx);
+  std::vector<double> previous_distances(n_approx);
+  std::vector<double> next_distances(n_approx);
 
-  for (int step = 0; step < 5; ++step) {
+  // n_steps must be number of points - 1
+  int n_steps = 4;
+  for (int step = 0; step < n_steps; ++step) {
     for (std::size_t i = 0; i < n_approx; ++i) {
-      int max_distance = 0;
+      double max_distance = 0;
       for (std::size_t j = 0; j < i; ++j) {
-        int candidate =
+        double candidate =
             previous_distances[j] +
             this->points[i * step_ratio].distance(this->points[j * step_ratio]);
         if (candidate > max_distance) {
@@ -173,25 +173,31 @@ double Flight::heuristic_score() {
   return *std::max_element(next_distances.begin(), next_distances.end());
 }
 
-void Flight::optimize(const ObjectiveFunction &objective_function,
-                      const BoundingFunction &bound_function) {
-  double current_score = 0;
+void Flight::optimize(const ObjectiveFunction &score,
+                      const BoundingFunction &bound) {
+  std::vector<std::size_t> initial_points = {5}; // TODO make this a parameter
+  auto initial_pair =
+      std::make_pair((std::size_t)0, (std::size_t)this->points.size());
+  std::vector<std::pair<std::size_t, std::size_t>> initial_box = {initial_pair};
 
   std::priority_queue<CandidateTree> candidates;
-  candidates.emplace();
+  CandidateTree initial_candidate(initial_points, initial_box);
+  bound(initial_candidate, *this);
+  candidates.push(initial_candidate);
 
+  double current_score = 0;
   while (!candidates.empty()) {
     CandidateTree node = candidates.top();
     candidates.pop();
 
     if (node.is_single_candidate()) {
-      current_score = objective_function(node);
+      current_score = score(node, *this);
       if (current_score > this->score) {
         this->score = current_score;
       }
     } else {
-      for (auto &&child : node.branch()) {
-        if (bound_function(child) >= this->score) {
+      for (auto &&child : node.branch(*this)) {
+        if (bound(child, *this) >= this->score) {
           candidates.push(child);
         }
       }
@@ -199,27 +205,100 @@ void Flight::optimize(const ObjectiveFunction &objective_function,
   }
 }
 
-/* CandidateTree */
+bool CandidateTree::is_single_candidate() {
+  for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
+    auto box_size = this->v_boxes.at(i).second - this->v_boxes.at(i).first;
+    if (box_size > 1) { // TODO figure out if 1 is correct
+      return false;
+    }
+  }
+  return true;
+}
 
-CandidateTree::CandidateTree() { std::cout << "yelp" << std::endl; }
-
-bool CandidateTree::is_single_candidate() { return false; }
-
-std::vector<CandidateTree> CandidateTree::branch() {
+std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) {
   std::vector<CandidateTree> branches = {};
+
+  std::size_t picked_index = 0;
+  std::size_t largest_box = 0;
+  for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
+    auto box_size = flight.max_diagonal(this->v_boxes.at(i));
+    if (box_size > largest_box) {
+      picked_index = i;
+      largest_box = box_size;
+    }
+  }
+
+  auto n = this->v_points[picked_index];
+  auto picked_box = this->v_boxes[picked_index];
+  auto half_point = (picked_box.first + picked_box.second) / 2;
+
+  for (std::size_t i = 0; i <= n; i++) {
+    // all elements must be deep copied to not modify original objects
+    auto first_half = std::make_pair(picked_box.first, half_point);
+    auto second_half = std::make_pair(half_point, picked_box.second);
+    CandidateTree new_candidate(*this);
+    new_candidate.set_score(-1);
+
+    auto box_it = new_candidate.v_boxes.begin() + picked_index + 1;
+    auto points_it = new_candidate.v_points.begin() + picked_index + 1;
+
+    if (n - i > 0) {
+      new_candidate.v_points.insert(points_it, n - i);
+      new_candidate.v_boxes.insert(box_it, second_half);
+    }
+    if (i > 0) {
+      new_candidate.v_points.at(picked_index) = i;
+      new_candidate.v_boxes.at(picked_index) = first_half;
+    } else {
+      auto points_to_erase = new_candidate.v_points.begin() + picked_index;
+      auto box_to_erase = new_candidate.v_boxes.begin() + picked_index;
+      new_candidate.v_points.erase(points_to_erase);
+      new_candidate.v_boxes.erase(box_to_erase);
+    }
+
+    branches.push_back(new_candidate);
+  }
+
   return branches;
 }
 
 /* FreeObjectiveFunction */
 
-double FreeObjectiveFunction::operator()(const CandidateTree &node) const {
-  (void)node;
-  return 0;
+double FreeObjectiveFunction::operator()(const CandidateTree &node,
+                                         const Flight &flight) const {
+  (void)flight;
+  return node.score();
 }
 
 /* FreeBoundingFunction */
 
-double FreeBoundingFunction::operator()(const CandidateTree &node) const {
-  (void)node;
-  return 0;
+double FreeBoundingFunction::operator()(CandidateTree &node,
+                                        const Flight &flight) const {
+  if (node.score() != -1) {
+    return node.score();
+  }
+
+  std::vector<std::vector<GeoPoint>> bboxes;
+  for (std::size_t i = 0; i < node.v_points.size(); i++) {
+    auto box = flight.bbox(node.v_boxes.at(i));
+    bboxes.insert(bboxes.end(), node.v_points.at(i), box);
+  }
+
+  double best_score = 0;
+  double current_score = 0;
+  GeoPoint previous_point;
+  for (auto combination : util::product<GeoPoint>(bboxes)) {
+    current_score = 0;
+    previous_point = combination[0];
+    for (std::size_t i = 1; i < combination.size(); i++) {
+      current_score += previous_point.distance(combination.at(i));
+      previous_point = combination.at(i);
+    }
+    if (current_score > best_score) {
+      best_score = current_score;
+    }
+  }
+  node.set_score(best_score);
+
+  return best_score;
 }
