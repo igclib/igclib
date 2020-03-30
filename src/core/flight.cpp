@@ -144,6 +144,7 @@ void Flight::compute_score() {
   this->score = this->heuristic_score();
   this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
   this->optimize(TriangleObjectiveFunction(), TriangleBoundingFunction());
+  this->optimize(TriangleObjectiveFunction(), FAIBoundingFunction());
 }
 
 double Flight::heuristic_score() {
@@ -372,6 +373,55 @@ double TriangleBoundingFunction::operator()(CandidateTree &node,
 
   best_score -= best_closing;
   best_score *= 1.2; // triangle coefficient
+  node.set_score(best_score);
+  return best_score;
+}
+
+double FAIBoundingFunction::operator()(CandidateTree &node,
+                                       const Flight &flight) const {
+  if (node.score() != -1) {
+    return node.score();
+  }
+
+  std::vector<std::vector<GeoPoint>> bboxes;
+  for (std::size_t i = 0; i < node.v_points.size(); i++) {
+    auto box = flight.bbox(node.v_boxes.at(i));
+    bboxes.insert(bboxes.end(), node.v_points.at(i), box);
+  }
+
+  auto closing_boxes = {bboxes.front(), bboxes.back()};
+  bboxes.pop_back();
+  bboxes.erase(bboxes.begin());
+  double best_closing = std::numeric_limits<double>::max();
+  double current_closing = 0;
+
+  for (auto &&combination : util::product<GeoPoint>(closing_boxes)) {
+    current_closing = combination.front().distance(combination.back());
+    if (current_closing < best_closing) {
+      best_closing = current_closing;
+    }
+  }
+
+  double best_score = 0;
+  double current_score = 0;
+  double min_leg = 0;
+  double c_fai = 0;
+  std::vector<double> legs;
+  for (auto &&combination : util::product<GeoPoint>(bboxes)) {
+    legs.clear();
+    legs.push_back(combination.at(0).distance(combination.at(1)));
+    legs.push_back(combination.at(1).distance(combination.at(2)));
+    legs.push_back(combination.at(2).distance(combination.at(0)));
+    current_score = std::accumulate(legs.begin(), legs.end(), 0);
+    min_leg = *std::min_element(legs.begin(), legs.end());
+    c_fai = min_leg / 0.28 - best_closing;
+    current_score = std::min(current_score, c_fai);
+    if (current_score > best_score) {
+      best_score = current_score;
+    }
+  }
+
+  best_score *= 1.4; // triangle coefficient
   node.set_score(best_score);
   return best_score;
 }
