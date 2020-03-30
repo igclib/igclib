@@ -142,7 +142,7 @@ void Flight::compute_score() {
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
   this->score = this->heuristic_score();
-  // this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
+  this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
   this->optimize(TriangleObjectiveFunction(), TriangleBoundingFunction());
 }
 
@@ -179,7 +179,7 @@ void Flight::optimize(const ObjectiveFunction &score,
   std::vector<std::size_t> initial_points = {
       5}; // TODO make this a parameter, or is there 5 points in any case?
   auto initial_pair =
-      std::make_pair((std::size_t)0, (std::size_t)this->points.size());
+      std::make_pair((std::size_t)0, (std::size_t)this->points.size() - 1);
   std::vector<std::pair<std::size_t, std::size_t>> initial_box = {initial_pair};
 
   std::priority_queue<CandidateTree> candidates;
@@ -240,11 +240,11 @@ std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) {
   std::size_t picked_index = 0;
   std::size_t largest_box = 0;
   for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
-    // eager branching of box sharing points
-    if (this->v_points.at(i) > 1) {
-      picked_index = i;
-      break;
-    }
+    // eager branching of box sharing points (DOZSN'T WORK BECAUSE TRIES TO
+    // SPLIT CLOSING POINTS) if (this->v_points.at(i) > 1) {
+    //  picked_index = i;
+    //  break;
+    //}
     // branching on box with largest diagonal
     auto box_size = flight.max_diagonal(this->v_boxes.at(i));
     if (box_size > largest_box) {
@@ -329,8 +329,8 @@ double FreeBoundingFunction::operator()(CandidateTree &node,
       best_score = current_score;
     }
   }
-  node.set_score(best_score);
 
+  node.set_score(best_score);
   return best_score;
 }
 
@@ -346,22 +346,31 @@ double TriangleBoundingFunction::operator()(CandidateTree &node,
     bboxes.insert(bboxes.end(), node.v_points.at(i), box);
   }
 
-  double best_score = 0;
-  double current_score = 0;
-  double accepted_closing;
-  for (auto &&combination : util::product<GeoPoint>(bboxes)) {
-    current_score = combination.at(1).distance(combination.at(2));
-    current_score += combination.at(2).distance(combination.at(3));
-    current_score += combination.at(3).distance(combination.at(1));
-    if (current_score > best_score) {
-      accepted_closing = std::max(3000.0, 0.05 * current_score);
-      if (flight.is_closed(node.v_boxes.front(), node.v_boxes.back(),
-                           accepted_closing)) {
-        best_score = current_score;
-      }
+  auto closing_boxes = {bboxes.front(), bboxes.back()};
+  bboxes.pop_back();
+  bboxes.erase(bboxes.begin());
+  double best_closing = std::numeric_limits<double>::max();
+  double current_closing = 0;
+
+  for (auto &&combination : util::product<GeoPoint>(closing_boxes)) {
+    current_closing = combination.front().distance(combination.back());
+    if (current_closing < best_closing) {
+      best_closing = current_closing;
     }
   }
 
+  double best_score = 0;
+  double current_score = 0;
+  for (auto &&combination : util::product<GeoPoint>(bboxes)) {
+    current_score = combination.at(0).distance(combination.at(1));
+    current_score += combination.at(1).distance(combination.at(2));
+    current_score += combination.at(2).distance(combination.at(0));
+    if (current_score > best_score) {
+      best_score = current_score;
+    }
+  }
+
+  best_score -= best_closing;
   best_score *= 1.2; // triangle coefficient
   node.set_score(best_score);
   return best_score;

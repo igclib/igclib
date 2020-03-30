@@ -58,7 +58,7 @@ std::vector<GeoPoint> PointCollection::bbox(int start, int end) const {
   double max_lat = -90.0;
   double min_lon = 180.0;
   double max_lon = -180;
-  for (auto it = this->begin() + start; it < this->begin() + end; ++it) {
+  for (auto it = this->begin() + start; it <= this->begin() + end; ++it) {
     min_lat = std::min(it->lat, min_lat);
     max_lat = std::max(it->lat, max_lat);
     min_lon = std::min(it->lon, min_lon);
@@ -75,12 +75,14 @@ std::vector<GeoPoint> PointCollection::bbox(int start, int end) const {
 
 double PointCollection::max_diagonal(int start, int end) const {
   std::vector<GeoPoint> bbox = this->bbox(start, end);
-  return std::max(bbox[0].distance(bbox[3]), bbox[1].distance(bbox[2]));
+  return std::max(bbox.at(0).distance(bbox.at(3)),
+                  bbox.at(1).distance(bbox.at(2)));
 }
 
 double PointCollection::max_diagonal() const {
   std::vector<GeoPoint> bbox = this->bbox();
-  return std::max(bbox[0].distance(bbox[3]), bbox[1].distance(bbox[2]));
+  return std::max(bbox.at(0).distance(bbox.at(3)),
+                  bbox.at(1).distance(bbox.at(2)));
 }
 
 std::vector<std::pair<double, double>> PointCollection::latlon() const {
