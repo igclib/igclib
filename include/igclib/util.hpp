@@ -27,7 +27,8 @@ inline void trim(std::string &s) {
 }
 
 template <typename T>
-std::vector<std::vector<T>> product(const std::vector<std::vector<T>> &lists) {
+inline std::vector<std::vector<T>>
+product(const std::vector<std::vector<T>> &lists) {
   {
     std::vector<std::vector<T>> result;
     if (std::find_if(std::begin(lists), std::end(lists), [](auto e) -> bool {

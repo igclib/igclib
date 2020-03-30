@@ -142,7 +142,8 @@ void Flight::compute_score() {
   // http://www.penguin.cz/~ondrap/algorithm.pdf
 
   this->score = this->heuristic_score();
-  this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
+  // this->optimize(FreeObjectiveFunction(), FreeBoundingFunction());
+  this->optimize(TriangleObjectiveFunction(), TriangleBoundingFunction());
 }
 
 double Flight::heuristic_score() {
@@ -175,7 +176,8 @@ double Flight::heuristic_score() {
 
 void Flight::optimize(const ObjectiveFunction &score,
                       const BoundingFunction &bound) {
-  std::vector<std::size_t> initial_points = {5}; // TODO make this a parameter
+  std::vector<std::size_t> initial_points = {
+      5}; // TODO make this a parameter, or is there 5 points in any case?
   auto initial_pair =
       std::make_pair((std::size_t)0, (std::size_t)this->points.size());
   std::vector<std::pair<std::size_t, std::size_t>> initial_box = {initial_pair};
@@ -205,10 +207,27 @@ void Flight::optimize(const ObjectiveFunction &score,
   }
 }
 
+bool Flight::is_closed(std::pair<std::size_t, std::size_t> start_box,
+                       std::pair<std::size_t, std::size_t> end_box,
+                       double max_distance) const {
+  // first, check for closing on bounding box ?
+  std::size_t n_approx_start = (start_box.second - start_box.first) / 5;
+  std::size_t n_approx_end = (end_box.second - end_box.first) / 5;
+  for (std::size_t i = start_box.first; i <= start_box.second;
+       i += n_approx_start) {
+    for (std::size_t j = end_box.first; j < end_box.second; j += n_approx_end) {
+      if (this->points.at(i).distance(this->points.at(j)) < max_distance) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool CandidateTree::is_single_candidate() {
   for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
     auto box_size = this->v_boxes.at(i).second - this->v_boxes.at(i).first;
-    if (box_size > 1) { // TODO figure out if 1 is correct
+    if (box_size > 10) { // TODO figure out if 1 is correct
       return false;
     }
   }
@@ -221,6 +240,12 @@ std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) {
   std::size_t picked_index = 0;
   std::size_t largest_box = 0;
   for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
+    // eager branching of box sharing points
+    if (this->v_points.at(i) > 1) {
+      picked_index = i;
+      break;
+    }
+    // branching on box with largest diagonal
     auto box_size = flight.max_diagonal(this->v_boxes.at(i));
     if (box_size > largest_box) {
       picked_index = i;
@@ -237,7 +262,7 @@ std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) {
     auto first_half = std::make_pair(picked_box.first, half_point);
     auto second_half = std::make_pair(half_point, picked_box.second);
     CandidateTree new_candidate(*this);
-    new_candidate.set_score(-1);
+    new_candidate.set_score(-1); // FIXME
 
     auto box_it = new_candidate.v_boxes.begin() + picked_index + 1;
     auto points_it = new_candidate.v_points.begin() + picked_index + 1;
@@ -270,6 +295,12 @@ double FreeObjectiveFunction::operator()(const CandidateTree &node,
   return node.score();
 }
 
+double TriangleObjectiveFunction::operator()(const CandidateTree &node,
+                                             const Flight &flight) const {
+  (void)flight;
+  return node.score();
+}
+
 /* FreeBoundingFunction */
 
 double FreeBoundingFunction::operator()(CandidateTree &node,
@@ -289,7 +320,7 @@ double FreeBoundingFunction::operator()(CandidateTree &node,
   GeoPoint previous_point;
   for (auto combination : util::product<GeoPoint>(bboxes)) {
     current_score = 0;
-    previous_point = combination[0];
+    previous_point = combination.at(0);
     for (std::size_t i = 1; i < combination.size(); i++) {
       current_score += previous_point.distance(combination.at(i));
       previous_point = combination.at(i);
@@ -300,5 +331,38 @@ double FreeBoundingFunction::operator()(CandidateTree &node,
   }
   node.set_score(best_score);
 
+  return best_score;
+}
+
+double TriangleBoundingFunction::operator()(CandidateTree &node,
+                                            const Flight &flight) const {
+  if (node.score() != -1) {
+    return node.score();
+  }
+
+  std::vector<std::vector<GeoPoint>> bboxes;
+  for (std::size_t i = 0; i < node.v_points.size(); i++) {
+    auto box = flight.bbox(node.v_boxes.at(i));
+    bboxes.insert(bboxes.end(), node.v_points.at(i), box);
+  }
+
+  double best_score = 0;
+  double current_score = 0;
+  double accepted_closing;
+  for (auto &&combination : util::product<GeoPoint>(bboxes)) {
+    current_score = combination.at(1).distance(combination.at(2));
+    current_score += combination.at(2).distance(combination.at(3));
+    current_score += combination.at(3).distance(combination.at(1));
+    if (current_score > best_score) {
+      accepted_closing = std::max(3000.0, 0.05 * current_score);
+      if (flight.is_closed(node.v_boxes.front(), node.v_boxes.back(),
+                           accepted_closing)) {
+        best_score = current_score;
+      }
+    }
+  }
+
+  best_score *= 1.2; // triangle coefficient
+  node.set_score(best_score);
   return best_score;
 }

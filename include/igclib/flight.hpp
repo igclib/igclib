@@ -27,6 +27,9 @@ public:
   double max_diagonal(std::pair<int, int> pair) const {
     return this->points.max_diagonal(pair.first, pair.second);
   };
+  bool is_closed(std::pair<std::size_t, std::size_t> start_box,
+                 std::pair<std::size_t, std::size_t> end_box,
+                 double max_distance) const;
 
 private:
   void process_H_record(const std::string &record);
@@ -79,6 +82,13 @@ public:
 class FreeObjectiveFunction : public ObjectiveFunction {
 public:
   FreeObjectiveFunction(){};
+  virtual double operator()(const CandidateTree &node,
+                            const Flight &flight) const;
+};
+
+class TriangleObjectiveFunction : public ObjectiveFunction {
+public:
+  TriangleObjectiveFunction(){};
   virtual double operator()(const CandidateTree &node,
                             const Flight &flight) const;
 };
