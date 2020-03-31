@@ -6,6 +6,12 @@
 
 using json = nlohmann::json;
 
+bool GeoPoint::operator==(const GeoPoint &other) const {
+  return (this->lat == other.lat && this->lon == other.lon);
+}
+
+std::string GeoPoint::id() const { return this->m_id; }
+
 IGCPoint::IGCPoint(const std::string &str) {
   // http://vali.fai-civl.org/documents/IGC-Spec_v1.00.pdf
   double DD;
@@ -93,6 +99,7 @@ GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {
   this->lon = lon;
   this->alt = alt;
   this->agl = agl;
+  this->m_id = std::to_string(this->lat) + std::to_string(this->lon);
 }
 
 double GeoPoint::distance(const GeoPoint &p) const {

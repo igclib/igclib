@@ -8,10 +8,6 @@
 #include <string>
 #include <vector>
 
-class CandidateTree;
-class ObjectiveFunction;
-class BoundingFunction;
-
 class Flight {
   typedef std::vector<GeoPoint> geopoints_t;
   typedef std::map<std::string, geopoints_t> infractions_t;

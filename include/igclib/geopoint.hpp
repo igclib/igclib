@@ -4,11 +4,14 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <unordered_map>
 
 class GeoPoint {
 public:
   GeoPoint() : lat(0), lon(0), alt(0), agl(0){};
   GeoPoint(double lat, double lon, int alt, int agl);
+  bool operator==(const GeoPoint &other) const;
+  std::string id() const;
   double distance(const GeoPoint &p) const;
   double heading(const GeoPoint &p) const;
   GeoPoint project(double distance, double heading) const;
@@ -18,6 +21,9 @@ public:
   double lon;
   int alt;
   int agl;
+
+private:
+  std::string m_id;
 };
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(GeoPoint, double, cs::cartesian, lat, lon)

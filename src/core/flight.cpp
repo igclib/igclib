@@ -1,6 +1,7 @@
 #include <cpr/cpr.h>
 #include <fstream>
 #include <igclib/airspace.hpp>
+#include <igclib/cache.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/geopoint.hpp>
 #include <igclib/pointcollection.hpp>
@@ -143,13 +144,11 @@ void Flight::compute_score() {
   std::priority_queue<CandidateTree> candidates;
   candidates.emplace(*this);
 
-  double current_score = 0;
   while (!candidates.empty()) {
     CandidateTree node = candidates.top();
     candidates.pop();
-
     if (node.is_single_candidate()) {
-      current_score = node.score();
+      double current_score = node.score();
       if (current_score > lower_bound) {
         lower_bound = current_score;
       }
@@ -163,6 +162,7 @@ void Flight::compute_score() {
   }
 
   // compute final score
+  cache::print_stats();
   std::cout << lower_bound << std::endl;
 }
 
