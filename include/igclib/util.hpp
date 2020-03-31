@@ -10,15 +10,15 @@ namespace util {
 // trim left whitespace in string (in place)
 inline void ltrim(std::string &s) {
   s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                                  [](int ch) { return !std::isspace(ch); }));
+                                  [](int c) { return !std::isspace(c); }));
 }
 
 // trim right whitespace in string (in place)
 inline void rtrim(std::string &s) {
-  s.erase(std::find_if(s.rbegin(), s.rend(),
-                       [](int ch) { return !std::isspace(ch); })
-              .base(),
-          s.end());
+  s.erase(
+      std::find_if(s.rbegin(), s.rend(), [](int c) { return !std::isspace(c); })
+          .base(),
+      s.end());
 }
 
 // trim whitespace from both side of a string (in place)
@@ -27,34 +27,24 @@ inline void trim(std::string &s) {
   rtrim(s);
 }
 
+// cartesian product of vectors, nice implementation
+// https://stackoverflow.com/a/17050528/11589613
 template <typename T>
 inline std::vector<std::vector<T>>
-product(const std::vector<std::vector<T>> &lists) {
-  {
-    std::vector<std::vector<T>> result;
-    if (std::find_if(std::begin(lists), std::end(lists), [](auto e) -> bool {
-          return e.size() == 0;
-        }) != std::end(lists)) {
-      return result;
-    }
-    for (auto &e : lists[0]) {
-      result.push_back({e});
-    }
-    for (size_t i = 1; i < lists.size(); ++i) {
-      std::vector<std::vector<T>> temp;
-      for (auto &e : result) {
-        for (auto f : lists[i]) {
-          auto e_tmp = e;
-          e_tmp.push_back(f);
-          temp.push_back(e_tmp);
-        }
+product(const std::vector<std::vector<T>> &v) {
+  std::vector<std::vector<T>> s = {{}};
+  for (const auto &u : v) {
+    std::vector<std::vector<T>> r;
+    for (const auto &x : s) {
+      for (const auto y : u) {
+        r.push_back(x);
+        r.back().push_back(y);
       }
-      result = temp;
     }
-    return result;
+    s = std::move(r);
   }
+  return s;
 }
-
 } // namespace util
 
 namespace convert {

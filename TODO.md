@@ -7,5 +7,9 @@
 ## NOTES
 
 - run 3 optimizations, or combine them in a single one for free, flat and FAI ?
-- should branch function split on half indices or half box ?
+
+## ?
+
+
+
 
