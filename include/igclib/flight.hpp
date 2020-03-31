@@ -30,7 +30,7 @@ private:
   void process_H_record(const std::string &record);
   void process_B_record(const std::string &record);
   double heuristic_score();
-
+  template <class T> double optimize_xc(double lower_bound);
   int time_zone_offset = 0;
   XCInfo xcinfo;
   std::string pilot_name = "Unknown pilot";

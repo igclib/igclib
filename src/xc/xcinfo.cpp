@@ -9,7 +9,7 @@ XCInfo::XCInfo() {
   this->score = 0;
 }
 
-XCInfo::XCInfo(xc_style &style, double distance, double score) {
+XCInfo::XCInfo(xc_style style, double distance, double score) {
   this->style = style;
   this->distance = distance;
   this->score = score;

@@ -138,19 +138,33 @@ void Flight::validate(const Airspace &airspace) {
 void Flight::compute_score() {
   // Inspired by by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
-
   double lower_bound = this->heuristic_score();
+  double free_score = this->optimize_xc<FreeCandidateTree>(lower_bound);
+  if (free_score > lower_bound) {
+    lower_bound = free_score;
+  } /*
+   double triangle_score =
+   this->optimize_xc<TriangleCandidateTree>(lower_bound); if (triangle_score >
+   lower_bound) { lower_bound = triangle_score;
+   }
+   double fai_score = this->optimize_xc<FAICandidateTree>(lower_bound);
+ */
+  // compute final score
+  cache::print_stats();
+  std::cout << free_score << std::endl;
+}
 
-  std::priority_queue<CandidateTree> candidates;
+template <class T> double Flight::optimize_xc(double lower_bound) {
+  std::priority_queue<T> candidates;
   candidates.emplace(*this);
 
   while (!candidates.empty()) {
-    CandidateTree node = candidates.top();
+    T node = candidates.top();
     candidates.pop();
     if (node.is_single_candidate()) {
-      double current_score = node.score();
-      if (current_score > lower_bound) {
-        lower_bound = current_score;
+      double candidate_score = node.score(*this);
+      if (candidate_score > lower_bound) {
+        lower_bound = candidate_score;
       }
     } else {
       for (auto &&child : node.branch(*this)) {
@@ -160,10 +174,7 @@ void Flight::compute_score() {
       }
     }
   }
-
-  // compute final score
-  cache::print_stats();
-  std::cout << lower_bound << std::endl;
+  return lower_bound;
 }
 
 double Flight::heuristic_score() {

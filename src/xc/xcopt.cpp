@@ -10,7 +10,7 @@ CandidateTree::CandidateTree(const CandidateTree &other)
 CandidateTree::CandidateTree(const Flight &flight)
     : v_points{5}, v_boxes{{(std::size_t)0, (std::size_t)flight.size() - 1}} {}
 
-bool CandidateTree::is_single_candidate() {
+bool CandidateTree::is_single_candidate() const {
   for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
     auto box_size = this->v_boxes.at(i).second - this->v_boxes.at(i).first;
     if (box_size > 10) { // margin ?
@@ -20,8 +20,9 @@ bool CandidateTree::is_single_candidate() {
   return true;
 }
 
-std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) const {
-  std::vector<CandidateTree> branches = {};
+template <class T>
+std::vector<T> CandidateTree::branch(const Flight &flight) const {
+  std::vector<T> branches = {};
 
   std::size_t picked_index = 0;
   std::size_t largest_box = 0;
@@ -50,7 +51,7 @@ std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) const {
     auto first_half = std::make_pair(picked_box.first, half_point);
     auto second_half = std::make_pair(half_point, picked_box.second);
 
-    CandidateTree new_candidate(*this);
+    T new_candidate(*this);
     new_candidate.m_score = -1; // reset score is is very important
     auto box_it = new_candidate.v_boxes.begin() + picked_index + 1;
     auto points_it = new_candidate.v_points.begin() + picked_index + 1;
@@ -75,18 +76,12 @@ std::vector<CandidateTree> CandidateTree::branch(const Flight &flight) const {
   return branches;
 }
 
-double CandidateTree::bound(const Flight &flight) {
-
-  double free_score = this->bound_free(flight);
-  // double free_score = 0;
-  // double triangle_score = 0;
-  double triangle_score = this->bound_triangle(flight);
-  double best_score = std::max(free_score, triangle_score);
-  this->m_score = best_score;
-  return best_score;
+std::vector<FreeCandidateTree>
+FreeCandidateTree::branch(const Flight &flight) const {
+  return CandidateTree::branch<FreeCandidateTree>(flight);
 }
 
-double CandidateTree::bound_free(const Flight &flight) {
+double FreeCandidateTree::bound(const Flight &flight) const {
   std::vector<std::vector<GeoPoint>> bboxes;
   for (std::size_t i = 0; i < this->v_points.size(); i++) {
     auto box = flight.bbox(this->v_boxes.at(i));
@@ -113,11 +108,17 @@ double CandidateTree::bound_free(const Flight &flight) {
   return best_score;
 }
 
+double FreeCandidateTree::score(const Flight &flight) const {
+  return this->bound(flight);
+}
+
+/*
+
 double CandidateTree::bound_triangle(const Flight &flight) {
   std::vector<std::vector<GeoPoint>> bboxes;
-  for (std::size_t i = 0; i < this->v_points.size(); i++) {
-    auto box = flight.bbox(this->v_boxes.at(i));
-    bboxes.insert(bboxes.end(), this->v_points.at(i), box);
+  for (std::size_t i = 0; i < this.v_points.size(); i++) {
+    auto box = flight.bbox(this.v_boxes.at(i));
+    bboxes.insert(bboxes.end(), this.v_points.at(i), box);
   }
 
   auto closing_boxes = {bboxes.front(), bboxes.back()};
@@ -164,3 +165,4 @@ double CandidateTree::bound_triangle(const Flight &flight) {
   best_score *= 1.2;
   return best_score;
 }
+*/
