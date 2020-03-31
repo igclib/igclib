@@ -7,6 +7,13 @@ CandidateTree::CandidateTree(const CandidateTree &other)
     : v_points(other.v_points), v_boxes(other.v_boxes), m_score(other.m_score) {
 }
 
+CandidateTree &CandidateTree::operator=(const CandidateTree &other) {
+  v_points = other.v_points;
+  v_boxes = other.v_boxes;
+  m_score = other.m_score;
+  return *this;
+}
+
 CandidateTree::CandidateTree(const Flight &flight)
     : v_points{5}, v_boxes{{(std::size_t)0, (std::size_t)flight.size() - 1}} {}
 
@@ -76,6 +83,8 @@ std::vector<T> CandidateTree::branch(const Flight &flight) const {
   return branches;
 }
 
+/* Free flight */
+
 std::vector<FreeCandidateTree>
 FreeCandidateTree::branch(const Flight &flight) const {
   return CandidateTree::branch<FreeCandidateTree>(flight);
@@ -91,15 +100,13 @@ double FreeCandidateTree::bound(const Flight &flight) const {
   double best_score = 0;
   double current_score = 0;
   GeoPoint previous_point;
-  for (auto &&combination : util::product<GeoPoint>(bboxes)) {
+  for (auto &combination : util::product<GeoPoint>(bboxes)) {
     current_score = 0;
     previous_point = combination.at(0);
     for (std::size_t i = 1; i < combination.size(); i++) {
-      // current_score += previous_point.distance(combination.at(i));
       current_score += cache::distance(previous_point, combination.at(i));
       previous_point = combination.at(i);
     }
-
     if (current_score > best_score) {
       best_score = current_score;
     }
@@ -112,13 +119,18 @@ double FreeCandidateTree::score(const Flight &flight) const {
   return this->bound(flight);
 }
 
-/*
+/* Triangle flight */
 
-double CandidateTree::bound_triangle(const Flight &flight) {
+std::vector<TriangleCandidateTree>
+TriangleCandidateTree::branch(const Flight &flight) const {
+  return CandidateTree::branch<TriangleCandidateTree>(flight);
+}
+
+double TriangleCandidateTree::bound(const Flight &flight) const {
   std::vector<std::vector<GeoPoint>> bboxes;
-  for (std::size_t i = 0; i < this.v_points.size(); i++) {
-    auto box = flight.bbox(this.v_boxes.at(i));
-    bboxes.insert(bboxes.end(), this.v_points.at(i), box);
+  for (std::size_t i = 0; i < this->v_points.size(); i++) {
+    auto box = flight.bbox(this->v_boxes.at(i));
+    bboxes.insert(bboxes.end(), this->v_points.at(i), box);
   }
 
   auto closing_boxes = {bboxes.front(), bboxes.back()};
@@ -127,8 +139,7 @@ double CandidateTree::bound_triangle(const Flight &flight) {
   double best_closing = std::numeric_limits<double>::max();
   double current_closing = 0;
 
-  for (auto &&combination : util::product<GeoPoint>(closing_boxes)) {
-    // current_closing = combination.front().distance(combination.back());
+  for (auto &combination : util::product<GeoPoint>(closing_boxes)) {
     current_closing = cache::distance(combination.front(), combination.back());
     if (current_closing < best_closing) {
       best_closing = current_closing;
@@ -136,33 +147,107 @@ double CandidateTree::bound_triangle(const Flight &flight) {
   }
 
   double best_score = 0;
-  double current_fai_score = 0;
-  double current_triangle_score = 0;
-  double min_leg = 0;
-  double c_fai = 0;
-  std::vector<double> legs;
-  for (auto &&combination : util::product<GeoPoint>(bboxes)) {
-    legs.clear();
-    // legs.push_back(combination.at(0).distance(combination.at(1)));
-    // legs.push_back(combination.at(1).distance(combination.at(2)));
-    // legs.push_back(combination.at(2).distance(combination.at(0)));
-    legs.push_back(cache::distance(combination.at(0), combination.at(1)));
-    legs.push_back(cache::distance(combination.at(1), combination.at(2)));
-    legs.push_back(cache::distance(combination.at(2), combination.at(0)));
-    current_triangle_score =
-        std::accumulate(legs.begin(), legs.end(), 0) - best_closing;
-    min_leg = *std::min_element(legs.begin(), legs.end());
-    c_fai = (min_leg / 0.28) - best_closing;
-    current_fai_score = std::min(current_triangle_score, c_fai);
-
-    if (current_triangle_score > best_score) {
-      best_score = current_triangle_score;
-    } else if (current_fai_score > best_score) {
-      // best_score = current_fai_score;
+  double current_score = 0;
+  for (auto &combination : util::product<GeoPoint>(bboxes)) {
+    current_score = cache::distance(combination.at(0), combination.at(1));
+    current_score += cache::distance(combination.at(1), combination.at(2));
+    current_score += cache::distance(combination.at(2), combination.at(0));
+    if (current_score > best_score) {
+      best_score = current_score;
     }
   }
 
-  best_score *= 1.2;
+  return (best_score - best_closing);
+}
+
+double TriangleCandidateTree::score(const Flight &flight) const {
+  GeoPoint start_point = flight.at(this->v_boxes.front().first);
+  GeoPoint end_point = flight.at(this->v_boxes.back().first);
+  double closing_distance = start_point.distance(end_point);
+  double triangle_distance =
+      flight.at(this->v_boxes.at(1).first)
+          .distance(flight.at(this->v_boxes.at(2).first));
+  triangle_distance += flight.at(this->v_boxes.at(2).first)
+                           .distance(flight.at(this->v_boxes.at(3).first));
+  triangle_distance += flight.at(this->v_boxes.at(3).first)
+                           .distance(flight.at(this->v_boxes.at(1).first));
+  if (closing_distance < 3000.0) {
+    return 1.2 * triangle_distance;
+  } else if (closing_distance < 0.05 * triangle_distance) {
+    return 1.2 * (triangle_distance - closing_distance);
+  } else {
+    return 0;
+  }
+}
+
+/* FAI flight */
+
+std::vector<FAICandidateTree>
+FAICandidateTree::branch(const Flight &flight) const {
+  return CandidateTree::branch<FAICandidateTree>(flight);
+}
+
+double FAICandidateTree::bound(const Flight &flight) const {
+  std::vector<std::vector<GeoPoint>> bboxes;
+  for (std::size_t i = 0; i < this->v_points.size(); i++) {
+    auto box = flight.bbox(this->v_boxes.at(i));
+    bboxes.insert(bboxes.end(), this->v_points.at(i), box);
+  }
+
+  auto closing_boxes = {bboxes.front(), bboxes.back()};
+  bboxes.pop_back();
+  bboxes.erase(bboxes.begin());
+  double best_closing = std::numeric_limits<double>::max();
+  double current_closing = 0;
+
+  for (auto &combination : util::product<GeoPoint>(closing_boxes)) {
+    current_closing = cache::distance(combination.front(), combination.back());
+    if (current_closing < best_closing) {
+      best_closing = current_closing;
+    }
+  }
+
+  double best_score = std::numeric_limits<double>::min();
+  double current_score = 0;
+  double min_leg = 0;
+  double c_fai = 0;
+  std::vector<double> legs;
+  for (auto &combination : util::product<GeoPoint>(bboxes)) {
+    legs.clear();
+    legs.push_back(combination.at(0).distance(combination.at(1)));
+    legs.push_back(combination.at(1).distance(combination.at(2)));
+    legs.push_back(combination.at(2).distance(combination.at(0)));
+    current_score = std::accumulate(legs.begin(), legs.end(), 0);
+    min_leg = *std::min_element(legs.begin(), legs.end());
+    c_fai = min_leg / 0.28 - best_closing;
+    current_score = std::min(current_score, c_fai);
+    if (current_score > best_score) {
+      best_score = current_score;
+    }
+  }
+
   return best_score;
 }
-*/
+
+double FAICandidateTree::score(const Flight &flight) const {
+  GeoPoint start_point = flight.at(this->v_boxes.front().first);
+  GeoPoint end_point = flight.at(this->v_boxes.back().first);
+  double closing_distance = start_point.distance(end_point);
+  std::vector<double> legs;
+  legs.push_back(flight.at(this->v_boxes.at(1).first)
+                     .distance(flight.at(this->v_boxes.at(2).first)));
+  legs.push_back(flight.at(this->v_boxes.at(2).first)
+                     .distance(flight.at(this->v_boxes.at(3).first)));
+  legs.push_back(flight.at(this->v_boxes.at(3).first)
+                     .distance(flight.at(this->v_boxes.at(1).first)));
+  double min_leg = *std::min_element(legs.begin(), legs.end());
+  double triangle_distance = std::accumulate(legs.begin(), legs.end(), 0.0);
+  if (min_leg >= 0.28 * triangle_distance) {
+    if (closing_distance < 3000.0) {
+      return 1.4 * triangle_distance;
+    } else if (closing_distance < 0.05 * triangle_distance) {
+      return 1.4 * (triangle_distance - closing_distance);
+    }
+  }
+  return 0;
+}

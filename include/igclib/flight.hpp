@@ -25,11 +25,12 @@ public:
     return this->points.max_diagonal(pair.first, pair.second);
   };
   std::size_t size() const { return this->points.size(); }
+  const GeoPoint &at(std::size_t index) const { return this->points.at(index); }
 
 private:
   void process_H_record(const std::string &record);
   void process_B_record(const std::string &record);
-  double heuristic_score();
+  double heuristic_free() const;
   template <class T> double optimize_xc(double lower_bound);
   int time_zone_offset = 0;
   XCInfo xcinfo;

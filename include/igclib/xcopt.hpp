@@ -10,9 +10,12 @@ public:
                 std::vector<std::pair<std::size_t, std::size_t>> boxes)
       : v_points(points), v_boxes(boxes){};
   CandidateTree(const CandidateTree &other);
+  CandidateTree &operator=(const CandidateTree &other);
   bool operator<(const CandidateTree &other) const {
     return this->m_score < other.m_score;
   };
+
+  void set_score(double s) { this->m_score = s; };
 
   template <class T> std::vector<T> branch(const Flight &flight) const;
   virtual bool is_single_candidate() const;
@@ -34,12 +37,10 @@ public:
   virtual double score(const Flight &flight) const;
 };
 
-/*
 class TriangleCandidateTree : public CandidateTree {
 public:
   TriangleCandidateTree(const Flight &flight) : CandidateTree(flight){};
-  TriangleCandidateTree(const TriangleCandidateTree &other)
-      : CandidateTree(other){};
+  TriangleCandidateTree(const CandidateTree &other) : CandidateTree(other){};
   virtual std::vector<TriangleCandidateTree> branch(const Flight &flight) const;
   virtual double bound(const Flight &flight) const;
   virtual double score(const Flight &flight) const;
@@ -48,8 +49,8 @@ public:
 class FAICandidateTree : public CandidateTree {
 public:
   FAICandidateTree(const Flight &flight) : CandidateTree(flight){};
-  FAICandidateTree(const FAICandidateTree &other) : CandidateTree(other){};
+  FAICandidateTree(const CandidateTree &other) : CandidateTree(other){};
   virtual std::vector<FAICandidateTree> branch(const Flight &flight) const;
   virtual double bound(const Flight &flight) const;
   virtual double score(const Flight &flight) const;
-};*/
+};

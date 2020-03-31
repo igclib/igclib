@@ -138,23 +138,25 @@ void Flight::validate(const Airspace &airspace) {
 void Flight::compute_score() {
   // Inspired by by Ondrej Palkovsky
   // http://www.penguin.cz/~ondrap/algorithm.pdf
-  double lower_bound = this->heuristic_score();
-  double free_score = this->optimize_xc<FreeCandidateTree>(lower_bound);
-  if (free_score > lower_bound) {
-    lower_bound = free_score;
-  } /*
-   double triangle_score =
-   this->optimize_xc<TriangleCandidateTree>(lower_bound); if (triangle_score >
-   lower_bound) { lower_bound = triangle_score;
-   }
-   double fai_score = this->optimize_xc<FAICandidateTree>(lower_bound);
- */
-  // compute final score
+  double lower_bound = this->heuristic_free();
+  std::cout << "Freeflight heuristic : " << lower_bound << std::endl;
+  lower_bound = this->optimize_xc<FreeCandidateTree>(lower_bound);
+  std::cout << "Freeflight score : " << lower_bound << std::endl;
+
+  // TODO find good heuristics, can't use free distance bc bound not comparable
+  // ?
+  double triangle_score = this->optimize_xc<TriangleCandidateTree>(0);
+  std::cout << "Triangle score : " << triangle_score << std::endl;
+
+  double fai_score = this->optimize_xc<FAICandidateTree>(0);
+  std::cout << "FAI score : " << fai_score << std::endl;
+
+  // compute final score and assign to flight
   cache::print_stats();
-  std::cout << free_score << std::endl;
 }
 
 template <class T> double Flight::optimize_xc(double lower_bound) {
+  double best_score = 0;
   std::priority_queue<T> candidates;
   candidates.emplace(*this);
 
@@ -164,20 +166,23 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
     if (node.is_single_candidate()) {
       double candidate_score = node.score(*this);
       if (candidate_score > lower_bound) {
-        lower_bound = candidate_score;
+        best_score = candidate_score;
+        lower_bound = best_score;
       }
     } else {
-      for (auto &&child : node.branch(*this)) {
-        if (child.bound(*this) >= lower_bound) {
+      for (auto &child : node.branch(*this)) {
+        double node_bound = child.bound(*this);
+        if (node_bound >= lower_bound) {
+          child.set_score(node_bound);
           candidates.push(child);
         }
       }
     }
   }
-  return lower_bound;
+  return best_score;
 }
 
-double Flight::heuristic_score() {
+double Flight::heuristic_free() const {
   const int n_approx = 100; // number of points used for tracklog approximation
   const int step_ratio = this->points.size() / n_approx;
 

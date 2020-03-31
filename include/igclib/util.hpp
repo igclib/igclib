@@ -27,7 +27,7 @@ inline void trim(std::string &s) {
   rtrim(s);
 }
 
-// cartesian product of vectors, nice implementation
+// cartesian product of vectors, nice implementation by
 // https://stackoverflow.com/a/17050528/11589613
 template <typename T>
 inline std::vector<std::vector<T>>

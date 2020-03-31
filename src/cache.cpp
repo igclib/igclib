@@ -14,10 +14,7 @@ void print_stats() {
 }
 
 double distance(const GeoPoint &p1, const GeoPoint &p2) {
-  if (dist_cache.empty()) {
-    dist_cache.reserve(20000);
-  }
-  auto id = p1.id() + p2.id();
+  std::string id = p1.id() + "*" + p2.id();
   auto found = dist_cache.find(id);
   if (found != dist_cache.end()) {
     cache_hit++;
@@ -25,7 +22,7 @@ double distance(const GeoPoint &p1, const GeoPoint &p2) {
   } else {
     cache_miss++;
     double distance = p1.distance(p2);
-    auto reversed_id = p2.id() + p1.id();
+    std::string reversed_id = p2.id() + "*" + p1.id();
     dist_cache[id] = distance;
     dist_cache[reversed_id] = distance;
     return distance;
