@@ -2,6 +2,7 @@
 
 #include <igclib/airspace.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/xcinfo.hpp>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -27,95 +28,16 @@ public:
   double max_diagonal(std::pair<int, int> pair) const {
     return this->points.max_diagonal(pair.first, pair.second);
   };
-  bool is_closed(std::pair<std::size_t, std::size_t> start_box,
-                 std::pair<std::size_t, std::size_t> end_box,
-                 double max_distance) const;
+  std::size_t size() const { return this->points.size(); }
 
 private:
   void process_H_record(const std::string &record);
   void process_B_record(const std::string &record);
   double heuristic_score();
-  void optimize(const ObjectiveFunction &objective_function,
-                const BoundingFunction &bound_function);
 
   int time_zone_offset = 0;
-  double score = 0;
+  XCInfo xcinfo;
   std::string pilot_name = "Unknown pilot";
   PointCollection points;
   infractions_t infractions;
-};
-
-class CandidateTree {
-public:
-  CandidateTree(std::vector<std::size_t> points,
-                std::vector<std::pair<std::size_t, std::size_t>> boxes)
-      : v_points(points), v_boxes(boxes){};
-  CandidateTree(const CandidateTree &other)
-      : v_points(other.v_points), v_boxes(other.v_boxes),
-        m_score(other.m_score){};
-  bool operator<(const CandidateTree &other) const {
-    return this->m_score < other.m_score;
-  };
-
-  bool is_single_candidate();
-  std::vector<CandidateTree> branch(const Flight &flight);
-
-  std::vector<std::size_t> v_points;
-  std::vector<std::pair<std::size_t, std::size_t>> v_boxes;
-
-  double score() const { return this->m_score; }
-  void set_score(double s) { this->m_score = s; }
-
-private:
-  double m_score = -1;
-};
-
-/* Objective Functions*/
-
-class ObjectiveFunction {
-public:
-  ObjectiveFunction(){};
-  virtual double operator()(const CandidateTree &node,
-                            const Flight &flight) const = 0;
-};
-
-class FreeObjectiveFunction : public ObjectiveFunction {
-public:
-  FreeObjectiveFunction(){};
-  virtual double operator()(const CandidateTree &node,
-                            const Flight &flight) const;
-};
-
-class TriangleObjectiveFunction : public ObjectiveFunction {
-public:
-  TriangleObjectiveFunction(){};
-  virtual double operator()(const CandidateTree &node,
-                            const Flight &flight) const;
-};
-
-/* Bounding Functions*/
-
-class BoundingFunction {
-public:
-  BoundingFunction(){};
-  virtual double operator()(CandidateTree &node,
-                            const Flight &flight) const = 0;
-};
-
-class FreeBoundingFunction : public BoundingFunction {
-public:
-  FreeBoundingFunction(){};
-  virtual double operator()(CandidateTree &node, const Flight &flight) const;
-};
-
-class FAIBoundingFunction : public BoundingFunction {
-public:
-  FAIBoundingFunction(){};
-  virtual double operator()(CandidateTree &node, const Flight &flight) const;
-};
-
-class TriangleBoundingFunction : public BoundingFunction {
-public:
-  TriangleBoundingFunction(){};
-  virtual double operator()(CandidateTree &node, const Flight &flight) const;
 };

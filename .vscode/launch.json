@@ -9,8 +9,8 @@
       "args": [
         "xc",
         "--flight",
-        //"$HOME/Downloads/igcfile.igc",
-        "tests/data/flights/xc_col_agnel.igc",
+        "tmp/flights/21846.txt",
+        //"tests/data/flights/xc_col_agnel.igc",
         //"--airspace",
         //"tests/data/airspace/france_airspace.txt"
       ],
