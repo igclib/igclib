@@ -11,7 +11,7 @@ public:
   GeoPoint() : lat(0), lon(0), alt(0), agl(0){};
   GeoPoint(double lat, double lon, int alt, int agl);
   bool operator==(const GeoPoint &other) const;
-  std::string id() const;
+  std::string id() const; // used for caching distances
   double distance(const GeoPoint &p) const;
   double heading(const GeoPoint &p) const;
   GeoPoint project(double distance, double heading) const;

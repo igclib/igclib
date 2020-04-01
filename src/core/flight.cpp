@@ -140,17 +140,14 @@ void Flight::compute_score() {
   // http://www.penguin.cz/~ondrap/algorithm.pdf
   double lower_bound = this->heuristic_free();
   std::cout << "Freeflight heuristic : " << lower_bound << std::endl;
-  lower_bound = this->optimize_xc<FreeCandidateTree>(lower_bound);
+
+  // lower_bound = this->optimize_xc<FreeCandidateTree>(lower_bound);
   std::cout << "Freeflight score : " << lower_bound << std::endl;
 
-  double triangle_score = this->optimize_xc<TriangleCandidateTree>(lower_bound);
+  double triangle_score = this->optimize_xc<TriangleCandidateTree>(0);
   std::cout << "Triangle score : " << triangle_score << std::endl;
 
-  if (triangle_score > lower_bound) {
-    // lower_bound = triangle_score;
-  }
-
-  double fai_score = this->optimize_xc<FAICandidateTree>(lower_bound);
+  double fai_score = this->optimize_xc<FAICandidateTree>(triangle_score);
   std::cout << "FAI score : " << fai_score << std::endl;
 
   // compute final score and assign to flight

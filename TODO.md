@@ -8,6 +8,9 @@
 ## NOTES
 
 - run 3 optimizations, or combine them in a single one for free, flat and FAI ?
+- broken line works, but needs eager branching for straight line detection
+- generate approximate solutions faster to tighten lower bound
+
 
 ## ?
 

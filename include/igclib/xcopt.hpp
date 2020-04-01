@@ -7,8 +7,7 @@ class CandidateTree {
 public:
   CandidateTree(const Flight &flight);
   CandidateTree(std::vector<std::size_t> points,
-                std::vector<std::pair<std::size_t, std::size_t>> boxes)
-      : v_points(points), v_boxes(boxes){};
+                std::vector<std::pair<std::size_t, std::size_t>> boxes);
   CandidateTree(const CandidateTree &other);
   CandidateTree &operator=(const CandidateTree &other);
   bool operator<(const CandidateTree &other) const {
