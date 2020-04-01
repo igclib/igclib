@@ -143,12 +143,14 @@ void Flight::compute_score() {
   lower_bound = this->optimize_xc<FreeCandidateTree>(lower_bound);
   std::cout << "Freeflight score : " << lower_bound << std::endl;
 
-  // TODO find good heuristics, can't use free distance bc bound not comparable
-  // ?
-  double triangle_score = this->optimize_xc<TriangleCandidateTree>(0);
+  double triangle_score = this->optimize_xc<TriangleCandidateTree>(lower_bound);
   std::cout << "Triangle score : " << triangle_score << std::endl;
 
-  double fai_score = this->optimize_xc<FAICandidateTree>(0);
+  if (triangle_score > lower_bound) {
+    // lower_bound = triangle_score;
+  }
+
+  double fai_score = this->optimize_xc<FAICandidateTree>(lower_bound);
   std::cout << "FAI score : " << fai_score << std::endl;
 
   // compute final score and assign to flight

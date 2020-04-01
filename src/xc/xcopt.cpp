@@ -126,6 +126,14 @@ TriangleCandidateTree::branch(const Flight &flight) const {
   return CandidateTree::branch<TriangleCandidateTree>(flight);
 }
 
+bool overlap(const std::vector<std::vector<GeoPoint>> &boxes) {
+  bool overlap_lat = (boxes.at(0).at(2).lat >= boxes.at(1).at(0).lat) &&
+                     (boxes.at(1).at(2).lat >= boxes.at(0).at(0).lat);
+  bool overlap_lon = (boxes.at(0).at(1).lon >= boxes.at(1).at(0).lon) &&
+                     (boxes.at(1).at(1).lon >= boxes.at(0).at(0).lon);
+  return (overlap_lat && overlap_lon);
+}
+
 double TriangleCandidateTree::bound(const Flight &flight) const {
   std::vector<std::vector<GeoPoint>> bboxes;
   for (std::size_t i = 0; i < this->v_points.size(); i++) {
@@ -136,13 +144,18 @@ double TriangleCandidateTree::bound(const Flight &flight) const {
   auto closing_boxes = {bboxes.front(), bboxes.back()};
   bboxes.pop_back();
   bboxes.erase(bboxes.begin());
-  double best_closing = std::numeric_limits<double>::max();
-  double current_closing = 0;
 
-  for (auto &combination : util::product<GeoPoint>(closing_boxes)) {
-    current_closing = cache::distance(combination.front(), combination.back());
-    if (current_closing < best_closing) {
-      best_closing = current_closing;
+  double best_closing = std::numeric_limits<double>::max();
+  if (overlap(closing_boxes)) {
+    best_closing = 0;
+  } else {
+    double current_closing = 0;
+    for (auto &combination : util::product<GeoPoint>(closing_boxes)) {
+      current_closing =
+          cache::distance(combination.front(), combination.back());
+      if (current_closing < best_closing) {
+        best_closing = current_closing;
+      }
     }
   }
 
@@ -157,7 +170,7 @@ double TriangleCandidateTree::bound(const Flight &flight) const {
     }
   }
 
-  return (best_score - best_closing);
+  return 1.2 * (best_score - best_closing);
 }
 
 double TriangleCandidateTree::score(const Flight &flight) const {
@@ -198,12 +211,16 @@ double FAICandidateTree::bound(const Flight &flight) const {
   bboxes.pop_back();
   bboxes.erase(bboxes.begin());
   double best_closing = std::numeric_limits<double>::max();
-  double current_closing = 0;
-
-  for (auto &combination : util::product<GeoPoint>(closing_boxes)) {
-    current_closing = cache::distance(combination.front(), combination.back());
-    if (current_closing < best_closing) {
-      best_closing = current_closing;
+  if (overlap(closing_boxes)) {
+    best_closing = 0;
+  } else {
+    double current_closing = 0;
+    for (auto &combination : util::product<GeoPoint>(closing_boxes)) {
+      current_closing =
+          cache::distance(combination.front(), combination.back());
+      if (current_closing < best_closing) {
+        best_closing = current_closing;
+      }
     }
   }
 
@@ -217,16 +234,17 @@ double FAICandidateTree::bound(const Flight &flight) const {
     legs.push_back(combination.at(0).distance(combination.at(1)));
     legs.push_back(combination.at(1).distance(combination.at(2)));
     legs.push_back(combination.at(2).distance(combination.at(0)));
-    current_score = std::accumulate(legs.begin(), legs.end(), 0);
+    current_score =
+        std::accumulate(legs.begin(), legs.end(), 0.0) - best_closing;
     min_leg = *std::min_element(legs.begin(), legs.end());
-    c_fai = min_leg / 0.28 - best_closing;
+    c_fai = (min_leg / 0.28) - best_closing;
     current_score = std::min(current_score, c_fai);
     if (current_score > best_score) {
       best_score = current_score;
     }
   }
 
-  return best_score;
+  return 1.4 * best_score;
 }
 
 double FAICandidateTree::score(const Flight &flight) const {
