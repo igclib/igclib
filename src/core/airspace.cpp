@@ -24,6 +24,7 @@ Airspace::Airspace(const std::string &airspace_file) {
 
   std::string line;
   std::vector<std::string> record;
+  // FIXME replace with do-while to not insert last zone separately
   while (std::getline(f, line)) {
     util::trim(line);
     // discard comments and empty lines

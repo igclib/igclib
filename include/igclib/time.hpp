@@ -8,6 +8,7 @@ public:
   Time(int hour, int minute, int second, int offset = 0);
   size_t hash(void) const { return this->sec_from_midnight; };
   bool operator==(const Time &t) const;
+  std::string to_string() const;
 
 protected:
   int hour = 0;

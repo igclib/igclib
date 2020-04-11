@@ -16,8 +16,8 @@ public:
   Flight(const std::string &igc_file);
   void save(const std::string &out) const;
   void validate(const Airspace &airspace);
+  void compute_score(/*TODO add rules ?*/);
   nlohmann::json serialize() const;
-  void compute_score();
   geopoints_t bbox(std::pair<std::size_t, std::size_t> pair) const {
     return this->points.bbox(pair.first, pair.second);
   };

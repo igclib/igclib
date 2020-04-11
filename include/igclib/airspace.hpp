@@ -24,7 +24,7 @@ public:
   void infractions(const PointCollection &points, infractions_t &infractions,
                    bool with_agl) const;
 
-  bool need_agl_checking;
+  bool need_agl_checking; // TODO should count how many zones
 
 private:
   std::vector<Zone> zones;

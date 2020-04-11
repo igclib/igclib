@@ -5,6 +5,8 @@
 - implement eager branching for straight line detection
 - ask about bound functions comparisons
 
+- airspace.need_agl_checking should count how many zones rather than be a bool
+
 ## NOTES
 
 - run 3 optimizations, or combine them in a single one for free, flat and FAI ?

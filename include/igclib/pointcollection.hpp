@@ -17,6 +17,7 @@ public:
   void insert(const Time &t, const GeoPoint &p);
   const GeoPoint &operator[](const Time &t) const;
   const GeoPoint &operator[](std::size_t index) const;
+  const Time &find_time(const GeoPoint &p) const;
   const GeoPoint &at(std::size_t index) const;
   std::size_t size() const { return geopoints.size(); };
   geopoints_t bbox() const;

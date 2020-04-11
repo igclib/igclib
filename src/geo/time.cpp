@@ -31,3 +31,9 @@ Time::Time(int hour, int minute, int second, int offset /* = 0*/) {
   this->sec_from_midnight =
       3600 * this->hour + 60 * this->minute + this->second;
 }
+
+std::string Time::to_string() const {
+  char timechar[9];
+  sprintf(timechar, "%02d:%02d:%02d", this->hour, this->minute, this->second);
+  return timechar;
+}

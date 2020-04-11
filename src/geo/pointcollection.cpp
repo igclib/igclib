@@ -29,6 +29,15 @@ const GeoPoint &PointCollection::operator[](std::size_t index) const {
   return geopoints.at(index);
 }
 
+const Time &PointCollection::find_time(const GeoPoint &p) const {
+  for (const auto &x : this->timepoints) {
+    if (this->geopoints.at(x.second) == p) {
+      return x.first;
+    }
+  }
+  throw std::runtime_error("Point not found in pilot track");
+}
+
 const GeoPoint &PointCollection::at(std::size_t index) const {
   return geopoints.at(index);
 }

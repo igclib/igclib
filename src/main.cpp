@@ -24,7 +24,7 @@ void command_xc(const std::string &flight_file,
       Airspace airspace(airspace_file);
       flight.validate(airspace);
     }
-    flight.compute_score();
+    // flight.compute_score();
     flight.save(output);
   } catch (std::runtime_error &e) {
     std::cout << e.what() << std::endl;
