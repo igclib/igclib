@@ -10,7 +10,6 @@
 
 class Flight {
   typedef std::vector<GeoPoint> geopoints_t;
-  typedef std::map<std::string, geopoints_t> infractions_t;
 
 public:
   Flight(const std::string &igc_file);
@@ -36,5 +35,5 @@ private:
   XCInfo xcinfo;
   std::string pilot_name = "Unknown pilot";
   PointCollection points;
-  infractions_t infractions;
+  std::map<Zone, std::vector<GeoPoint>> infractions;
 };

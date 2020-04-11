@@ -27,15 +27,17 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       this->cls = r.substr(3);
     } else if (line_code == "AN") {
       // name
-      this->name = r.substr(3);
+      this->m_name = r.substr(3);
     } else if (line_code == "AH") {
       // ceiling
       std::pair<bool, int> alt = convert::str2alt(r.substr(3));
+      this->ceiling_txt = r.substr(3);
       this->ceiling_is_ground_relative = alt.first;
       this->ceiling = alt.second;
     } else if (line_code == "AL") {
       // floor
       std::pair<bool, int> alt = convert::str2alt(r.substr(3));
+      this->floor_txt = r.substr(3);
       this->floor_is_ground_relative = alt.first;
       this->floor = alt.second;
     } else if (line_code == "DP") {
@@ -85,7 +87,7 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
         (void)airway_width;
       }
       std::cerr << "Airways are not yet supported. DY record of zone "
-                << this->name << " is discarded." << std::endl;
+                << this->m_name << " is discarded." << std::endl;
     } else if (r.substr(0, 4) == "V D=") {
       // direction assignement for DA and DB records
       if (r.find('-' != std::string::npos)) {
@@ -108,9 +110,8 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   if (!polygon_vertices.empty() && polygon_vertices.size() <= 2) {
     std::cerr
         << "Automatic closing of 2 DP is not supported. DP records of zone "
-        << this->name << " are discarded." << std::endl;
-  }
-  else if (polygon_vertices.size() > 2) {
+        << this->m_name << " are discarded." << std::endl;
+  } else if (polygon_vertices.size() > 2) {
     std::shared_ptr<Geometry> p = std::make_shared<Polygon>(polygon_vertices);
     this->geometries.push_back(p);
   }
@@ -171,4 +172,20 @@ bool Zone::in_altitude_range(const GeoPoint &p, bool with_agl) const {
 
 bool Zone::needs_agl_checking() const {
   return this->floor_is_ground_relative || this->ceiling_is_ground_relative;
+}
+
+// comparison operator necessary to use Zone as map key
+bool Zone::operator<(const Zone &other) const {
+  return this->m_name < other.m_name;
+}
+
+const nlohmann::json Zone::to_json() const {
+  return {{"class", this->cls},
+          {"name", this->m_name},
+          {"floor", this->floor},
+          {"floor_txt", this->floor_txt},
+          {"floor_ground_relative", this->floor_is_ground_relative},
+          {"ceiling", this->ceiling},
+          {"ceiling_txt", this->ceiling_txt},
+          {"ceiling_ground_relative", this->ceiling_is_ground_relative}};
 }

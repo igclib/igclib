@@ -81,8 +81,9 @@ void Airspace::infractions(const PointCollection &points,
     zone_infractions =
         this->zones[zone_index.second].contained_points(points, with_agl);
     if (!zone_infractions.empty()) {
-      std::cerr << this->zones[zone_index.second].name << std::endl;
-      infractions[zones[zone_index.second].name] = zone_infractions;
+      std::cerr << "INFRACTION " << this->zones[zone_index.second].m_name
+                << std::endl;
+      infractions[zones[zone_index.second]] = zone_infractions;
     }
   }
 }

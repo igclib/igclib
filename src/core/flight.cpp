@@ -66,10 +66,10 @@ json Flight::serialize() const {
   json j = {{"pilot", this->pilot_name}};
 
   for (const auto &infraction : this->infractions) {
-    j["infractions"][infraction.first];
+    j["infractions"][infraction.first.name()] = infraction.first.to_json();
     for (const GeoPoint &p : infraction.second) {
       std::string time(this->points.find_time(p).to_string());
-      j["infractions"][infraction.first][time] = p.serialize();
+      j["infractions"][infraction.first.name()]["points"][time] = p.serialize();
     }
   }
 
@@ -104,13 +104,15 @@ void Flight::validate(const Airspace &airspace) {
       std::string key = getenv("ELEVATION_API_KEY");
       std::string api = "https://geolocalisation.ffvl.fr/elevation?key=" + key;
       json data = this->points.latlon();
-      cpr::Session session;
       cpr::Body body(data.dump());
+      cpr::Session session;
       session.SetVerifySsl(false);
       session.SetUrl(api);
       session.SetBody(body);
+      std::cerr << "Retrieving flight altitude ... ";
       cpr::Response r = session.Post();
       if (r.status_code == 200) {
+        std::cerr << "done." << std::endl;
         data = json::parse(r.text);
         std::vector<double> altitudes = data.get<std::vector<double>>();
         if (this->points.set_agl(altitudes)) {

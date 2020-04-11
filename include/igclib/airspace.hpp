@@ -15,7 +15,7 @@ class Airspace {
   typedef bg::model::box<GeoPoint> box_t;
   typedef std::pair<bg::model::box<GeoPoint>, size_t> box_mapping_t;
   typedef std::vector<GeoPoint> geopoints_t;
-  typedef std::map<std::string, geopoints_t> infractions_t;
+  typedef std::map<Zone, geopoints_t> infractions_t;
 
 public:
   Airspace(const std::string &airspace_file);
