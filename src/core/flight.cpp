@@ -143,14 +143,14 @@ void Flight::compute_score() {
   double lower_bound = this->heuristic_free();
   std::cout << "Freeflight heuristic : " << lower_bound << std::endl;
 
-  // lower_bound = this->optimize_xc<FreeCandidateTree>(lower_bound);
-  std::cout << "Freeflight score : " << lower_bound << std::endl;
-
   double triangle_score = this->optimize_xc<TriangleCandidateTree>(0);
   std::cout << "Triangle score : " << triangle_score << std::endl;
 
-  double fai_score = this->optimize_xc<FAICandidateTree>(triangle_score);
-  std::cout << "FAI score : " << fai_score << std::endl;
+  // double fai_score = this->optimize_xc<FAICandidateTree>(triangle_score);
+  // std::cout << "FAI score : " << fai_score << std::endl;
+
+  // lower_bound = this->optimize_xc<FreeCandidateTree>(lower_bound);
+  // std::cout << "Freeflight score : " << lower_bound << std::endl;
 
   // compute final score and assign to flight
   cache::print_stats();
@@ -166,6 +166,7 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
     candidates.pop();
     if (node.is_single_candidate()) {
       double candidate_score = node.score(*this);
+      std::cerr << "Score : " << candidate_score << std::endl;
       if (candidate_score > lower_bound) {
         best_score = candidate_score;
         lower_bound = best_score;
@@ -174,6 +175,7 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
       for (auto &child : node.branch(*this)) {
         double node_bound = child.bound(*this);
         if (node_bound >= lower_bound) {
+          std::cerr << "Bound : " << node_bound << std::endl;
           child.set_score(node_bound);
           candidates.push(child);
         }

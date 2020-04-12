@@ -2,9 +2,12 @@
 
 A command-line tool for paragliding competitions and XC.
 
-## Features
+## Current Features
 
-- Efficient airspace checking against OpenAir files
+- Airspace checking of flights against OpenAir files.
+
+## In Progress
+
 - XC score computation
 
 ## Future features

@@ -25,7 +25,7 @@ CandidateTree::CandidateTree(const Flight &flight)
 bool CandidateTree::is_single_candidate() const {
   for (std::size_t i = 0; i < this->v_boxes.size(); i++) {
     auto box_size = this->v_boxes.at(i).second - this->v_boxes.at(i).first;
-    if (box_size > 10) { // TODO set no margin when algo is finished
+    if (box_size > 1) {
       return false;
     }
   }
