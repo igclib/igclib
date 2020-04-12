@@ -24,7 +24,11 @@ public:
   void infractions(const PointCollection &points, infractions_t &infractions,
                    bool with_agl) const;
 
-  bool need_agl_checking; // TODO should count how many zones
+  // needs_agl_checking counts the number of zones in the airspace file which
+  // need to be checked against ground altitude. this is to prevent having to
+  // ask the elevation service for altitudes if they aren't needed for airspace
+  // validation
+  std::size_t needs_agl_checking = 0;
 
 private:
   std::vector<Zone> zones;

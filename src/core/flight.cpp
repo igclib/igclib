@@ -99,7 +99,7 @@ void Flight::validate(const Airspace &airspace) {
   bool is_agl_validable = false;
 
   // retrieve the ground altitude for each point of the flight
-  if (airspace.need_agl_checking) {
+  if (airspace.needs_agl_checking > 0) {
     if (getenv("ELEVATION_API_KEY")) {
       std::string key = getenv("ELEVATION_API_KEY");
       std::string api = "https://geolocalisation.ffvl.fr/elevation?key=" + key;
@@ -125,7 +125,8 @@ void Flight::validate(const Airspace &airspace) {
         std::cerr << "Elevation service could not be reached." << std::endl;
       }
     } else {
-      std::cerr << "This airspace file contains zones which need to be checked "
+      std::cerr << "This airspace file contains " << airspace.needs_agl_checking
+                << " zones which need to be checked "
                    "against ground altitude of the flight, but the environment "
                    "variable 'ELEVATION_API_KEY' is not set. These zones will "
                    "not be considered."

@@ -2,7 +2,7 @@
 
 #include <string>
 
-const std::string VERSION = "igclib version 0.1.0";
+const std::string VERSION = "igclib version 0.1.1";
 
 const std::string USAGE =
     VERSION +

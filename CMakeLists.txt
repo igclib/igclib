@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # why does cmake strips runtime paths ?
 set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror  -Wunused -Wextra -g -pedantic")
@@ -22,9 +23,9 @@ set(BUILD_CPR_TESTS OFF CACHE INTERNAL "")
 set(USE_SYSTEM_CURL ON)
 
 # add libraries
-add_subdirectory(include/geographiclib EXCLUDE_FROM_ALL)
-add_subdirectory(include/json EXCLUDE_FROM_ALL)
-add_subdirectory(include/cpr EXCLUDE_FROM_ALL)
+add_subdirectory(include/geographiclib)
+add_subdirectory(include/json)
+add_subdirectory(include/cpr)
 
 # add subdirectories
 add_subdirectory(src)
