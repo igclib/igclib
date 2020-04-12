@@ -18,6 +18,8 @@ public:
   Zone(const std::vector<std::string> &openair_record);
   std::vector<GeoPoint> contained_points(const PointCollection &points,
                                          bool with_agl) const;
+  // TODO add correct method to check if minimum attributes are set and
+  // prevent uninitialized conditional jumps
   bool empty() const { return geometries.empty(); };
   bool needs_agl_checking() const;
   bool operator<(const Zone &other) const;

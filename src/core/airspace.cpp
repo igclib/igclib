@@ -18,7 +18,7 @@ Airspace::Airspace(const std::string &airspace_file) {
 
   std::string line;
   std::vector<std::string> record;
-  // FIXME replace with do-while to not insert last zone separately
+
   while (std::getline(f, line)) {
     util::trim(line);
     // discard comments and empty lines
@@ -32,14 +32,11 @@ Airspace::Airspace(const std::string &airspace_file) {
           // in this case, do not add it to the index, but clear the record
           // anyway
           if (!zone.empty()) {
-            box_mapping_t value =
-                std::make_pair(zone.bounding_box, this->zones.size());
-            this->index.insert(value);
-            this->zones.push_back(zone);
-
             if (zone.needs_agl_checking()) {
               this->needs_agl_checking++;
             }
+            this->index.insert(std::make_pair(zone.bounding_box,
+                                              std::make_shared<Zone>(zone)));
           }
           record.clear();
         }
@@ -51,8 +48,11 @@ Airspace::Airspace(const std::string &airspace_file) {
   // Insert last zone
   Zone zone(record);
   if (!zone.empty()) {
-    index.insert(std::make_pair(zone.bounding_box, zones.size()));
-    zones.push_back(record);
+    this->index.insert(
+        std::make_pair(zone.bounding_box, std::make_shared<Zone>(zone)));
+  }
+  if (zone.needs_agl_checking()) {
+    this->needs_agl_checking++;
   }
 
   f.close();
@@ -65,19 +65,19 @@ void Airspace::infractions(const PointCollection &points,
   // altitude predicate)
   // https://www.boost.org/doc/libs/1_66_0/libs/geometry/doc/html/geometry/spatial_indexes/queries.html
   std::vector<box_mapping_t> first_pass;
-  geopoints_t zone_infractions;
+  std::vector<GeoPoint> zone_infractions;
 
-  linestring_t flight_track(points.begin(), points.end());
+  bg::model::linestring<GeoPoint> flight_track(points.begin(), points.end());
   this->index.query(bgi::intersects(flight_track),
                     std::back_inserter(first_pass));
 
-  for (const box_mapping_t &zone_index : first_pass) {
+  for (const box_mapping_t &possible_infraction : first_pass) {
     zone_infractions =
-        this->zones[zone_index.second].contained_points(points, with_agl);
+        possible_infraction.second->contained_points(points, with_agl);
     if (!zone_infractions.empty()) {
-      std::cerr << "INFRACTION " << this->zones[zone_index.second].m_name
+      std::cerr << "INFRACTION " << possible_infraction.second->m_name
                 << std::endl;
-      infractions[zones[zone_index.second]] = zone_infractions;
+      infractions[possible_infraction.second] = zone_infractions;
     }
   }
 }

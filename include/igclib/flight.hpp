@@ -4,6 +4,7 @@
 #include <igclib/geopoint.hpp>
 #include <igclib/xcinfo.hpp>
 #include <map>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
@@ -35,5 +36,5 @@ private:
   XCInfo xcinfo;
   std::string pilot_name = "Unknown pilot";
   PointCollection points;
-  std::map<Zone, std::vector<GeoPoint>> infractions;
+  std::map<std::shared_ptr<Zone>, std::vector<GeoPoint>> infractions;
 };

@@ -66,10 +66,11 @@ json Flight::serialize() const {
   json j = {{"pilot", this->pilot_name}};
 
   for (const auto &infraction : this->infractions) {
-    j["infractions"][infraction.first.name()] = infraction.first.to_json();
+    j["infractions"][infraction.first->name()] = infraction.first->to_json();
     for (const GeoPoint &p : infraction.second) {
       std::string time(this->points.find_time(p).to_string());
-      j["infractions"][infraction.first.name()]["points"][time] = p.serialize();
+      j["infractions"][infraction.first->name()]["points"][time] =
+          p.serialize();
     }
   }
 
