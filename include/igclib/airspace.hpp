@@ -31,5 +31,6 @@ public:
   std::size_t needs_agl_checking = 0;
 
 private:
+  void update_index(std::vector<std::string> &record);
   bgi::rtree<box_mapping_t, bgi::quadratic<16>> index;
 };

@@ -37,7 +37,7 @@
         "--flight",
         "tests/data/flights/xc_col_agnel.igc",
         "--airspace",
-        "tests/data/airspace/france_airspace.txt"
+        "tests/data/airspace/france_08_19.txt"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
