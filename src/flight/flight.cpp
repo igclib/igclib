@@ -39,8 +39,6 @@ Flight::Flight(const std::string &igc_file) {
       break;
     }
   }
-
-  f.close();
 }
 
 void Flight::process_H_record(const std::string &record) {

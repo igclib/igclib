@@ -37,8 +37,6 @@ Airspace::Airspace(const std::string &airspace_file) {
 
   // Insert last zone
   this->update_index(record);
-
-  f.close();
 }
 
 void Airspace::update_index(std::vector<std::string> &record) {

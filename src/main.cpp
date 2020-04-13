@@ -29,10 +29,13 @@ void command_xc(const std::string &flight_file,
       flight.compute_score();
     }
     flight.save(output);
+    exit(EXIT_SUCCESS);
   } catch (std::runtime_error &e) {
-    std::cout << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
   }
 }
+
+void command_task(const std::string &task_file, const std::string &output) {}
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -42,6 +45,7 @@ int main(int argc, char *argv[]) {
 
   std::string flight_file;
   std::string airspace_file;
+  std::string task_file;
   std::string command;
   std::string output;
   bool force_xc = false; // TODO remove once xc optimization works
@@ -53,16 +57,20 @@ int main(int argc, char *argv[]) {
       airspace_file = argv[++i];
     } else if (!strcmp(argv[i], "--output")) {
       output = argv[++i];
+    } else if (!strcmp(argv[i], "--task")) {
+      task_file = argv[++i];
     } else if (!strcmp(argv[i], "--force_xc")) {
       force_xc = true;
     }
   }
 
   // parse command
-  if (!strcmp(argv[1], "xc")) {
-    command_xc(flight_file, airspace_file, output, force_xc);
-  } else if (!strcmp(argv[1], "version")) {
+  if (!strcmp(argv[1], "version")) {
     print_version();
+  } else if (!strcmp(argv[1], "xc")) {
+    command_xc(flight_file, airspace_file, output, force_xc);
+  } else if (!strcmp(argv[1], "task")) {
+    command_task(task_file, output);
   } else {
     std::cerr << "Unkown command : " << argv[1] << std::endl;
   }
