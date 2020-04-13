@@ -18,8 +18,6 @@ public:
   Zone(const std::vector<std::string> &openair_record);
   std::vector<GeoPoint> contained_points(const PointCollection &points,
                                          bool with_agl) const;
-  // TODO add correct method to check if minimum attributes are set and
-  // prevent uninitialized conditional jumps
   bool empty() const { return geometries.empty(); };
   bool needs_agl_checking() const;
   bool operator<(const Zone &other) const;
@@ -38,8 +36,8 @@ private:
   int ceiling;
   int floor;
 
-  bool ceiling_is_ground_relative;
-  bool floor_is_ground_relative;
+  bool ceiling_is_ground_relative = false;
+  bool floor_is_ground_relative = false;
 
   // necessary to store pointers to geometries to be able to call overloaded
   // virtual methods of derived classes

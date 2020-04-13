@@ -1,17 +1,6 @@
 .PHONY:xc
 
 # All commentend cmake instructions are available for cmake >= 3.14, not default on Ubuntu LTS
-debug:build-dir
-	#cmake -S . -B build
-	#cmake --build build -j $(nproc)
-	cd build && cmake .. && make -j $(nproc)
-
-xc:
-	build/src/igclib xc --flight tests/data/flights/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt
-
-profile: debug
-	perf record -o - -g -- build/src/igclib xc --flight tmp/flights/fai_30602.igc | perf script | c++filt | gprof2dot -f perf | dot -Tsvg -o tmp/profile.svg
-	
 release:build-dir
 	#cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 	#cmake --build build -j $(nproc)
@@ -25,5 +14,22 @@ install:release
 build-dir:
 	mkdir -p build
 
+### DEV TARGETS ###
+debug:build-dir
+	#cmake -S . -B build
+	#cmake --build build -j $(nproc)
+	cd build && cmake .. && make -j $(nproc)
+
+xc:
+	build/src/igclib xc --flight tests/data/flights/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt
+
+profile-perf: debug
+	perf record -o - -g -- build/src/igclib xc --flight tmp/flights/fai_30602.igc | perf script | c++filt | gprof2dot -f perf | dot -Tsvg -o tmp/profile.svg
+
+profile-memory: debug
+	valgrind --tool=massif --stacks=yes --massif-out-file=tmp/memory.out build/src/igclib xc --flight tests/data/flights/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt
+	massif-visualizer tmp/memory.out
+
 memory-check:
 	valgrind -s --track-origins=yes build/src/igclib xc --flight tests/data/flights/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt > /dev/null
+

@@ -4,7 +4,6 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <unordered_map>
 
 class GeoPoint {
 public:

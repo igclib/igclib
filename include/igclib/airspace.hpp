@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/geometry.hpp>
+#include <igclib/box.hpp>
 #include <igclib/geopoint.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/zone.hpp>
