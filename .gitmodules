@@ -6,4 +6,4 @@
 	url = git://git.code.sourceforge.net/p/geographiclib/code
 [submodule "third-party/json"]
 	path = third-party/json
-	url = url = https://github.com/nlohmann/json.git
+	url = https://github.com/nlohmann/json.git
