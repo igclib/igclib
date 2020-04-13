@@ -23,9 +23,9 @@ set(BUILD_CPR_TESTS OFF CACHE INTERNAL "")
 set(USE_SYSTEM_CURL ON)
 
 # add libraries
-add_subdirectory(include/geographiclib)
-add_subdirectory(include/json)
-add_subdirectory(include/cpr)
+add_subdirectory(third-party/geographiclib)
+add_subdirectory(third-party/json)
+add_subdirectory(third-party/cpr)
 
 # add subdirectories
 add_subdirectory(src)
