@@ -1,9 +1,9 @@
 [submodule "geographiclib"]
-	path = include/geographiclib
+	path = third-party/geographiclib
 	url = git://git.code.sourceforge.net/p/geographiclib/code
 [submodule "json"]
-	path = include/json
+	path = third-party/json
 	url = https://github.com/nlohmann/json.git
 [submodule "cpr"]
-	path = include/cpr
+	path = third-party/cpr
 	url = https://github.com/whoshuu/cpr.git
