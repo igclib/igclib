@@ -102,6 +102,14 @@ GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {
   this->m_id = std::to_string(this->lat) + ":" + std::to_string(this->lon);
 }
 
+GeoPoint::GeoPoint(double lat, double lon, int alt) {
+  this->lat = lat;
+  this->lon = lon;
+  this->alt = alt;
+  this->agl = 0;
+  this->m_id = std::to_string(this->lat) + ":" + std::to_string(this->lon);
+}
+
 double GeoPoint::distance(const GeoPoint &p) const {
   GeographicLib::Geodesic geod = GeographicLib::Geodesic::WGS84();
   double distance;

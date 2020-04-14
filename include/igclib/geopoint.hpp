@@ -8,6 +8,7 @@
 class GeoPoint {
 public:
   GeoPoint() : lat(0), lon(0), alt(0), agl(0){};
+  GeoPoint(double lat, double lon, int alt);
   GeoPoint(double lat, double lon, int alt, int agl);
   bool operator==(const GeoPoint &other) const;
   std::string id() const; // used for caching distances
@@ -21,7 +22,7 @@ public:
   int alt;
   int agl;
 
-private:
+protected:
   std::string m_id;
 };
 

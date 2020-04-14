@@ -8,18 +8,18 @@
 using json = nlohmann::json;
 
 Task::Task(const std::string &task_file) {
-  this->identify(task_file, this->format);
+  this->identify(task_file);
   switch (this->format) {
   case TaskFormat::XCTRACK:
-    logging::debug({"File", task_file, "identified XCTRACK task format"});
-    // this->task = std::make_shared<XCTask>(task_file);
+    logging::debug({"File", task_file, "identified as XCTRACK task format"});
+    this->task = std::make_shared<XCTask>(task_file);
     break;
   case TaskFormat::PWCA:
-    logging::debug({"File", task_file, "identified PWCA task format"});
+    logging::debug({"File", task_file, "identified as PWCA task format"});
     // this->task = std::make_shared<XCTask>(task_file);
     break;
   case TaskFormat::FFVL:
-    logging::debug({"File", task_file, "identified FFVL task format"});
+    logging::debug({"File", task_file, "identified as FFVL task format"});
     // this->task = std::make_shared<XCTask>(task_file);
     break;
   case TaskFormat::UNKOWN:
@@ -31,7 +31,9 @@ Task::Task(const std::string &task_file) {
   }
 }
 
-void Task::identify(const std::string &task_file, TaskFormat &tf) const {
+// For now all supported task formats are JSON files. If this was to change, it
+// would be wise to implement a TaskIdentifier class with the different cases.
+void Task::identify(const std::string &task_file) {
   std::size_t matching_formats = 0;
   std::ifstream f(task_file);
   json j;
@@ -44,13 +46,13 @@ void Task::identify(const std::string &task_file, TaskFormat &tf) const {
 
   // XCTRACK identifiers
   if (j.contains("taskType") && j.contains("earthcore")) {
-    tf = TaskFormat::XCTRACK;
+    this->format = TaskFormat::XCTRACK;
     matching_formats++;
   }
 
   // FFVL identifiers
   if (j.contains("source")) {
-    tf = TaskFormat::FFVL;
+    this->format = TaskFormat::FFVL;
     matching_formats++;
   }
 

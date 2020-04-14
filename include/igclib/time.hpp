@@ -11,6 +11,7 @@ public:
   std::string to_string() const;
 
 protected:
+  void check_time() const;
   int hour = 0;
   int minute = 0;
   int second = 0;
@@ -26,7 +27,11 @@ template <> struct hash<Time> {
 } // namespace std
 
 class IGCTime : public Time {
-
 public:
   IGCTime(const std::string &str, int offset = 0);
+};
+
+class XCTaskTime : public Time {
+public:
+  XCTaskTime(const std::string &str, int offset = 0);
 };
