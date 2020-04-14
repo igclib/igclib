@@ -4,6 +4,7 @@
 #include "igclib/util.hpp"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
+#include <igclib/logging.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -66,15 +67,17 @@ void Airspace::infractions(const PointCollection &points,
 
   bg::model::linestring<GeoPoint> flight_track(points.begin(), points.end());
   this->index.query(bgi::intersects(flight_track) &&
-                        bgi::satisfies([](auto const &v) { return true; }),
+                        bgi::satisfies([](auto const &v) {
+                          (void)v;
+                          return true;
+                        }),
                     std::back_inserter(first_pass));
 
   for (const box_mapping_t &possible_infraction : first_pass) {
     zone_infractions =
         possible_infraction.second->contained_points(points, with_agl);
     if (!zone_infractions.empty()) {
-      std::cerr << "INFRACTION " << possible_infraction.second->m_name
-                << std::endl;
+      logging::debug({"infraction", possible_infraction.second->m_name});
       infractions[possible_infraction.second] = zone_infractions;
     } else {
       useless++;

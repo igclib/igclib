@@ -1,6 +1,8 @@
 #include <igclib/airspace.hpp>
 #include <igclib/config.hpp>
 #include <igclib/flight.hpp>
+#include <igclib/logging.hpp>
+#include <igclib/task.hpp>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +17,7 @@ void command_xc(const std::string &flight_file,
                 const std::string &airspace_file, const std::string &output,
                 bool force_xc) {
   if (flight_file.empty()) {
-    std::cerr << "No flight file provided" << std::endl;
+    logging::error({"No flight file provided"});
     exit(EXIT_FAILURE);
   }
 
@@ -31,11 +33,24 @@ void command_xc(const std::string &flight_file,
     flight.save(output);
     exit(EXIT_SUCCESS);
   } catch (std::runtime_error &e) {
-    std::cerr << e.what() << std::endl;
+    logging::error({e.what()});
+    exit(EXIT_FAILURE);
   }
 }
 
-void command_task(const std::string &task_file, const std::string &output) {}
+void command_opti(const std::string &task_file, const std::string &output) {
+  if (task_file.empty()) {
+    logging::error({"No task file provided"});
+    exit(EXIT_FAILURE);
+  }
+  try {
+    Task task(task_file);
+    task.save(output);
+  } catch (std::runtime_error &e) {
+    logging::error({e.what()});
+    exit(EXIT_FAILURE);
+  }
+}
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -43,6 +58,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_SUCCESS);
   }
 
+  std::string arg;
   std::string flight_file;
   std::string airspace_file;
   std::string task_file;
@@ -50,29 +66,37 @@ int main(int argc, char *argv[]) {
   std::string output;
   bool force_xc = false; // TODO remove once xc optimization works
 
-  for (int i = 2; i < argc - 1; i++) {
-    if (!strcmp(argv[i], "--flight")) {
+  for (int i = 2; i < argc; i++) {
+    arg = argv[i];
+
+    if ((arg == "--flight") && (i + 1 < argc)) {
       flight_file = argv[++i];
-    } else if (!strcmp(argv[i], "--airspace")) {
+    } else if ((arg == "--airspace") && (i + 1 < argc)) {
       airspace_file = argv[++i];
-    } else if (!strcmp(argv[i], "--output")) {
+    } else if ((arg == "--output") && (i + 1 < argc)) {
       output = argv[++i];
-    } else if (!strcmp(argv[i], "--task")) {
+    } else if ((arg == "--task") && (i + 1 < argc)) {
       task_file = argv[++i];
-    } else if (!strcmp(argv[i], "--force_xc")) {
+    } else if (arg == "--force_xc") {
       force_xc = true;
+    } else if ((arg == "--quiet") || (arg == "-q")) {
+      logging::set_level(logging::verbosity::QUIET);
+    } else if ((arg == "--verbose") || (arg == "-v")) {
+      logging::set_level(logging::verbosity::DEBUG);
     }
   }
 
   // parse command
-  if (!strcmp(argv[1], "version")) {
+  arg = argv[1];
+  if (arg == "version") {
     print_version();
-  } else if (!strcmp(argv[1], "xc")) {
+  } else if (arg == "xc") {
     command_xc(flight_file, airspace_file, output, force_xc);
-  } else if (!strcmp(argv[1], "task")) {
-    command_task(task_file, output);
+  } else if (arg == "opti") {
+    command_opti(task_file, output);
   } else {
-    std::cerr << "Unkown command : " << argv[1] << std::endl;
+    logging::error({"Unkown command", argv[1]});
+    usage();
   }
 
   return EXIT_SUCCESS;

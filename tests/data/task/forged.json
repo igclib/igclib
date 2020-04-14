@@ -1,0 +1,112 @@
+{
+	"version": 1,
+	"taskType": "CLASSIC",
+	"source": "Cargol",
+	"turnpoints": [
+		{
+			"radius": 40,
+			"waypoint": {
+				"lon": -46.626895904541016,
+				"lat": -22.015241622924805,
+				"altSmoothed": 1634,
+				"name": "D00",
+				"description": "Pico do Gaviao"
+			},
+			"type": "TAKEOFF"
+		},
+		{
+			"radius": 20000,
+			"waypoint": {
+				"lon": -46.73835372924805,
+				"lat": -22.166385650634766,
+				"altSmoothed": 866,
+				"name": "P18",
+				"description": "Esp- Sto Pinhal - Colegio Agricola"
+			},
+			"type": "SSS"
+		},
+		{
+			"radius": 10000,
+			"waypoint": {
+				"lon": -46.565372467041016,
+				"lat": -21.84031867980957,
+				"altSmoothed": 1260,
+				"name": "R50",
+				"description": "Pocos de Caldas - Aeroporto"
+			}
+		},
+		{
+			"radius": 200,
+			"waypoint": {
+				"lon": -46.8409538269043,
+				"lat": -22.01603126525879,
+				"altSmoothed": 764,
+				"name": "R15",
+				"description": "SJBV - Azul do Vento"
+			}
+		},
+		{
+			"radius": 15000,
+			"waypoint": {
+				"lon": -46.8409538269043,
+				"lat": -22.01603126525879,
+				"altSmoothed": 764,
+				"name": "R15",
+				"description": "SJBV - Azul do Vento"
+			}
+		},
+		{
+			"radius": 200,
+			"waypoint": {
+				"lon": -46.8409538269043,
+				"lat": -22.01603126525879,
+				"altSmoothed": 764,
+				"name": "R15",
+				"description": "SJBV - Azul do Vento"
+			}
+		},
+		{
+			"radius": 20000,
+			"waypoint": {
+				"lon": -46.60560607910156,
+				"lat": -22.27422523498535,
+				"altSmoothed": 819,
+				"name": "P22",
+				"description": "Jacutinga - Pasto Rodeio"
+			}
+		},
+		{
+			"radius": 2000,
+			"waypoint": {
+				"lon": -46.625030517578125,
+				"lat": -22.045211791992188,
+				"altSmoothed": 944,
+				"name": "G01",
+				"description": "Andradas - Pouso Sul"
+			},
+			"type": "ESS"
+		},
+		{
+			"radius": 100,
+			"waypoint": {
+				"lon": -46.625030517578125,
+				"lat": -22.045211791992188,
+				"altSmoothed": 944,
+				"name": "G01",
+				"description": "Andradas - Pouso Sul"
+			}
+		}
+	],
+	"sss": {
+		"type": "RACE",
+		"direction": "EXIT",
+		"timeGates": [
+			"12:40:00Z"
+		]
+	},
+	"goal": {
+		"type": "LINE",
+		"deadline": "17:00:00Z"
+	},
+	"earthcore": "WGS84"
+}

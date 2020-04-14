@@ -18,7 +18,7 @@ configure_file("${PROJECT_SOURCE_DIR}/include/igclib/config.hpp.in" "${PROJECT_S
 find_package(Boost REQUIRED)
 
 # disable library tests
-set(JSON_BUILDTESTS OFF CACHE INTERNAL "")
+set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(BUILD_CPR_TESTS OFF CACHE INTERNAL "")
 set(USE_SYSTEM_CURL ON)
 

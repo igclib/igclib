@@ -10,7 +10,7 @@
         "xc",
         "--flight",
         "tmp/flights/free_38870.igc",
-        //"tests/data/flights/xc_col_agnel.igc",
+        //"tests/data/flight/xc_col_agnel.igc",
         //"--airspace",
         //"tests/data/airspace/france_airspace.txt"
       ],
@@ -35,9 +35,33 @@
       "args": [
         "xc",
         "--flight",
-        "tests/data/flights/xc_col_agnel.igc",
+        "tests/data/flight/xc_col_agnel.igc",
         "--airspace",
         "tests/data/airspace/france_08_19.txt"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "opti",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [
+        "opti",
+        "--task",
+        "tests/data/task/xctrack_1.xctsk",
+        "-v"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

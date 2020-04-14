@@ -2,6 +2,7 @@
 #include <boost/geometry.hpp>
 #include <igclib/geometry.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/logging.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
@@ -86,8 +87,8 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
       if (width_is_set) {
         (void)airway_width;
       }
-      std::cerr << "Airways are not yet supported. DY record of zone "
-                << this->m_name << " is discarded." << std::endl;
+      logging::warning({"Airways are not yet supported. DY record of zone",
+                        this->m_name, "is discarded."});
     } else if (r.substr(0, 4) == "V D=") {
       // direction assignement for DA and DB records
       if (r.find('-' != std::string::npos)) {
@@ -108,9 +109,9 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   // TODO : when only two DP were set, try to define polygon with rest of
   // geometries ?
   if (!polygon_vertices.empty() && polygon_vertices.size() <= 2) {
-    std::cerr
-        << "Automatic closing of 2 DP is not supported. DP records of zone "
-        << this->m_name << " are discarded." << std::endl;
+    logging::warning(
+        {"Automatic closing of 2 DP is not supported. DP records of zone",
+         this->m_name, "are discarded."});
   } else if (polygon_vertices.size() > 2) {
     std::shared_ptr<Geometry> p = std::make_shared<Polygon>(polygon_vertices);
     this->geometries.push_back(p);

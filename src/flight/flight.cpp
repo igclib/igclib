@@ -4,6 +4,7 @@
 #include <igclib/cache.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/logging.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
@@ -109,28 +110,28 @@ void Flight::validate(const Airspace &airspace) {
       session.SetVerifySsl(false);
       session.SetUrl(api);
       session.SetBody(body);
-      std::cerr << "Retrieving flight altitude ... ";
+      logging::debug({"Airspace checking requires ground relative data, trying "
+                      "to call elevation API"});
       cpr::Response r = session.Post();
       if (r.status_code == 200) {
-        std::cerr << "done." << std::endl;
+        logging::debug({"Got API response"});
         data = json::parse(r.text);
         std::vector<double> altitudes = data.get<std::vector<double>>();
         if (this->points.set_agl(altitudes)) {
           is_agl_validable = true;
         }
       } else if (r.status_code == 400) {
-        std::cerr << "Missing or invalid API key for the elevation service."
-                  << std::endl;
+        logging::warning({"Missing or invalid API key for the elevation API"});
       } else {
-        std::cerr << "Elevation service could not be reached." << std::endl;
+        logging::warning({"Elevation service could not be reached"});
       }
     } else {
-      std::cerr << "This airspace file contains " << airspace.needs_agl_checking
-                << " zones which need to be checked "
-                   "against ground altitude of the flight, but the environment "
-                   "variable 'ELEVATION_API_KEY' is not set. These zones will "
-                   "not be considered."
-                << std::endl;
+      logging::warning(
+          {"This airspace file contains",
+           std::to_string(airspace.needs_agl_checking),
+           "zones which need to be checked against ground altitude of the "
+           "flight, but the environment variable 'ELEVATION_API_KEY' is not "
+           "set. These zones will not be considered."});
     }
   }
 

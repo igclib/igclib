@@ -1,0 +1,150 @@
+{
+	"date": 1550271600,
+	"num": 1,
+	"type": "elapsed",
+	"source": "Cargol",
+	"turnpoints": [
+		{
+			"lat": 43.722798,
+			"lon": 6.943988,
+			"name": "D90115",
+			"source": "3382_balises.wpt",
+			"role": "takeoff",
+			"radius": 400,
+			"description": "D-EMBARNIER",
+			"altitude": 1108,
+			"previous": 0,
+			"open": 43200,
+			"close": 52200
+		},
+		{
+			"lat": 43.722798,
+			"lon": 6.943988,
+			"name": "D90115",
+			"source": "3382_balises.wpt",
+			"role": "start",
+			"radius": 1000,
+			"description": "D-EMBARNIER",
+			"altitude": 1108,
+			"previous": 1000,
+			"open": 45000
+		},
+		{
+			"lat": 43.738221,
+			"lon": 7.063616,
+			"name": "B18103",
+			"source": "3382_balises.wpt",
+			"role": "turnpoint",
+			"radius": 1000,
+			"description": "NAOURI",
+			"altitude": 1030,
+			"previous": 8784
+		},
+		{
+			"lat": 43.67563,
+			"lon": 6.923683,
+			"name": "B24084",
+			"source": "3382_balises.wpt",
+			"role": "turnpoint",
+			"radius": 400,
+			"description": "702GRASSE",
+			"altitude": 840,
+			"previous": 20630
+		},
+		{
+			"lat": 43.715547,
+			"lon": 7.026496,
+			"name": "B17085",
+			"source": "3382_balises.wpt",
+			"role": "turnpoint",
+			"radius": 400,
+			"description": "VG-COURMETTES",
+			"altitude": 850,
+			"previous": 29223
+		},
+		{
+			"lat": 43.709905,
+			"lon": 6.828304,
+			"name": "D96100",
+			"source": "3382_balises.wpt",
+			"role": "turnpoint",
+			"radius": 3000,
+			"description": "D-STVALLIER",
+			"altitude": 1000,
+			"previous": 41779
+		},
+		{
+			"lat": 43.721935,
+			"lon": 6.962759,
+			"name": "A01077",
+			"source": "3382_balises.wpt",
+			"role": "ess",
+			"radius": 1000,
+			"description": "A-ABEILLES",
+			"altitude": 770,
+			"previous": 48672
+		},
+		{
+			"lat": 43.721935,
+			"lon": 6.962759,
+			"name": "A01077",
+			"source": "3382_balises.wpt",
+			"role": "goal",
+			"radius": 200,
+			"description": "A-ABEILLES",
+			"altitude": 770,
+			"previous": 49672,
+			"close": 64800,
+			"finish": "cylinder"
+		}
+	],
+	"takeoff": {
+		"lat": 43.722798,
+		"lon": 6.943988,
+		"name": "D90115",
+		"source": "3382_balises.wpt",
+		"role": "takeoff",
+		"radius": 400,
+		"description": "D-EMBARNIER",
+		"altitude": 1108,
+		"previous": 0,
+		"open": 43200,
+		"close": 52200
+	},
+	"start": {
+		"lat": 43.722798,
+		"lon": 6.943988,
+		"name": "D90115",
+		"source": "3382_balises.wpt",
+		"role": "start",
+		"radius": 1000,
+		"description": "D-EMBARNIER",
+		"altitude": 1108,
+		"previous": 1000,
+		"open": 45000
+	},
+	"ess": {
+		"lat": 43.721935,
+		"lon": 6.962759,
+		"name": "A01077",
+		"source": "3382_balises.wpt",
+		"role": "ess",
+		"radius": 1000,
+		"description": "A-ABEILLES",
+		"altitude": 770,
+		"previous": 48672
+	},
+	"goal": {
+		"lat": 43.721935,
+		"lon": 6.962759,
+		"name": "A01077",
+		"source": "3382_balises.wpt",
+		"role": "goal",
+		"radius": 200,
+		"description": "A-ABEILLES",
+		"altitude": 770,
+		"previous": 49672,
+		"close": 64800,
+		"finish": "cylinder"
+	}
+}
