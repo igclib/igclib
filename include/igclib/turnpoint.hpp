@@ -9,6 +9,8 @@ public:
   Turnpoint(const GeoPoint &center, const std::size_t &radius,
             const std::string &name, const std::string &desc);
   virtual std::string to_string() const;
+  const GeoPoint &center() const { return this->m_center; };
+  double radius() const { return this->m_radius; };
 
 protected:
   GeoPoint m_center;
