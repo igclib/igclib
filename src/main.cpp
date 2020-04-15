@@ -71,9 +71,9 @@ int main(int argc, char *argv[]) {
 
     if ((arg == "--flight") && (i + 1 < argc)) {
       flight_file = argv[++i];
-    } else if ((arg == "--airspace") && (i + 1 < argc)) {
+    } else if (((arg == "--airspace") || ((arg == "-a"))) && (i + 1 < argc)) {
       airspace_file = argv[++i];
-    } else if ((arg == "--output") && (i + 1 < argc)) {
+    } else if (((arg == "--output") || (arg == "-o")) && (i + 1 < argc)) {
       output = argv[++i];
     } else if ((arg == "--task") && (i + 1 < argc)) {
       task_file = argv[++i];

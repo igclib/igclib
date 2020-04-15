@@ -1,7 +1,7 @@
 #pragma once
 
-#include <boost/geometry.hpp>
-#include <igclib/geopoint.hpp>
+//#include <boost/geometry.hpp>
+//#include <igclib/geopoint.hpp>
 
 // boost::geometry::model::box<GeoPoint>
 

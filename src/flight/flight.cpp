@@ -4,18 +4,16 @@
 #include <igclib/cache.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <igclib/logging.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
 #include <igclib/xcopt.hpp>
 #include <iostream>
-#include <nlohmann/json.hpp>
 #include <queue>
 #include <stdexcept>
 #include <string>
-
-using json = nlohmann::json;
 
 Flight::Flight(const std::string &igc_file) {
   // read and parse igc file
@@ -61,7 +59,7 @@ void Flight::process_B_record(const std::string &record) {
 }
 
 // Returns the JSON serialization of a Flight
-json Flight::serialize() const {
+json Flight::to_json() const {
   json j = {{"pilot", this->pilot_name}};
 
   j["infractions"];
@@ -69,18 +67,17 @@ json Flight::serialize() const {
     j["infractions"][infraction.first->name()] = infraction.first->to_json();
     for (const GeoPoint &p : infraction.second) {
       std::string time(this->points.find_time(p).to_string());
-      j["infractions"][infraction.first->name()]["points"][time] =
-          p.serialize();
+      j["infractions"][infraction.first->name()]["points"][time] = p.to_json();
     }
   }
 
-  j["xc_info"] = this->xcinfo.serialize();
+  j["xc_info"] = this->xcinfo.to_json();
 
   return j;
 }
 
 void Flight::save(const std::string &out) const {
-  json j = serialize();
+  json j = this->to_json();
 
   if (out == "-" || out.empty()) {
     std::cout << j.dump(4) << std::endl;
@@ -92,7 +89,6 @@ void Flight::save(const std::string &out) const {
       throw std::runtime_error(error);
     }
     f << j.dump(4);
-    f.close();
   }
 }
 

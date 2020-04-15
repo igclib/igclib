@@ -2,10 +2,10 @@
 
 #include <igclib/airspace.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <igclib/xcinfo.hpp>
 #include <map>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -17,7 +17,7 @@ public:
   void save(const std::string &out) const;
   void validate(const Airspace &airspace);
   void compute_score(/*TODO add rules ?*/);
-  nlohmann::json serialize() const;
+  json to_json() const;
   geopoints_t bbox(std::pair<std::size_t, std::size_t> pair) const {
     return this->points.bbox(pair.first, pair.second);
   };

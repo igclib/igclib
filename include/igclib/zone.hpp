@@ -1,9 +1,9 @@
 #pragma once
 
-#include "igclib/geometry.hpp"
-#include "igclib/geopoint.hpp"
-#include "igclib/pointcollection.hpp"
-#include <nlohmann/json.hpp>
+#include <igclib/geometry.hpp>
+#include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
+#include <igclib/pointcollection.hpp>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -22,7 +22,7 @@ public:
   bool needs_agl_checking() const;
   bool operator<(const Zone &other) const;
   std::string name() const { return this->m_name; };
-  const nlohmann::json to_json() const;
+  json to_json() const;
 
 private:
   bool in_altitude_range(const GeoPoint &p, bool with_agl) const;

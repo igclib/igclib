@@ -2,6 +2,7 @@
 #include <boost/geometry.hpp>
 #include <igclib/geometry.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <igclib/logging.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
@@ -180,7 +181,7 @@ bool Zone::operator<(const Zone &other) const {
   return this->m_name < other.m_name;
 }
 
-const nlohmann::json Zone::to_json() const {
+json Zone::to_json() const {
   return {{"class", this->cls},
           {"name", this->m_name},
           {"floor", this->floor},

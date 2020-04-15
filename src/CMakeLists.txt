@@ -1,5 +1,7 @@
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CPR_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR}/../third-party/json/single-include)
+
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.cpp)

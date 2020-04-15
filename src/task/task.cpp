@@ -1,14 +1,10 @@
-#include <cmath>
-#include <dlib/optimization.h>
 #include <fstream>
+#include <igclib/json.hpp>
 #include <igclib/logging.hpp>
-#include <igclib/routedist.hpp>
+#include <igclib/route.hpp>
 #include <igclib/task.hpp>
 #include <iostream>
-#include <nlohmann/json.hpp>
 #include <string>
-
-using json = nlohmann::json;
 
 Task::Task(const std::string &task_file) {
   this->identify(task_file);
@@ -34,7 +30,8 @@ Task::Task(const std::string &task_file) {
     break;
   }
 
-  this->compute_optimized_route();
+  this->m_route = Route(this->m_task->centers().front(),
+                        this->m_task->centers(), this->m_task->radii());
 }
 
 // Identifies the format of the task file from known providers, based on
@@ -71,37 +68,43 @@ void Task::identify(const std::string &task_file) {
   }
 }
 
-void Task::compute_optimized_route() {
-  RouteDist r(this->m_task->centers().front(), this->m_task->centers(),
-              this->m_task->radii());
-  dlib::matrix<double, 0, 1> theta(this->m_task->n_turnpoints());
-  for (std::size_t i = 0; i < this->m_task->n_turnpoints(); i++) {
-    theta(i) = 0; // TODO better first guess ?
-  }
-  dlib::find_min_using_approximate_derivatives(
-      dlib::bfgs_search_strategy(), dlib::objective_delta_stop_strategy(1e-7),
-      r, theta, -1);
-
-  double opt_distance = r(theta);
-  std::vector<double> t(theta.begin(), theta.end());
-  std::string res = "Theta : {";
-  for (auto &x : t) {
-    // double constrained = std::fmod(x, 360.0);
-    // constrained = std::fmod((constrained + 360.0), 360.0);
-    // if (constrained > 180.0)
-    //  constrained -= 360.0;
-    res += " " + std::to_string(x) + " ";
-  }
-  res += "}";
-  logging::debug({res});
-  logging::debug({"Optimized distance", std::to_string(opt_distance)});
+json Task::to_json() const {
+  json j;
+  j["task"] = this->m_task->to_json();
+  j["route"] = this->m_route.to_json();
+  return j;
 }
 
-void Task::save(const std::string &out) const { (void)out; }
+void Task::save(const std::string &out) const {
+  json j = this->to_json();
+  if (out == "-" || out.empty()) {
+    std::cout << j.dump(4) << std::endl;
+  } else {
+    std::ofstream f;
+    f.open(out);
+    if (!f.is_open()) {
+      const std::string error = "Could not open file '" + out + "'";
+      throw std::runtime_error(error);
+    }
+    f << j.dump(4);
+  }
+}
 
 void TaskImpl::flatten() {
   for (const auto &tp : this->m_all_tp) {
     this->m_centers.push_back(tp->center());
     this->m_radii.push_back(tp->radius());
   }
+}
+
+json TaskImpl::to_json() const {
+  json j;
+  j["takeoff"] = this->m_takeoff->to_json();
+  j["sss"] = this->m_sss->to_json();
+  j["ess"] = this->m_ess->to_json();
+  j["goal"] = this->m_goal->to_json();
+  for (const auto &tp : this->m_all_tp) {
+    j["turnpoints"].push_back(tp->to_json());
+  }
+  return j;
 }

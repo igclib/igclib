@@ -1,4 +1,5 @@
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <igclib/time.hpp>
 #include <igclib/turnpoint.hpp>
 
@@ -17,6 +18,17 @@ std::string Turnpoint::to_string() const {
   return res;
 }
 
+json Turnpoint::to_json() const {
+  json j;
+  j["name"] = this->m_name;
+  j["desc"] = this->m_desc;
+  j["lat"] = this->m_center.lat;
+  j["lon"] = this->m_center.lon;
+  j["alt"] = this->m_center.alt;
+  j["role"] = "TURNPOINT";
+  return j;
+}
+
 std::string Takeoff::to_string() const {
   std::string res;
   res += "TAKEOFF ";
@@ -26,6 +38,12 @@ std::string Takeoff::to_string() const {
   res += " - ";
   res += std::to_string(this->m_radius) + "m";
   return res;
+}
+
+json Takeoff::to_json() const {
+  json j = Turnpoint::to_json();
+  j["role"] = "TAKEOFF";
+  return j;
 }
 
 std::string SSS::to_string() const {
@@ -40,6 +58,13 @@ std::string SSS::to_string() const {
   return res;
 }
 
+json SSS::to_json() const {
+  json j = Turnpoint::to_json();
+  j["open"] = this->m_open.to_string();
+  j["role"] = "SSS";
+  return j;
+}
+
 std::string ESS::to_string() const {
   std::string res;
   res += "ESS ";
@@ -49,6 +74,12 @@ std::string ESS::to_string() const {
   res += " - ";
   res += std::to_string(this->m_radius) + "m";
   return res;
+}
+
+json ESS::to_json() const {
+  json j = Turnpoint::to_json();
+  j["role"] = "ESS";
+  return j;
 }
 
 std::string Goal::to_string() const {
@@ -66,6 +97,13 @@ std::string Goal::to_string() const {
   res += std::to_string(this->m_radius) + "m ";
   res += "- closes at " + this->m_close.to_string();
   return res;
+}
+
+json Goal::to_json() const {
+  json j = Turnpoint::to_json();
+  j["role"] = "GOAL";
+  j["is_line"] = this->is_line();
+  return j;
 }
 
 Takeoff::Takeoff(const GeoPoint &center, const std::size_t &radius,

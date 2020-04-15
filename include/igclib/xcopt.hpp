@@ -1,3 +1,5 @@
+#pragma once
+
 #include <igclib/flight.hpp>
 #include <vector>
 

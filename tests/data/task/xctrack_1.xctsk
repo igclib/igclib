@@ -3,7 +3,7 @@
     "taskType": "CLASSIC",
     "turnpoints": [
         {
-            "radius": 400,
+            "radius": 40,
             "waypoint": {
                 "lon": -46.626895904541016,
                 "lat": -22.015241622924805,

@@ -2,7 +2,7 @@
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
-#include <nlohmann/json.hpp>
+#include <igclib/json.hpp>
 #include <string>
 
 class GeoPoint {
@@ -15,7 +15,7 @@ public:
   double distance(const GeoPoint &p) const;
   double heading(const GeoPoint &p) const;
   GeoPoint project(double distance, double heading) const;
-  nlohmann::json serialize() const;
+  json to_json() const;
 
   double lat;
   double lon;

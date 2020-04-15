@@ -63,5 +63,5 @@ XCTask::XCTask(const std::string &task_file) {
     logging::debug({this->m_all_tp.back()->to_string()});
   }
 
-  TaskImpl::flatten();
+  this->flatten();
 }

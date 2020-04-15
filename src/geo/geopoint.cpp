@@ -1,10 +1,8 @@
 #include <GeographicLib/Geodesic.hpp>
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <iostream>
-#include <nlohmann/json.hpp>
 #include <stdexcept>
-
-using json = nlohmann::json;
 
 bool GeoPoint::operator==(const GeoPoint &other) const {
   return (this->lat == other.lat && this->lon == other.lon);
@@ -133,7 +131,7 @@ GeoPoint GeoPoint::project(double heading, double distance) const {
   return GeoPoint(lat, lon, this->alt, this->agl);
 }
 
-json GeoPoint::serialize() const {
+json GeoPoint::to_json() const {
   json j = {
       {"lat", this->lat},
       {"lon", this->lon},

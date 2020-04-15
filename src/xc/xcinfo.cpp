@@ -1,6 +1,6 @@
+#include <igclib/json.hpp>
 #include <igclib/pointcollection.hpp>
 #include <igclib/xcinfo.hpp>
-#include <nlohmann/json.hpp>
 #include <string>
 
 XCInfo::XCInfo() {
@@ -24,7 +24,7 @@ bool XCInfo::operator>(const XCInfo &other) const {
 }
 
 // Returns the JSON serialization of an XCInfo
-nlohmann::json XCInfo::serialize() const {
+json XCInfo::to_json() const {
   std::string xc_style;
   switch (this->style) {
   case xc_style::THREE_POINTS:

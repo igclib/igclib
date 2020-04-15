@@ -1,6 +1,6 @@
 #pragma once
 
-#include "igclib/geopoint.hpp"
+#include <igclib/geopoint.hpp>
 #include <string>
 #include <vector>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <igclib/json.hpp>
 
 typedef enum class xc_style {
   UNDEFINED,
@@ -13,7 +13,7 @@ class XCInfo {
 public:
   XCInfo();
   XCInfo(xc_style style, double distance, double score);
-  nlohmann::json serialize() const;
+  json to_json() const;
   bool operator<(const XCInfo &other) const;
   bool operator>(const XCInfo &other) const;
 

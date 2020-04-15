@@ -1,3 +1,5 @@
+#pragma once
+
 #include <igclib/geopoint.hpp>
 #include <unordered_map>
 
