@@ -1,4 +1,5 @@
-#include <cppoptlib/solver/bfgssolver.h>
+#include <cmath>
+#include <dlib/optimization.h>
 #include <fstream>
 #include <igclib/logging.hpp>
 #include <igclib/routedist.hpp>
@@ -71,14 +72,28 @@ void Task::identify(const std::string &task_file) {
 }
 
 void Task::compute_optimized_route() {
-  RouteDist r(this->m_task->centers(), this->m_task->radii());
-  Eigen::VectorXd theta(this->m_task->n_turnpoints());
+  RouteDist r(this->m_task->centers().front(), this->m_task->centers(),
+              this->m_task->radii());
+  dlib::matrix<double, 0, 1> theta(this->m_task->n_turnpoints());
   for (std::size_t i = 0; i < this->m_task->n_turnpoints(); i++) {
-    theta(i, 0) = 90;
+    theta(i) = 0; // TODO better first guess ?
   }
-  cppoptlib::BfgsSolver<RouteDist> solver;
-  solver.minimize(r, theta);
+  dlib::find_min_using_approximate_derivatives(
+      dlib::bfgs_search_strategy(), dlib::objective_delta_stop_strategy(1e-7),
+      r, theta, -1);
+
   double opt_distance = r(theta);
+  std::vector<double> t(theta.begin(), theta.end());
+  std::string res = "Theta : {";
+  for (auto &x : t) {
+    // double constrained = std::fmod(x, 360.0);
+    // constrained = std::fmod((constrained + 360.0), 360.0);
+    // if (constrained > 180.0)
+    //  constrained -= 360.0;
+    res += " " + std::to_string(x) + " ";
+  }
+  res += "}";
+  logging::debug({res});
   logging::debug({"Optimized distance", std::to_string(opt_distance)});
 }
 

@@ -5,8 +5,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # why does cmake strips runtime paths ?
 set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wunused -Wextra -g -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wunused -Wextra -g -DDLIB_USE_CUDA=0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wunused -Wextra -g -pedantic -DDLIB_USE_CUDA=0")
 
 message("-- CMAKE_CXX_FLAGS_DEBUG : ${CMAKE_CXX_FLAGS_DEBUG}")
 message("-- CMAKE_CXX_FLAGS_RELEASE : ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -17,9 +19,6 @@ configure_file("${PROJECT_SOURCE_DIR}/include/igclib/config.hpp.in" "${PROJECT_S
 # find boost libraries
 find_package(Boost REQUIRED)
 
-# find eigen libraries
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
-
 # disable library tests
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(BUILD_CPR_TESTS OFF CACHE INTERNAL "")
@@ -29,6 +28,7 @@ set(USE_SYSTEM_CURL ON)
 add_subdirectory(third-party/json)
 add_subdirectory(third-party/cpr)
 add_subdirectory(third-party/geographiclib)
+add_subdirectory(third-party/dlib)
 
 # add subdirectories
 add_subdirectory(src)

@@ -8,12 +8,13 @@ add_executable(${BINARY} ${SOURCES})
 target_link_libraries(${BINARY} GeographicLib)
 target_link_libraries(${BINARY} nlohmann_json::nlohmann_json)
 target_link_libraries(${BINARY} ${CPR_LIBRARIES})
-target_link_libraries(${BINARY} Eigen3::Eigen)
+target_link_libraries(${BINARY} dlib::dlib)
 
 add_library(lib_${BINARY} STATIC ${SOURCES})
 target_link_libraries(lib_${BINARY} GeographicLib)
 target_link_libraries(lib_${BINARY} nlohmann_json::nlohmann_json)
 target_link_libraries(lib_${BINARY} ${CPR_LIBRARIES})
-target_link_libraries(lib_${BINARY} Eigen3::Eigen)
+target_link_libraries(lib_${BINARY} dlib::dlib)
+
 
 install(TARGETS ${BINARY} DESTINATION bin)

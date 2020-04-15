@@ -130,7 +130,7 @@ GeoPoint GeoPoint::project(double heading, double distance) const {
   double lat;
   double lon;
   geod.Direct(this->lat, this->lon, heading, distance, lat, lon);
-  return GeoPoint(lat, lon, this->alt, this->alt);
+  return GeoPoint(lat, lon, this->alt, this->agl);
 }
 
 json GeoPoint::serialize() const {
