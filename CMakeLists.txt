@@ -20,8 +20,6 @@ find_package(Boost REQUIRED)
 # find eigen libraries
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
-find_package (GeographicLib REQUIRED)
-
 # disable library tests
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(BUILD_CPR_TESTS OFF CACHE INTERNAL "")
@@ -30,6 +28,7 @@ set(USE_SYSTEM_CURL ON)
 # add third-party libraries
 add_subdirectory(third-party/json)
 add_subdirectory(third-party/cpr)
+add_subdirectory(third-party/geographiclib)
 
 # add subdirectories
 add_subdirectory(src)
