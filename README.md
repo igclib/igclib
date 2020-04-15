@@ -8,6 +8,7 @@ A command-line tool for paragliding competitions and XC.
 
 ## In Progress
 
+- Task optimization
 - XC score computation
 
 ## Future features

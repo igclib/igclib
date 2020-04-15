@@ -36,11 +36,19 @@ protected:
   std::vector<std::shared_ptr<Turnpoint>> m_tp;
 };
 
-class FFVLTask : public TaskImpl {};
+class FFVLTask : public TaskImpl {
+public:
+  FFVLTask(const std::string &task_file);
+};
 
 class XCTask : public TaskImpl {
 public:
   XCTask(const std::string &task_file);
+};
+
+class PWCATask : public TaskImpl {
+public:
+  PWCATask(const std::string &task_file);
 };
 
 class Task {

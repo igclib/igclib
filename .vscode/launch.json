@@ -60,7 +60,7 @@
       "args": [
         "opti",
         "--task",
-        "tests/data/task/xctrack_1.xctsk",
+        "tests/data/task/ffvl_1.json",
         "-v"
       ],
       "stopAtEntry": false,

@@ -1,11 +1,10 @@
 #include <fstream>
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <igclib/logging.hpp>
 #include <igclib/task.hpp>
 #include <igclib/time.hpp>
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#include <igclib/turnpoint.hpp>
 
 // Creates an task from a valid JSON file, according to XCTrack spec
 // https://xctrack.org/Competition_Interfaces.html

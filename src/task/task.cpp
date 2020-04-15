@@ -15,11 +15,11 @@ Task::Task(const std::string &task_file) {
     break;
   case TaskFormat::PWCA:
     logging::debug({"File", task_file, "identified as PWCA task format"});
-    // this->task = std::make_shared<XCTask>(task_file);
+    this->m_task = std::make_shared<PWCATask>(task_file);
     break;
   case TaskFormat::FFVL:
     logging::debug({"File", task_file, "identified as FFVL task format"});
-    // this->task = std::make_shared<XCTask>(task_file);
+    this->m_task = std::make_shared<FFVLTask>(task_file);
     break;
   case TaskFormat::UNKOWN:
     throw std::runtime_error("Unknown file format");
@@ -44,7 +44,7 @@ void Task::identify(const std::string &task_file) {
   json j;
   try {
     f >> j;
-  } catch (const nlohmann::detail::parse_error &e) {
+  } catch (const json::parse_error &e) {
     logging::debug({e.what()});
     throw std::runtime_error(task_file + " is not valid JSON");
   }

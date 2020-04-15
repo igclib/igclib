@@ -1,4 +1,5 @@
-#include "igclib/time.hpp"
+#include <igclib/time.hpp>
+#include <math.h>
 #include <stdexcept>
 #include <string>
 
@@ -30,6 +31,14 @@ Time::Time(int hour, int minute, int second, int offset /* = 0*/) {
   this->second = second;
   this->sec_from_midnight =
       3600 * this->hour + 60 * this->minute + this->second;
+  check_time();
+}
+
+// seconds is the number of seconds since midnight
+Time::Time(int seconds) {
+  this->hour = std::floor((double)seconds / 3600.0);
+  this->minute = std::floor(((double)seconds - 3600.0 * this->hour) / 60.0);
+  this->second = seconds % 60;
   check_time();
 }
 

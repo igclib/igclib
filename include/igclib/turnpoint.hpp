@@ -11,8 +11,8 @@ public:
             const std::string &name, const std::string &desc);
 
   // get
-  const GeoPoint &center() const { return this->m_center; };
-  double radius() const { return this->m_radius; };
+  const GeoPoint &center() const;
+  const std::size_t &radius() const;
 
   // display
   virtual std::string to_string() const;
