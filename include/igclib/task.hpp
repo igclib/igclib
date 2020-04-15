@@ -1,6 +1,5 @@
 #pragma once
 
-#include <dlib/optimization.h>
 #include <igclib/geopoint.hpp>
 #include <igclib/turnpoint.hpp>
 #include <memory>
@@ -44,9 +43,6 @@ public:
 protected:
   void identify(const std::string &task_file);
   void compute_optimized_route();
-  static double routedist(const dlib::matrix<double, 0, 1> &theta,
-                          const std::vector<GeoPoint> &centers,
-                          const std::vector<std::size_t> &radii);
 
   std::vector<GeoPoint> m_optimized_route;
   std::vector<std::size_t> m_optimized_legs;

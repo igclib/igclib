@@ -1,12 +1,7 @@
 [submodule "third-party/cpr"]
 	path = third-party/cpr
 	url = https://github.com/whoshuu/cpr.git
-[submodule "third-party/geographiclib"]
-	path = third-party/geographiclib
-	url = git://git.code.sourceforge.net/p/geographiclib/code
 [submodule "third-party/json"]
 	path = third-party/json
 	url = https://github.com/nlohmann/json.git
-[submodule "third-party/dlib"]
-	path = third-party/dlib
-	url = https://github.com/davisking/dlib.git
+

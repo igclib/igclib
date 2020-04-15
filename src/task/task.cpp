@@ -1,6 +1,7 @@
-#include <dlib/optimization.h>
+#include <cppoptlib/solver/bfgssolver.h>
 #include <fstream>
 #include <igclib/logging.hpp>
+#include <igclib/routedist.hpp>
 #include <igclib/task.hpp>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -70,33 +71,15 @@ void Task::identify(const std::string &task_file) {
 }
 
 void Task::compute_optimized_route() {
-  // std::vector<double> theta(this->m_task->n_turnpoints(), 0);
-  dlib::matrix<double, 0, 1> theta(this->m_task->n_turnpoints(), 0);
-  const auto &c = this->m_task->centers();
-  const auto &r = this->m_task->radii();
-  auto f = [c, r](const dlib::matrix<double, 0, 1> &t) {
-    return Task::routedist(t, c, r);
-  };
-  // auto f = [this](int a, bool b) -> double {};
-  dlib::find_max_using_approximate_derivatives(
-      dlib::bfgs_search_strategy(), // Use BFGS search algorithm
-      dlib::objective_delta_stop_strategy(1e-7), f, theta, -1);
-  logging::debug(
-      {"Optimized distance", std::to_string(this->routedist(theta, c, r))});
-}
-
-double Task::routedist(const dlib::matrix<double, 0, 1> &theta,
-                       const std::vector<GeoPoint> &centers,
-                       const std::vector<std::size_t> &radii) {
-  double distance = 0;
-  GeoPoint last_proj = centers.front().project(radii.front(), theta(0));
-  GeoPoint next_proj;
-  for (std::size_t i = 1; i < centers.size(); i++) {
-    next_proj = centers.at(i).project(radii.at(i), theta(i));
-    distance += last_proj.distance(next_proj);
-    last_proj = next_proj;
+  RouteDist r(this->m_task->centers(), this->m_task->radii());
+  Eigen::VectorXd theta(this->m_task->n_turnpoints());
+  for (std::size_t i = 0; i < this->m_task->n_turnpoints(); i++) {
+    theta(i, 0) = 90;
   }
-  return distance;
+  cppoptlib::BfgsSolver<RouteDist> solver;
+  solver.minimize(r, theta);
+  double opt_distance = r(theta);
+  logging::debug({"Optimized distance", std::to_string(opt_distance)});
 }
 
 void Task::save(const std::string &out) const { (void)out; }
