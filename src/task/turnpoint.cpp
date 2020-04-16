@@ -77,6 +77,7 @@ json Turnpoint::to_json() const {
   j["desc"] = this->m_desc;
   j["lat"] = this->m_center.lat;
   j["lon"] = this->m_center.lon;
+  j["radius"] = this->m_radius;
   j["alt"] = this->m_center.alt;
   j["role"] = "TURNPOINT";
   return j;

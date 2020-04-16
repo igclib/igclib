@@ -94,21 +94,10 @@ FreeCandidateTree::branch(const Flight &flight) const {
 }
 
 double FreeCandidateTree::bound(const Flight &flight) const {
-  std::vector<std::vector<GeoPoint>> bboxes;
+  std::vector<box_t> bboxes;
   for (std::size_t i = 0; i < this->v_points.size(); i++) {
     const auto &box = flight.bbox(this->v_boxes.at(i));
     bboxes.insert(bboxes.end(), this->v_points.at(i), box);
-    /* eager branching ?
-    if (this->v_points.at(i) > 1) {
-      if (bboxes.empty()) {
-        bboxes.insert(bboxes.end(), 2, box);
-      } else {
-        bboxes.insert(bboxes.end(), 1, box);
-      }
-    } else {
-      bboxes.insert(bboxes.end(), this->v_points.at(i), box);
-    }
-    */
   }
 
   double best_score = 0;
@@ -140,27 +129,24 @@ TriangleCandidateTree::branch(const Flight &flight) const {
   return CandidateTree::branch<TriangleCandidateTree>(flight);
 }
 
-bool overlap_lat(const std::vector<GeoPoint> &box1,
-                 const std::vector<GeoPoint> &box2) {
+bool overlap_lat(const box_t &box1, const box_t &box2) {
   return (box1.at(2).lat >= box2.at(0).lat) &&
          (box2.at(2).lat >= box1.at(0).lat);
 }
 
-bool overlap_lon(const std::vector<GeoPoint> &box1,
-                 const std::vector<GeoPoint> &box2) {
+bool overlap_lon(const box_t &box1, const box_t &box2) {
   return (box1.at(1).lon >= box2.at(0).lon) &&
          (box2.at(1).lon >= box1.at(0).lon);
 }
 
 double TriangleCandidateTree::bound(const Flight &flight) const {
-  std::vector<std::vector<GeoPoint>> bboxes;
+  std::vector<box_t> bboxes;
   for (std::size_t i = 0; i < this->v_points.size(); i++) {
     auto box = flight.bbox(this->v_boxes.at(i));
     bboxes.insert(bboxes.end(), this->v_points.at(i), box);
   }
 
-  const std::vector<std::vector<GeoPoint>> closing_boxes = {bboxes.front(),
-                                                            bboxes.back()};
+  const std::vector<box_t> closing_boxes = {bboxes.front(), bboxes.back()};
   bboxes.pop_back();
   bboxes.erase(bboxes.begin());
 
@@ -226,16 +212,16 @@ double TriangleCandidateTree::bound(const Flight &flight) const {
 double TriangleCandidateTree::score(const Flight &flight) const {
   // FIXME some boxes are still shared, separate them here by counting
   // v_points
-  GeoPoint start_point = flight.at(this->v_boxes.front().first);
-  GeoPoint end_point = flight.at(this->v_boxes.back().first);
-  double closing_distance = start_point.distance(end_point);
+  auto start_point = flight.at(this->v_boxes.front().first);
+  auto end_point = flight.at(this->v_boxes.back().first);
+  double closing_distance = start_point->distance(*end_point);
   double triangle_distance =
       flight.at(this->v_boxes.at(1).first)
-          .distance(flight.at(this->v_boxes.at(2).first));
+          ->distance(*flight.at(this->v_boxes.at(2).first));
   triangle_distance += flight.at(this->v_boxes.at(2).first)
-                           .distance(flight.at(this->v_boxes.at(3).first));
+                           ->distance(*flight.at(this->v_boxes.at(3).first));
   triangle_distance += flight.at(this->v_boxes.at(3).first)
-                           .distance(flight.at(this->v_boxes.at(1).first));
+                           ->distance(*flight.at(this->v_boxes.at(1).first));
   if (closing_distance < 3000.0) {
     return 1.2 * triangle_distance;
   } else if (closing_distance < 0.05 * triangle_distance) {
@@ -253,14 +239,13 @@ FAICandidateTree::branch(const Flight &flight) const {
 }
 
 double FAICandidateTree::bound(const Flight &flight) const {
-  std::vector<std::vector<GeoPoint>> bboxes;
+  std::vector<box_t> bboxes;
   for (std::size_t i = 0; i < this->v_points.size(); i++) {
     auto box = flight.bbox(this->v_boxes.at(i));
     bboxes.insert(bboxes.end(), this->v_points.at(i), box);
   }
 
-  const std::vector<std::vector<GeoPoint>> closing_boxes = {bboxes.front(),
-                                                            bboxes.back()};
+  const std::vector<box_t> closing_boxes = {bboxes.front(), bboxes.back()};
   bboxes.pop_back();
   bboxes.erase(bboxes.begin());
 
@@ -332,16 +317,16 @@ double FAICandidateTree::bound(const Flight &flight) const {
 }
 
 double FAICandidateTree::score(const Flight &flight) const {
-  GeoPoint start_point = flight.at(this->v_boxes.front().first);
-  GeoPoint end_point = flight.at(this->v_boxes.back().first);
-  double closing_distance = start_point.distance(end_point);
+  auto start_point = flight.at(this->v_boxes.front().first);
+  auto end_point = flight.at(this->v_boxes.back().first);
+  double closing_distance = start_point->distance(*end_point);
   std::vector<double> legs;
   legs.push_back(flight.at(this->v_boxes.at(1).first)
-                     .distance(flight.at(this->v_boxes.at(2).first)));
+                     ->distance(*flight.at(this->v_boxes.at(2).first)));
   legs.push_back(flight.at(this->v_boxes.at(2).first)
-                     .distance(flight.at(this->v_boxes.at(3).first)));
+                     ->distance(*flight.at(this->v_boxes.at(3).first)));
   legs.push_back(flight.at(this->v_boxes.at(3).first)
-                     .distance(flight.at(this->v_boxes.at(1).first)));
+                     ->distance(*flight.at(this->v_boxes.at(1).first)));
   double min_leg = *std::min_element(legs.begin(), legs.end());
   double triangle_distance = std::accumulate(legs.begin(), legs.end(), 0.0);
   if (min_leg >= 0.28 * triangle_distance) {

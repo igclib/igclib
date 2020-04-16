@@ -15,13 +15,14 @@ namespace bgi = boost::geometry::index;
 class Airspace {
   typedef std::pair<bg::model::box<GeoPoint>, std::shared_ptr<Zone>>
       box_mapping_t;
-  typedef std::map<std::shared_ptr<Zone>, std::vector<GeoPoint>> infractions_t;
+  typedef std::vector<std::pair<std::shared_ptr<Zone>, PointCollection>>
+      infractions_t;
 
 public:
   Airspace(const std::string &airspace_file);
   std::size_t size() const { return this->index.size(); };
 
-  void infractions(const PointCollection &points, infractions_t &infractions,
+  void infractions(const PointCollection &flight, infractions_t &infractions,
                    bool with_agl) const;
 
   // needs_agl_checking counts the number of zones in the airspace file which

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <string>
 #include <vector>
@@ -32,6 +33,25 @@ inline void trim(std::string &s) {
 template <typename T>
 inline std::vector<std::vector<T>>
 product(const std::vector<std::vector<T>> &v) {
+  std::vector<std::vector<T>> s = {{}};
+  for (const auto &u : v) {
+    std::vector<std::vector<T>> r;
+    for (const auto &x : s) {
+      for (const auto y : u) {
+        r.push_back(x);
+        r.back().push_back(y);
+      }
+    }
+    s = std::move(r);
+  }
+  return s;
+}
+
+// cartesian product of vectors(temporary fix for boxes), nice implementation by
+// https://stackoverflow.com/a/17050528/11589613
+template <typename T>
+inline std::vector<std::vector<T>>
+product(const std::vector<std::array<T, 4>> &v) {
   std::vector<std::vector<T>> s = {{}};
   for (const auto &u : v) {
     std::vector<std::vector<T>> r;

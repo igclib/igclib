@@ -5,7 +5,10 @@
 
 class Flight;
 
+typedef std::array<GeoPoint, 4> box_t;
+
 class CandidateTree {
+
 public:
   CandidateTree(const Flight &flight);
   CandidateTree(std::vector<std::size_t> points,

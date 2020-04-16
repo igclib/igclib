@@ -28,9 +28,7 @@ Airspace::Airspace(const std::string &airspace_file) {
       boost::to_upper(line);
       // zones are delimited by AC instructions
       if (line.substr(0, 2) == "AC") {
-        if (!record.empty()) {
-          this->update_index(record);
-        }
+        this->update_index(record);
       }
       record.push_back(line);
     }
@@ -40,22 +38,25 @@ Airspace::Airspace(const std::string &airspace_file) {
   this->update_index(record);
 }
 
+// adds the zone built from the record to the index and clears the record
 void Airspace::update_index(std::vector<std::string> &record) {
-  Zone zone(record);
-  // zone might be empty if no geometry could be parsed from the record
-  // in this case, do not add it to the index, but clear the record
-  // anyway
-  if (!zone.empty()) {
-    this->index.insert(
-        std::make_pair(zone.bounding_box, std::make_shared<Zone>(zone)));
+  if (!record.empty()) {
+    Zone zone(record);
+    // zone might be empty if no geometry could be parsed from the record
+    // in this case, do not add it to the index, but clear the record
+    // anyway
+    if (!zone.empty()) {
+      this->index.insert(
+          std::make_pair(zone.bounding_box, std::make_shared<Zone>(zone)));
+    }
+    if (zone.needs_agl_checking()) {
+      this->needs_agl_checking++;
+    }
+    record.clear();
   }
-  if (zone.needs_agl_checking()) {
-    this->needs_agl_checking++;
-  }
-  record.clear();
 }
 
-void Airspace::infractions(const PointCollection &points,
+void Airspace::infractions(const PointCollection &flight,
                            infractions_t &infractions, bool with_agl) const {
 
   // TODO do in_altitude_range predicate to discard useless zones faster
@@ -63,9 +64,15 @@ void Airspace::infractions(const PointCollection &points,
   // https://www.boost.org/doc/libs/1_66_0/libs/geometry/doc/html/geometry/spatial_indexes/queries.html
 
   std::vector<box_mapping_t> first_pass;
-  std::vector<GeoPoint> zone_infractions;
+  PointCollection zone_infractions;
 
-  bg::model::linestring<GeoPoint> flight_track(points.begin(), points.end());
+  // bg::model::linestring<GeoPoint> flight_track(flight.geopoints().begin(),
+  //                                            flight.geopoints().end());
+  bg::model::linestring<GeoPoint> flight_track;
+  for (const auto &p : flight.geopoints()) {
+    flight_track.push_back(*p);
+  }
+
   this->index.query(bgi::intersects(flight_track) &&
                         bgi::satisfies([](auto const &v) {
                           (void)v;
@@ -75,10 +82,11 @@ void Airspace::infractions(const PointCollection &points,
 
   for (const box_mapping_t &possible_infraction : first_pass) {
     zone_infractions =
-        possible_infraction.second->contained_points(points, with_agl);
-    if (!zone_infractions.empty()) {
+        possible_infraction.second->contained_points(flight, with_agl);
+    if (!zone_infractions.geopoints().empty()) {
       logging::debug({"infraction", possible_infraction.second->m_name});
-      infractions[possible_infraction.second] = zone_infractions;
+      auto &&p = std::make_pair(possible_infraction.second, zone_infractions);
+      infractions.push_back(p);
     } else {
       useless++;
     }

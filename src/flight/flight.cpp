@@ -9,7 +9,7 @@
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
-#include <igclib/xcopt.hpp>
+//#include <igclib/xcopt.hpp>
 #include <iostream>
 #include <queue>
 #include <stdexcept>
@@ -48,14 +48,17 @@ void Flight::process_H_record(const std::string &record) {
     util::trim(this->pilot_name);
   } else if (record_code == "TZO") {
     size_t delim = record.find(':') + 1;
-    this->time_zone_offset = std::stoi(record.substr(delim));
+    this->time_zone_offset = IGCTime(record.substr(delim));
   }
 }
 
 void Flight::process_B_record(const std::string &record) {
-  IGCTime t(record, this->time_zone_offset);
+  IGCTime t(record);
+  if (!this->time_zone_offset.zero()) {
+    t += this->time_zone_offset;
+  }
   IGCPoint p(record);
-  this->points.insert(t, p);
+  this->m_points.insert(t, p);
 }
 
 // Returns the JSON serialization of a Flight
@@ -63,11 +66,11 @@ json Flight::to_json() const {
   json j = {{"pilot", this->pilot_name}};
 
   j["infractions"];
-  for (const auto &infraction : this->infractions) {
+  for (const auto &infraction : this->m_infractions) {
     j["infractions"][infraction.first->name()] = infraction.first->to_json();
-    for (const GeoPoint &p : infraction.second) {
-      std::string time(this->points.find_time(p).to_string());
-      j["infractions"][infraction.first->name()]["points"][time] = p.to_json();
+    for (const auto &timepoint : infraction.second.timepoints()) {
+      j["infractions"][infraction.first->name()]["points"]
+       [timepoint.first.to_string()] = timepoint.second->to_json();
     }
   }
 
@@ -100,7 +103,7 @@ void Flight::validate(const Airspace &airspace) {
     if (getenv("ELEVATION_API_KEY")) {
       std::string key = getenv("ELEVATION_API_KEY");
       std::string api = "https://geolocalisation.ffvl.fr/elevation?key=" + key;
-      json data = this->points.latlon();
+      json data = this->m_points.latlon();
       cpr::Body body(data.dump());
       cpr::Session session;
       session.SetVerifySsl(false);
@@ -113,7 +116,7 @@ void Flight::validate(const Airspace &airspace) {
         logging::debug({"Got API response"});
         data = json::parse(r.text);
         std::vector<double> altitudes = data.get<std::vector<double>>();
-        if (this->points.set_agl(altitudes)) {
+        if (this->m_points.set_agl(altitudes)) {
           is_agl_validable = true;
         }
       } else if (r.status_code == 400) {
@@ -132,7 +135,7 @@ void Flight::validate(const Airspace &airspace) {
   }
 
   // then validate intersections
-  airspace.infractions(this->points, this->infractions, is_agl_validable);
+  airspace.infractions(this->m_points, this->m_infractions, is_agl_validable);
 }
 
 void Flight::compute_score() {
@@ -141,8 +144,8 @@ void Flight::compute_score() {
   double lower_bound = this->heuristic_free();
   std::cout << "Freeflight heuristic : " << lower_bound << std::endl;
 
-  double triangle_score = this->optimize_xc<TriangleCandidateTree>(0);
-  std::cout << "Triangle score : " << triangle_score << std::endl;
+  // double triangle_score = this->optimize_xc<TriangleCandidateTree>(0);
+  // std::cout << "Triangle score : " << triangle_score << std::endl;
 
   // double fai_score = this->optimize_xc<FAICandidateTree>(triangle_score);
   // std::cout << "FAI score : " << fai_score << std::endl;
@@ -185,7 +188,7 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
 
 double Flight::heuristic_free() const {
   const int n_approx = 100; // number of points used for tracklog approximation
-  const int step_ratio = this->points.size() / n_approx;
+  const int step_ratio = this->m_points.size() / n_approx;
 
   std::vector<double> previous_distances(n_approx);
   std::vector<double> next_distances(n_approx);
@@ -196,9 +199,9 @@ double Flight::heuristic_free() const {
     for (std::size_t i = 0; i < n_approx; ++i) {
       double max_distance = 0;
       for (std::size_t j = 0; j < i; ++j) {
-        double candidate =
-            previous_distances[j] +
-            this->points[i * step_ratio].distance(this->points[j * step_ratio]);
+        double candidate = previous_distances[j] +
+                           this->m_points.at(i * step_ratio)
+                               ->distance(*this->m_points.at(j * step_ratio));
         if (candidate > max_distance) {
           max_distance = candidate;
         }
@@ -209,4 +212,12 @@ double Flight::heuristic_free() const {
   }
 
   return *std::max_element(next_distances.begin(), next_distances.end());
+}
+
+const std::shared_ptr<GeoPoint> Flight::at(std::size_t index) const {
+  return this->m_points.at(index);
+}
+
+const std::shared_ptr<GeoPoint> Flight::at(const Time &time) const {
+  return this->m_points.at(time);
 }

@@ -128,19 +128,19 @@ Zone::Zone(const std::vector<std::string> &openair_record) {
   boost::geometry::envelope(bboxes, this->bounding_box);
 }
 
-std::vector<GeoPoint> Zone::contained_points(const PointCollection &points,
-                                             bool with_agl) const {
-  std::vector<GeoPoint> contained_points;
+PointCollection Zone::contained_points(const PointCollection &points,
+                                       bool with_agl) const {
+  PointCollection contained;
   for (const std::shared_ptr<Geometry> g : geometries) {
-    for (const GeoPoint &p : points) {
-      if (this->in_altitude_range(p, with_agl)) {
-        if (g->contains(p)) {
-          contained_points.push_back(p);
+    for (const auto &p : points.timepoints()) {
+      if (this->in_altitude_range(*p.second, with_agl)) {
+        if (g->contains(*p.second)) {
+          contained.insert(p);
         }
       }
     }
   }
-  return contained_points;
+  return contained;
 }
 
 bool Zone::in_altitude_range(const GeoPoint &p, bool with_agl) const {

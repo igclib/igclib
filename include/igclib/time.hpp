@@ -4,35 +4,42 @@
 
 class Time {
 public:
-  Time(){};
-  Time(int hour, int minute, int second, int offset = 0);
+  Time();
   Time(int seconds);
-  size_t hash(void) const { return this->sec_from_midnight; };
-  bool operator==(const Time &t) const;
+  Time(int hour, int minute, int second);
+  Time(int hour, int minute, int second, const Time &offset);
+  Time(const Time &other);
+  bool operator==(const Time &other) const;
+  bool operator!=(const Time &other) const;
+  bool operator<(const Time &other) const;
+  bool operator>(const Time &other) const;
+  bool zero() const;
+  Time &operator++();
+  Time &operator--();
+  Time operator+(const Time &other);
+  Time operator-(const Time &other);
+  Time &operator+=(const Time &other);
+  Time &operator-=(const Time &other);
+  Time &operator=(const Time &other);
+
   std::string to_string() const;
 
 protected:
-  void check_time() const;
-  int hour = 0;
-  int minute = 0;
-  int second = 0;
-  int sec_from_midnight = 0;
-};
+  void check(int hour, int minute, int second) const;
+  void check(int seconds) const;
 
-namespace std {
-// specialize hash function to insert Time in unordered map
-template <> struct hash<Time> {
-  std::size_t operator()(const Time &t) const { return t.hash(); }
+  int m_hour;
+  int m_minute;
+  int m_second;
+  int m_sec_from_midnight;
 };
-
-} // namespace std
 
 class IGCTime : public Time {
 public:
-  IGCTime(const std::string &str, int offset = 0);
+  IGCTime(const std::string &str);
 };
 
 class XCTaskTime : public Time {
 public:
-  XCTaskTime(const std::string &str, int offset = 0);
+  XCTaskTime(const std::string &str);
 };

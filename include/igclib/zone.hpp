@@ -16,8 +16,8 @@ class Zone {
 
 public:
   Zone(const std::vector<std::string> &openair_record);
-  std::vector<GeoPoint> contained_points(const PointCollection &points,
-                                         bool with_agl) const;
+  PointCollection contained_points(const PointCollection &points,
+                                   bool with_agl) const;
   bool empty() const { return geometries.empty(); };
   bool needs_agl_checking() const;
   bool operator<(const Zone &other) const;
