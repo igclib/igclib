@@ -109,3 +109,9 @@ json TaskImpl::to_json() const {
   }
   return j;
 }
+
+const Time &Task::start() const { return this->m_task->start(); }
+const Time &Task::close() const { return this->m_task->close(); }
+
+const Time &TaskImpl::start() const { return this->m_sss->open(); }
+const Time &TaskImpl::close() const { return this->m_goal->close(); }

@@ -11,12 +11,16 @@
 typedef enum TaskFormat { XCTRACK, PWCA, FFVL, UNKOWN } TaskFormat;
 
 class TaskImpl {
+
 public:
   TaskImpl(){};
 
   std::size_t n_turnpoints() const { return this->m_all_tp.size(); }
   const std::vector<GeoPoint> &centers() const { return this->m_centers; };
   const std::vector<std::size_t> &radii() const { return this->m_radii; };
+  const Time &start() const;
+  const Time &close() const;
+
   json to_json() const;
 
 protected:
@@ -56,6 +60,9 @@ public:
   Task(const std::string &task_file);
   void save(const std::string &out) const;
   json to_json() const;
+
+  const Time &start() const;
+  const Time &close() const;
 
 protected:
   void identify(const std::string &task_file);

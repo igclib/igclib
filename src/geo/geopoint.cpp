@@ -46,6 +46,8 @@ IGCPoint::IGCPoint(const std::string &str) {
     throw std::runtime_error(
         "Absolute value of latitude must be between 0 and 90");
   }
+
+  this->m_id = std::to_string(this->lat) + ":" + std::to_string(this->lon);
 }
 
 OpenAirPoint::OpenAirPoint(const std::string &str) {
@@ -90,6 +92,7 @@ OpenAirPoint::OpenAirPoint(const std::string &str) {
 
   this->alt = -1;
   this->agl = -1;
+  this->m_id = std::to_string(this->lat) + ":" + std::to_string(this->lon);
 }
 
 GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {

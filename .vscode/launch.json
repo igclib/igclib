@@ -76,5 +76,31 @@
         }
       ]
     },
+    {
+      "name": "race",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [
+        "race",
+        "--task",
+        "tests/data/task/xctrack_1.xctsk",
+        "--flight",
+        "tests/data/race/1_all",
+        "-v"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
   ]
 }

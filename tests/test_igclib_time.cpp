@@ -17,7 +17,7 @@ int main() {
   try {
     --t1;
   } catch (const std::runtime_error &e) {
-    if (std::string(e.what()) != "Time underflow")
+    if (std::string(e.what()) != "time underflow")
       logging::error({"[underflow] test failed"});
   }
 
@@ -26,7 +26,7 @@ int main() {
   try {
     ++t2;
   } catch (const std::runtime_error &e) {
-    if (std::string(e.what()) != "Time overflow")
+    if (std::string(e.what()) != "time overflow")
       logging::error({"[overflow] test failed"});
   }
 

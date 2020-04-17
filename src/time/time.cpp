@@ -80,8 +80,16 @@ bool Time::operator<(const Time &other) const {
   return this->m_sec_from_midnight < other.m_sec_from_midnight;
 }
 
+bool Time::operator<=(const Time &other) const {
+  return this->m_sec_from_midnight <= other.m_sec_from_midnight;
+}
+
 bool Time::operator>(const Time &other) const {
   return this->m_sec_from_midnight > other.m_sec_from_midnight;
+}
+
+bool Time::operator>=(const Time &other) const {
+  return this->m_sec_from_midnight >= other.m_sec_from_midnight;
 }
 
 std::string Time::to_string() const {
@@ -93,21 +101,21 @@ std::string Time::to_string() const {
 
 void Time::check(int hour, int minute, int second) const {
   if ((hour < 0) || (hour > 23)) {
-    throw std::runtime_error("Hour must be between 0 and 23");
+    throw std::runtime_error("hour must be between 0 and 23");
   }
   if ((minute < 0) || (minute > 59)) {
-    throw std::runtime_error("Minute must be between 0 and 59");
+    throw std::runtime_error("minute must be between 0 and 59");
   }
   if ((second < 0) || (second > 59)) {
-    throw std::runtime_error("Second must be between 0 and 59");
+    throw std::runtime_error("second must be between 0 and 59");
   }
 }
 
 void Time::check(int seconds) const {
   if (seconds < 0) {
-    throw std::runtime_error("Time underflow");
+    throw std::runtime_error("time underflow");
   }
   if (seconds >= 86400) {
-    throw std::runtime_error("Time overflow");
+    throw std::runtime_error("time overflow");
   }
 }

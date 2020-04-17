@@ -21,12 +21,13 @@ Flight::Flight(const std::string &igc_file) {
   std::ifstream f;
   f.open(igc_file);
   if (!f.is_open()) {
-    const std::string error = "Could not open file '" + igc_file + "'";
+    const std::string error = "could not open file '" + igc_file + "'";
     throw std::runtime_error(error);
   }
 
-  this->file_name = boost::filesystem::path(igc_file).filename().string();
-  this->m_pilot_name = "Unknown pilot";
+  this->m_file_name =
+      boost::filesystem::path(igc_file).filename().stem().string();
+  this->m_pilot_name = "unknown pilot";
 
   std::string line;
   std::size_t lineno = 0;
@@ -68,23 +69,31 @@ void Flight::process_H_record(const std::string &record) {
     util::trim(this->m_pilot_name);
   } else if (record_code == "TZO") {
     size_t delim = record.find(':') + 1;
-    this->m_timezone_offset = IGCTime(record.substr(delim));
+    this->m_timezone_offset = IGCTimeOffset(record.substr(delim));
   }
 }
 
 void Flight::process_B_record(const std::string &record) {
   IGCTime &&t(record);
-  if (!this->m_timezone_offset.zero()) {
-    t += this->m_timezone_offset;
-  }
   IGCPoint &&p(record);
-  this->m_points.insert(t, p);
+  try {
+    if (!this->m_timezone_offset.zero()) {
+      if (this->m_timezone_offset.is_negative()) {
+        t -= this->m_timezone_offset;
+      } else {
+        t += this->m_timezone_offset;
+      }
+    }
+    this->m_points.insert(t, p);
+  } catch (const std::runtime_error &err) {
+    logging::debug({err.what()}); // todo handle time overflow errors separately
+  }
 }
 
 // Returns the JSON serialization of a Flight
 json Flight::to_json() const {
   json j = {{"pilot", this->m_pilot_name},
-            {"file", this->file_name},
+            {"file", this->m_file_name},
             {"infractions", {}}};
 
   // airspace infractions
@@ -241,6 +250,7 @@ double Flight::heuristic_free() const {
 /** accessors **/
 
 const std::string &Flight::pilot() const { return this->m_pilot_name; }
+const std::string &Flight::id() const { return this->m_file_name; }
 
 const std::shared_ptr<GeoPoint> Flight::at(std::size_t index) const {
   return this->m_points.at(index);

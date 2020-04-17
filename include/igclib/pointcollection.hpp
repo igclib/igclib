@@ -12,7 +12,7 @@ class PointCollection {
   typedef std::map<Time, std::shared_ptr<GeoPoint>> timepoints_t;
 
 public:
-  PointCollection(){};
+  PointCollection() : m_timepoints{}, m_geopoints{} {};
   void insert(const Time &t, const GeoPoint &p);
   void insert(const std::pair<const Time, std::shared_ptr<GeoPoint>> &p);
   const std::shared_ptr<GeoPoint> at(std::size_t idx) const;

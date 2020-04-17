@@ -41,6 +41,7 @@ public:
   SSS(){};
   SSS(const GeoPoint &center, const std::size_t &radius,
       const std::string &name, const std::string &desc, const Time &open);
+  const Time &open() const;
 
   // display
   std::string to_string() const;
@@ -72,6 +73,7 @@ public:
 
   // get
   bool is_line() const;
+  const Time &close() const;
 
   // display
   std::string to_string() const;

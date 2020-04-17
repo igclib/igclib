@@ -1,17 +1,19 @@
+#include <igclib/geopoint.hpp>
 #include <igclib/pointcollection.hpp>
+#include <igclib/time.hpp>
 #include <iostream>
 #include <iterator>
 #include <vector>
 
 void PointCollection::insert(const Time &t, const GeoPoint &p) {
-  auto &&pt = std::make_shared<GeoPoint>(p);
+  auto pt = std::make_shared<GeoPoint>(p);
   this->m_timepoints.emplace_hint(this->m_timepoints.end(), t, pt);
   this->m_geopoints.push_back(pt);
 }
 
 void PointCollection::insert(
     const std::pair<const Time, std::shared_ptr<GeoPoint>> &p) {
-  this->m_timepoints.emplace_hint(this->m_timepoints.end(), p.first, p.second);
+  this->m_timepoints.emplace(p.first, p.second);
   this->m_geopoints.push_back(p.second);
 }
 

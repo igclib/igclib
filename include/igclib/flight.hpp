@@ -3,6 +3,7 @@
 #include <igclib/airspace.hpp>
 #include <igclib/geopoint.hpp>
 #include <igclib/json.hpp>
+#include <igclib/task.hpp>
 #include <igclib/xcinfo.hpp>
 #include <map>
 #include <memory>
@@ -25,6 +26,7 @@ public:
   // accessors
   std::size_t size() const;
   const std::string &pilot() const;
+  const std::string &id() const;
   const std::shared_ptr<GeoPoint> at(std::size_t index) const;
   const std::shared_ptr<GeoPoint> at(const Time &time) const;
 
@@ -35,8 +37,8 @@ protected:
   template <class T> double optimize_xc(double lower_bound);
 
   std::string m_pilot_name;
-  std::string file_name;
-  Time m_timezone_offset;
+  std::string m_file_name;
+  IGCTimeOffset m_timezone_offset;
   XCInfo m_xcinfo;
   PointCollection m_points;
   infractions_t m_infractions;
@@ -45,6 +47,12 @@ protected:
 class RaceFlight : public Flight {
 public:
   RaceFlight(const std::string &igc_file);
+  void score(const Task &task);
+
+  const Time &first_instant() const;
+  const Time &last_instant() const;
 
 protected:
+  Time m_first_instant;
+  Time m_last_instant;
 };

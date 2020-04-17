@@ -51,6 +51,8 @@ json SSS::to_json() const {
   return j;
 }
 
+const Time &SSS::open() const { return this->m_open; }
+
 /** TURNPOINT **/
 
 Turnpoint::Turnpoint(const GeoPoint &center, const std::size_t &radius,
@@ -138,3 +140,5 @@ json Goal::to_json() const {
 }
 
 bool Goal::is_line() const { return this->m_line; }
+
+const Time &Goal::close() const { return this->m_close; }

@@ -12,7 +12,9 @@ public:
   bool operator==(const Time &other) const;
   bool operator!=(const Time &other) const;
   bool operator<(const Time &other) const;
+  bool operator<=(const Time &other) const;
   bool operator>(const Time &other) const;
+  bool operator>=(const Time &other) const;
   bool zero() const;
   Time &operator++();
   Time &operator--();
@@ -34,12 +36,32 @@ protected:
   int m_sec_from_midnight;
 };
 
+/* IGC */
+
 class IGCTime : public Time {
 public:
+  IGCTime() : Time() {}
   IGCTime(const std::string &str);
 };
 
+class IGCTimeOffset : public Time {
+public:
+  IGCTimeOffset() : Time(){};
+  IGCTimeOffset(const std::string &str);
+  bool is_negative() const { return this->m_negative; }
+
+protected:
+  bool m_negative;
+};
+
+/* XCTRACK */
+
 class XCTaskTime : public Time {
 public:
+  XCTaskTime() : Time(){};
   XCTaskTime(const std::string &str);
 };
+
+/* FFVL */
+
+class FFVLTime : public Time {};
