@@ -6,8 +6,8 @@
 
 Route::Route(const GeoPoint &position, const std::vector<GeoPoint> &centers,
              const std::vector<std::size_t> &radii)
-    : m_centers(centers), m_radii(radii),
-      m_position(position), m_opt_points{position} {
+    : m_position(position), m_centers(centers),
+      m_radii(radii), m_opt_points{position} {
   this->optimize();
   GeoPoint pos = position;
   GeoPoint prev_center = position;

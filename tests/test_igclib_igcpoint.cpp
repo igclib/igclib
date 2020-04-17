@@ -1,6 +1,6 @@
-#include "igclib/geopoint.hpp"
 #include <assert.h>
-#include <iostream>
+#include <igclib/geopoint.hpp>
+#include <igclib/logging.hpp>
 #include <vector>
 
 #define PRECISION 0.1
@@ -44,10 +44,10 @@ int main() {
 
   if (!failures.empty()) {
     for (int i : failures) {
-      std::cerr << "Test " << i << " failed" << std::endl;
+      logging::error({"test", std::to_string(i), "failed"});
     }
   } else {
-    std::cerr << "Test passed" << std::endl;
+    logging::info({"test passed"});
   }
   return EXIT_SUCCESS;
 }

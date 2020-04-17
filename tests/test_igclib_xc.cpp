@@ -1,15 +1,17 @@
-#include <assert.h>
 #include <igclib/flight.hpp>
 #include <igclib/json.hpp>
+#include <igclib/logging.hpp>
 #include <iostream>
 
 int main() {
-  Flight f("data/flights/xc_col_agnel.igc");
+  Flight f("data/flight/xc_col_agnel.igc");
+
+  // pilot name
   json j = f.to_json();
   if (j["pilot"] != "Téo Bouvard") {
-    std::cerr << "Test failed" << std::endl;
+    logging::error({"[pilot name] test failed"});
   }
 
-  std::cerr << "Test passed" << std::endl;
+  logging::info({"test passed"});
   return EXIT_SUCCESS;
 }

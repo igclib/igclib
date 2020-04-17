@@ -1,6 +1,6 @@
-#include "igclib/time.hpp"
 #include <assert.h>
-#include <iostream>
+#include <igclib/logging.hpp>
+#include <igclib/time.hpp>
 #include <vector>
 
 int main() {
@@ -14,8 +14,8 @@ int main() {
       "B1024504242000N02330000WA0275000264\n",
   };
 
-  Time expect[] = {Time(0, 0, 0),    Time(8, 42, 29),     Time(23, 59, 59),
-                   Time(14, 30, 51), Time(14, 42, 20, 1), Time(15, 24, 50, -5)};
+  Time expect[] = {Time(0, 0, 0),    Time(8, 42, 29),  Time(23, 59, 59),
+                   Time(14, 30, 51), Time(15, 42, 20), Time(10, 24, 50)};
 
   int n_test_cases = sizeof(test_cases) / sizeof(*test_cases);
   int n_expect = sizeof(expect) / sizeof(*expect);
@@ -31,10 +31,10 @@ int main() {
 
   if (!failures.empty()) {
     for (int i : failures) {
-      std::cerr << "Test " << i << " failed" << std::endl;
+      logging::error({"test", std::to_string(i), "failed"});
     }
   } else {
-    std::cerr << "Test passed" << std::endl;
+    logging::info({"test passed"});
   }
   return EXIT_SUCCESS;
 }

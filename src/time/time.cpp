@@ -61,11 +61,11 @@ Time &Time::operator=(const Time &other) {
 }
 
 Time Time::operator+(const Time &other) {
-  return Time(other.m_sec_from_midnight + other.m_sec_from_midnight);
+  return Time(this->m_sec_from_midnight + other.m_sec_from_midnight);
 }
 
 Time Time::operator-(const Time &other) {
-  return Time(other.m_sec_from_midnight - other.m_sec_from_midnight);
+  return Time(this->m_sec_from_midnight - other.m_sec_from_midnight);
 }
 
 bool Time::operator==(const Time &other) const {

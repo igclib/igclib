@@ -50,7 +50,7 @@ void Airspace::update_index(std::vector<std::string> &record) {
           std::make_pair(zone.bounding_box, std::make_shared<Zone>(zone)));
     }
     if (zone.needs_agl_checking()) {
-      this->needs_agl_checking++;
+      ++this->needs_agl_checking;
     }
     record.clear();
   }
@@ -60,24 +60,22 @@ void Airspace::infractions(const PointCollection &flight,
                            infractions_t &infractions, bool with_agl) const {
 
   // TODO do in_altitude_range predicate to discard useless zones faster
-  int useless = 0;
   // https://www.boost.org/doc/libs/1_66_0/libs/geometry/doc/html/geometry/spatial_indexes/queries.html
+  int useless = 0;
 
   std::vector<box_mapping_t> first_pass;
   PointCollection zone_infractions;
 
-  // bg::model::linestring<GeoPoint> flight_track(flight.geopoints().begin(),
-  //                                            flight.geopoints().end());
   bg::model::linestring<GeoPoint> flight_track;
-  for (const auto &p : flight.geopoints()) {
+  for (const auto p : flight.geopoints()) {
     flight_track.push_back(*p);
   }
 
-  this->index.query(bgi::intersects(flight_track) &&
-                        bgi::satisfies([](auto const &v) {
-                          (void)v;
-                          return true;
-                        }),
+  this->index.query(bgi::intersects(flight_track), /* &&
+                         bgi::satisfies([](auto const &v) {
+                           (void)v;
+                           return true;
+                         }),*/
                     std::back_inserter(first_pass));
 
   for (const box_mapping_t &possible_infraction : first_pass) {

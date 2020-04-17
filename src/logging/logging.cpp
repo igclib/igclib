@@ -35,4 +35,15 @@ void debug(const std::initializer_list<std::string> &msgs) {
     std::cerr << std::endl;
   }
 }
+
+void info(const std::initializer_list<std::string> &msgs) {
+  if (default_level > verbosity::QUIET) {
+    std::cerr << "[\033[32;1m INFO \033[0m] ";
+    for (const std::string &msg : msgs) {
+      std::cerr << msg << " ";
+    }
+    std::cerr << std::endl;
+  }
+}
+
 } // namespace logging

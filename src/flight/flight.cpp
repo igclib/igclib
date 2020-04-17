@@ -9,7 +9,7 @@
 #include <igclib/pointcollection.hpp>
 #include <igclib/time.hpp>
 #include <igclib/util.hpp>
-//#include <igclib/xcopt.hpp>
+#include <igclib/xcopt.hpp>
 #include <iostream>
 #include <queue>
 #include <stdexcept>
@@ -27,19 +27,21 @@ Flight::Flight(const std::string &igc_file) {
   std::string line;
   while (std::getline(f, line)) {
     switch (line[0]) {
-    // header records
     case 'H':
+      // header records
       process_H_record(line);
       break;
-    // fix records
     case 'B':
+      // fix records
       process_B_record(line);
     default:
+      // other records, not used
       break;
     }
   }
 }
 
+// extracts pilot name and time offset
 void Flight::process_H_record(const std::string &record) {
   const std::string record_code = record.substr(2, 3);
   if (record_code == "PLT") {
@@ -53,11 +55,11 @@ void Flight::process_H_record(const std::string &record) {
 }
 
 void Flight::process_B_record(const std::string &record) {
-  IGCTime t(record);
+  IGCTime &&t(record);
   if (!this->time_zone_offset.zero()) {
     t += this->time_zone_offset;
   }
-  IGCPoint p(record);
+  IGCPoint &&p(record);
   this->m_points.insert(t, p);
 }
 
@@ -186,27 +188,31 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
   return best_score;
 }
 
+// dynamic algorithm to compute the longest flight distance through 5 points
 double Flight::heuristic_free() const {
-  const int n_approx = 100; // number of points used for tracklog approximation
+  // number of points used for tracklog approximation
+  const std::size_t n_approx = 100;
   const int step_ratio = this->m_points.size() / n_approx;
+  std::size_t n_steps = 4;
+  double candidate;
+  double max_distance;
 
-  std::vector<double> previous_distances(n_approx);
-  std::vector<double> next_distances(n_approx);
+  std::array<double, n_approx> previous_distances{};
+  std::array<double, n_approx> next_distances{};
 
   // n_steps must be number of points - 1
-  int n_steps = 4;
-  for (int step = 0; step < n_steps; ++step) {
+  for (std::size_t step = 0; step < n_steps; ++step) {
     for (std::size_t i = 0; i < n_approx; ++i) {
-      double max_distance = 0;
+      max_distance = 0;
       for (std::size_t j = 0; j < i; ++j) {
-        double candidate = previous_distances[j] +
-                           this->m_points.at(i * step_ratio)
-                               ->distance(*this->m_points.at(j * step_ratio));
+        candidate = previous_distances.at(j) +
+                    this->m_points.at(i * step_ratio)
+                        ->distance(*this->m_points.at(j * step_ratio));
         if (candidate > max_distance) {
           max_distance = candidate;
         }
       }
-      next_distances[i] = max_distance;
+      next_distances.at(i) = max_distance;
     }
     previous_distances = next_distances;
   }

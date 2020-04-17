@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -7,8 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
-#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wunused -Wextra -g -DDLIB_USE_CUDA=0")
-#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wunused -Wextra -g -pedantic -DDLIB_USE_CUDA=0")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wunused -Wextra -g -DDLIB_USE_CUDA=0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wunused -Wextra -g -pedantic")
 
 message("-- CMAKE_CXX_FLAGS_DEBUG : ${CMAKE_CXX_FLAGS_DEBUG}")
 message("-- CMAKE_CXX_FLAGS_RELEASE : ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -33,5 +35,3 @@ add_subdirectory(third-party/dlib)
 # add source and tests
 add_subdirectory(src)
 add_subdirectory(tests)
-
-enable_testing()

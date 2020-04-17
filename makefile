@@ -15,6 +15,7 @@ build-dir:
 	mkdir -p build
 
 ### DEV TARGETS ###
+
 debug:build-dir
 	#cmake -S . -B build
 	#cmake --build build -j $(nproc)

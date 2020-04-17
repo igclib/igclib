@@ -1,11 +1,10 @@
-#include <assert.h>
+#include <igclib/airspace.hpp>
+#include <igclib/logging.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "igclib/airspace.hpp"
 int main() {
-
   std::vector<std::string> failures;
 
   Airspace airspace("data/airspace/reno.txt");
@@ -21,7 +20,7 @@ int main() {
       std::cerr << s << std::endl;
     }
   } else {
-    std::cerr << "Test passed" << std::endl;
+    logging::info({"[airspace counting] test passed"});
   }
   return EXIT_SUCCESS;
 }

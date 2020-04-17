@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 bool GeoPoint::operator==(const GeoPoint &other) const {
-  return (this->lat == other.lat && this->lon == other.lon);
+  return (this->id() == other.id());
 }
 
 std::string GeoPoint::id() const { return this->m_id; }
@@ -36,7 +36,7 @@ IGCPoint::IGCPoint(const std::string &str) {
   // decode altitude
   this->alt = std::stoi(tokens[7]);
   // all ground altitudes should be set in a batch request to the elevation API
-  this->agl = 0;
+  this->agl = -1;
 
   if ((this->lon < -180.0) || (lon > 180.0)) {
     throw std::runtime_error("Longitude must be between -180 and 180");
@@ -88,8 +88,8 @@ OpenAirPoint::OpenAirPoint(const std::string &str) {
   lon = deg + min / 60 + sec / 3600;
   this->lon = tokens[3] == "E" ? lon : -lon;
 
-  this->alt = 0;
-  this->agl = 0;
+  this->alt = -1;
+  this->agl = -1;
 }
 
 GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {
@@ -104,7 +104,7 @@ GeoPoint::GeoPoint(double lat, double lon, int alt) {
   this->lat = lat;
   this->lon = lon;
   this->alt = alt;
-  this->agl = 0;
+  this->agl = -1;
   this->m_id = std::to_string(this->lat) + ":" + std::to_string(this->lon);
 }
 
@@ -128,15 +128,19 @@ GeoPoint GeoPoint::project(double heading, double distance) const {
   double lat;
   double lon;
   geod.Direct(this->lat, this->lon, heading, distance, lat, lon);
-  return GeoPoint(lat, lon, this->alt, this->agl);
+  return GeoPoint(lat, lon, -1, -1);
 }
 
 json GeoPoint::to_json() const {
   json j = {
       {"lat", this->lat},
       {"lon", this->lon},
-      {"alt", this->alt},
-      {"agl", this->agl},
   };
+  if (this->alt != -1) {
+    j["alt"] = this->alt;
+  }
+  if (this->agl != -1) {
+    j["agl"] = this->agl;
+  }
   return j;
 }
