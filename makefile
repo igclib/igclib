@@ -25,10 +25,10 @@ xc:
 	build/src/igclib xc --flight tests/data/flight/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt
 
 profile-perf: debug
-	perf record -o - -g -- build/src/igclib xc --flight tmp/flight/fai_30602.igc | perf script | c++filt | gprof2dot -f perf | dot -Tsvg -o tmp/profile.svg
+	perf record -o - -g -- build/src/igclib xc --flight tests/data/flight/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt | perf script | c++filt | gprof2dot -f perf | dot -Tsvg -o tmp/profile.svg
 
 profile-memory: debug
-	valgrind --tool=massif --stacks=yes --massif-out-file=tmp/memory.out build/src/igclib xc --flight tests/data/flight/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt
+	valgrind --tool=massif --stacks=yes --massif-out-file=tmp/memory.out build/src/igclib xc --flight tests/data/flight/xc_col_agnel.igc -v --airspace tests/data/airspace/france_08_19.txt
 	massif-visualizer tmp/memory.out
 
 memory-check:

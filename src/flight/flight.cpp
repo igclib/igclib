@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include <cpr/cpr.h>
 #include <fstream>
 #include <igclib/airspace.hpp>
@@ -24,6 +25,9 @@ Flight::Flight(const std::string &igc_file) {
     throw std::runtime_error(error);
   }
 
+  boost::filesystem::path p(igc_file);
+  this->file_name = p.filename().string();
+  this->pilot_name = "Unknown pilot";
   std::string line;
   while (std::getline(f, line)) {
     switch (line[0]) {
@@ -35,7 +39,7 @@ Flight::Flight(const std::string &igc_file) {
       // fix records
       process_B_record(line);
     default:
-      // other records, not used
+      // other records, not used yet
       break;
     }
   }
@@ -65,15 +69,14 @@ void Flight::process_B_record(const std::string &record) {
 
 // Returns the JSON serialization of a Flight
 json Flight::to_json() const {
-  json j = {{"pilot", this->pilot_name}};
+  json j = {{"pilot", this->pilot_name},
+            {"file", this->file_name},
+            {"infractions", {}}};
 
-  j["infractions"];
   for (const auto &infraction : this->m_infractions) {
     j["infractions"][infraction.first->name()] = infraction.first->to_json();
-    for (const auto &timepoint : infraction.second.timepoints()) {
-      j["infractions"][infraction.first->name()]["points"]
-       [timepoint.first.to_string()] = timepoint.second->to_json();
-    }
+    j["infractions"][infraction.first->name()]["points"] =
+        infraction.second.to_json();
   }
 
   j["xc_info"] = this->xcinfo.to_json();
@@ -226,4 +229,15 @@ const std::shared_ptr<GeoPoint> Flight::at(std::size_t index) const {
 
 const std::shared_ptr<GeoPoint> Flight::at(const Time &time) const {
   return this->m_points.at(time);
+}
+
+std::size_t Flight::size() const { return this->m_points.size(); }
+
+double Flight::max_diagonal(std::pair<std::size_t, std::size_t> p) const {
+  return this->m_points.max_diagonal(p.first, p.second);
+}
+
+std::array<GeoPoint, 4>
+Flight::bbox(std::pair<std::size_t, std::size_t> p) const {
+  return this->m_points.bbox(p.first, p.second);
 }

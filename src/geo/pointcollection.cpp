@@ -85,3 +85,11 @@ bool PointCollection::set_agl(const std::vector<double> &altitudes) {
   }
   return true;
 }
+
+json PointCollection::to_json() const {
+  json j;
+  for (const auto &timepoint : this->timepoints()) {
+    j[timepoint.first.to_string()] = timepoint.second->to_json();
+  }
+  return j;
+}

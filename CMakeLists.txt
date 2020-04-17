@@ -19,7 +19,7 @@ project(igclib VERSION 0.1.1)
 configure_file("${PROJECT_SOURCE_DIR}/include/igclib/config.hpp.in" "${PROJECT_SOURCE_DIR}/include/igclib/config.hpp")
 
 # find boost libraries
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 # disable third-party tests
 set(JSON_BuildTests OFF CACHE INTERNAL "")

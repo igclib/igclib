@@ -19,13 +19,9 @@ public:
   void validate(const Airspace &airspace);
   void compute_score(/*TODO add rules ?*/);
   json to_json() const;
-  std::array<GeoPoint, 4> bbox(std::pair<std::size_t, std::size_t> pair) const {
-    return this->m_points.bbox(pair.first, pair.second);
-  };
-  double max_diagonal(std::pair<int, int> pair) const {
-    return this->m_points.max_diagonal(pair.first, pair.second);
-  };
-  std::size_t size() const { return this->m_points.size(); }
+  std::array<GeoPoint, 4> bbox(std::pair<std::size_t, std::size_t> pair) const;
+  double max_diagonal(std::pair<std::size_t, std::size_t> p) const;
+  std::size_t size() const;
 
   const std::shared_ptr<GeoPoint> at(std::size_t index) const;
   const std::shared_ptr<GeoPoint> at(const Time &time) const;
@@ -35,8 +31,10 @@ private:
   void process_B_record(const std::string &record);
   double heuristic_free() const;
   template <class T> double optimize_xc(double lower_bound);
+
+  std::string pilot_name;
+  std::string file_name;
   Time time_zone_offset;
-  std::string pilot_name = "Unknown pilot";
   XCInfo xcinfo;
   PointCollection m_points;
   infractions_t m_infractions;

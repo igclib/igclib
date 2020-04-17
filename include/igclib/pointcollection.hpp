@@ -1,6 +1,7 @@
 #pragma once
 
 #include <igclib/geopoint.hpp>
+#include <igclib/json.hpp>
 #include <igclib/time.hpp>
 #include <map>
 #include <memory>
@@ -23,6 +24,7 @@ public:
   double max_diagonal(int start, int end) const;
   const std::vector<std::pair<double, double>> latlon() const;
   bool set_agl(const std::vector<double> &altitudes);
+  json to_json() const;
 
   // range iterate over geopoints in PointCollection
   const geopoints_t &geopoints() const { return this->m_geopoints; }
