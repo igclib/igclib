@@ -2,12 +2,12 @@
 #include <igclib/config.hpp>
 #include <igclib/flight.hpp>
 #include <igclib/logging.hpp>
+#include <igclib/race.hpp>
 #include <igclib/task.hpp>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <vector>
 
 void usage() { std::cerr << USAGE << std::endl; }
 
@@ -31,7 +31,6 @@ void command_xc(const std::string &flight_file,
       flight.compute_score();
     }
     flight.save(output);
-    exit(EXIT_SUCCESS);
   } catch (std::runtime_error &e) {
     logging::error({e.what()});
     exit(EXIT_FAILURE);
@@ -52,6 +51,25 @@ void command_opti(const std::string &task_file, const std::string &output) {
   }
 }
 
+void command_race(const std::string &flight_dir, const std::string &task_file,
+                  const std::string &output) {
+  if (task_file.empty()) {
+    logging::error({"No task file provided"});
+    exit(EXIT_FAILURE);
+  }
+  if (flight_dir.empty()) {
+    logging::error({"No flight directory provided"});
+    exit(EXIT_FAILURE);
+  }
+  try {
+    Race race(flight_dir, task_file);
+    race.save(output);
+  } catch (std::runtime_error &e) {
+    logging::error({e.what()});
+    exit(EXIT_FAILURE);
+  }
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     usage();
@@ -66,6 +84,7 @@ int main(int argc, char *argv[]) {
   std::string output;
   bool force_xc = false; // TODO remove once xc optimization works
 
+  // TODO getopt (list of names, check i+1, not other opt)
   for (int i = 2; i < argc; i++) {
     arg = argv[i];
 
@@ -94,6 +113,8 @@ int main(int argc, char *argv[]) {
     command_xc(flight_file, airspace_file, output, force_xc);
   } else if (arg == "opti") {
     command_opti(task_file, output);
+  } else if (arg == "race") {
+    command_race(flight_file, task_file, output);
   } else {
     logging::error({"Unkown command", argv[1]});
     usage();

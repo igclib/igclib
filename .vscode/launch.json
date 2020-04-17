@@ -10,7 +10,7 @@
         "xc",
         "--flight",
         //"tmp/flights/free_38870.igc",
-        "tests/data/flight/xc_col_agnel.igc",
+        "tests/data/xc/col_agnel.igc",
         //"--airspace",
         //"tests/data/airspace/france_airspace.txt"
       ],
@@ -35,7 +35,7 @@
       "args": [
         "xc",
         "--flight",
-        "tests/data/flight/xc_col_agnel.igc",
+        "tests/data/xc/col_agnel.igc",
         "--airspace",
         "tests/data/airspace/france_08_19.txt"
       ],

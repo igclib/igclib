@@ -25,23 +25,37 @@ Flight::Flight(const std::string &igc_file) {
     throw std::runtime_error(error);
   }
 
-  boost::filesystem::path p(igc_file);
-  this->file_name = p.filename().string();
-  this->pilot_name = "Unknown pilot";
+  this->file_name = boost::filesystem::path(igc_file).filename().string();
+  this->m_pilot_name = "Unknown pilot";
+
   std::string line;
+  std::size_t lineno = 0;
   while (std::getline(f, line)) {
-    switch (line[0]) {
-    case 'H':
-      // header records
-      process_H_record(line);
-      break;
-    case 'B':
-      // fix records
-      process_B_record(line);
-    default:
-      // other records, not used yet
-      break;
+    ++lineno;
+    try {
+      switch (line[0]) {
+      case 'H':
+        // header records
+        process_H_record(line);
+        break;
+      case 'B':
+        // fix records
+        process_B_record(line);
+      default:
+        // other records, not used yet
+        break;
+      }
+    } catch (const std::runtime_error &err) {
+      const std::string newerr = std::string(err.what()) + " at " + igc_file +
+                                 ":" + std::to_string(lineno);
+      throw std::runtime_error(newerr);
     }
+  }
+
+  // throw if no useful info could be parsed
+  if (this->size() == 0) {
+    const std::string err = igc_file + " is empty";
+    throw std::runtime_error(err);
   }
 }
 
@@ -50,18 +64,18 @@ void Flight::process_H_record(const std::string &record) {
   const std::string record_code = record.substr(2, 3);
   if (record_code == "PLT") {
     size_t delim = record.find(':') + 1;
-    this->pilot_name = record.substr(delim);
-    util::trim(this->pilot_name);
+    this->m_pilot_name = record.substr(delim);
+    util::trim(this->m_pilot_name);
   } else if (record_code == "TZO") {
     size_t delim = record.find(':') + 1;
-    this->time_zone_offset = IGCTime(record.substr(delim));
+    this->m_timezone_offset = IGCTime(record.substr(delim));
   }
 }
 
 void Flight::process_B_record(const std::string &record) {
   IGCTime &&t(record);
-  if (!this->time_zone_offset.zero()) {
-    t += this->time_zone_offset;
+  if (!this->m_timezone_offset.zero()) {
+    t += this->m_timezone_offset;
   }
   IGCPoint &&p(record);
   this->m_points.insert(t, p);
@@ -69,17 +83,18 @@ void Flight::process_B_record(const std::string &record) {
 
 // Returns the JSON serialization of a Flight
 json Flight::to_json() const {
-  json j = {{"pilot", this->pilot_name},
+  json j = {{"pilot", this->m_pilot_name},
             {"file", this->file_name},
             {"infractions", {}}};
 
+  // airspace infractions
   for (const auto &infraction : this->m_infractions) {
     j["infractions"][infraction.first->name()] = infraction.first->to_json();
     j["infractions"][infraction.first->name()]["points"] =
         infraction.second.to_json();
   }
 
-  j["xc_info"] = this->xcinfo.to_json();
+  j["xc_info"] = this->m_xcinfo.to_json();
 
   return j;
 }
@@ -93,7 +108,7 @@ void Flight::save(const std::string &out) const {
     std::ofstream f;
     f.open(out);
     if (!f.is_open()) {
-      const std::string error = "Could not open file '" + out + "'";
+      const std::string error = "could not open file '" + out + "'";
       throw std::runtime_error(error);
     }
     f << j.dump(4);
@@ -222,6 +237,10 @@ double Flight::heuristic_free() const {
 
   return *std::max_element(next_distances.begin(), next_distances.end());
 }
+
+/** accessors **/
+
+const std::string &Flight::pilot() const { return this->m_pilot_name; }
 
 const std::shared_ptr<GeoPoint> Flight::at(std::size_t index) const {
   return this->m_points.at(index);

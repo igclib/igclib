@@ -61,6 +61,7 @@ protected:
   void identify(const std::string &task_file);
   void compute_optimized_route();
 
+  std::string m_filename;
   Route m_route;
   std::shared_ptr<TaskImpl> m_task;
   TaskFormat m_format = TaskFormat::UNKOWN;

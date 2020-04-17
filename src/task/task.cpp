@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <igclib/json.hpp>
 #include <igclib/logging.hpp>
@@ -8,25 +9,25 @@
 
 Task::Task(const std::string &task_file) {
   this->identify(task_file);
+  this->m_filename = boost::filesystem::path(task_file).filename().string();
   switch (this->m_format) {
   case TaskFormat::XCTRACK:
-    logging::debug({"File", task_file, "identified as XCTRACK task format"});
+    logging::debug({"[ TASK ]", this->m_filename, "identified as XCTRACK"});
     this->m_task = std::make_shared<XCTask>(task_file);
     break;
   case TaskFormat::PWCA:
-    logging::debug({"File", task_file, "identified as PWCA task format"});
+    logging::debug({"[ TASK ]", this->m_filename, "identified as PWCA"});
     this->m_task = std::make_shared<PWCATask>(task_file);
     break;
   case TaskFormat::FFVL:
-    logging::debug({"File", task_file, "identified as FFVL task format"});
+    logging::debug({"[ TASK ]", this->m_filename, "identified as FFVL"});
     this->m_task = std::make_shared<FFVLTask>(task_file);
     break;
   case TaskFormat::UNKOWN:
-    throw std::runtime_error("Unknown file format");
+    throw std::runtime_error("[ TASK ] unknown file format");
     break;
   default:
-    throw std::runtime_error(
-        "You're not supposed to be here [task identification]");
+    throw std::runtime_error("[ TASK ] you're not supposed to be here");
     break;
   }
 
@@ -45,7 +46,7 @@ void Task::identify(const std::string &task_file) {
   try {
     f >> j;
   } catch (const json::parse_error &e) {
-    logging::debug({e.what()});
+    logging::debug({"[ TASK ]", e.what()});
     throw std::runtime_error(task_file + " is not valid JSON");
   }
 

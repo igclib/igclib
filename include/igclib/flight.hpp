@@ -21,21 +21,30 @@ public:
   json to_json() const;
   std::array<GeoPoint, 4> bbox(std::pair<std::size_t, std::size_t> pair) const;
   double max_diagonal(std::pair<std::size_t, std::size_t> p) const;
-  std::size_t size() const;
 
+  // accessors
+  std::size_t size() const;
+  const std::string &pilot() const;
   const std::shared_ptr<GeoPoint> at(std::size_t index) const;
   const std::shared_ptr<GeoPoint> at(const Time &time) const;
 
-private:
+protected:
   void process_H_record(const std::string &record);
   void process_B_record(const std::string &record);
   double heuristic_free() const;
   template <class T> double optimize_xc(double lower_bound);
 
-  std::string pilot_name;
+  std::string m_pilot_name;
   std::string file_name;
-  Time time_zone_offset;
-  XCInfo xcinfo;
+  Time m_timezone_offset;
+  XCInfo m_xcinfo;
   PointCollection m_points;
   infractions_t m_infractions;
+};
+
+class RaceFlight : public Flight {
+public:
+  RaceFlight(const std::string &igc_file);
+
+protected:
 };
