@@ -18,7 +18,7 @@ public:
   bool operator>(const XCInfo &other) const;
 
 private:
-  xc_style style;
-  double distance;
-  double score;
+  xc_style m_style;
+  double m_distance;
+  double m_score;
 };

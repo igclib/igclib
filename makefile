@@ -24,8 +24,11 @@ debug:build-dir
 xc:
 	build/src/igclib xc --flight tests/data/xc/xc_col_agnel.igc --airspace tests/data/airspace/france_08_19.txt
 
-profile-perf: debug
+profile-perf-xc: debug
 	perf record -o - -g -- build/src/igclib xc --flight tests/data/xc/col_agnel.igc --airspace tests/data/airspace/france_08_19.txt | perf script | c++filt | gprof2dot -f perf | dot -Tsvg -o tmp/profile.svg
+
+profile-perf-race: debug
+	perf record -o - -g -- build/src/igclib race --flight tests/data/race/1_all --task tests/data/task/xctrack_1.xctsk --output /dev/null | perf script | c++filt | gprof2dot -f perf | dot -Tsvg -o tmp/profile.svg
 
 profile-memory: debug
 	valgrind --tool=massif --stacks=yes --massif-out-file=tmp/memory.out build/src/igclib xc --flight tests/data/xc/col_agnel.igc -v --airspace tests/data/airspace/france_08_19.txt

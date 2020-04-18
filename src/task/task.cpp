@@ -31,14 +31,21 @@ Task::Task(const std::string &task_file) {
     break;
   }
 
-  this->m_route = Route(this->m_task->centers().front(),
-                        this->m_task->centers(), this->m_task->radii());
+  this->m_task->flatten();
+  std::vector<GeoPoint> all_but_takeoff(this->m_task->centers().begin() + 1,
+                                        this->m_task->centers().end());
+  this->m_route = Route(this->m_task->centers().front(), all_but_takeoff,
+                        this->m_task->radii());
+}
+
+std::shared_ptr<Turnpoint> Task::at(std::size_t idx) const {
+  return this->m_task->m_all_tp.at(idx);
 }
 
 // Identifies the format of the task file from known providers, based on
 // distinctive traits. For now all supported task formats are JSON files. If
-// this was to change, it would be wise to implement a TaskIdentifier class with
-// the different cases.
+// this was to change, it would be wise to implement a TaskIdentifier class
+// with the different cases.
 void Task::identify(const std::string &task_file) {
   std::size_t matching_formats = 0;
   std::ifstream f(task_file);
@@ -104,14 +111,11 @@ json TaskImpl::to_json() const {
   j["sss"] = this->m_sss->to_json();
   j["ess"] = this->m_ess->to_json();
   j["goal"] = this->m_goal->to_json();
-  for (const auto &tp : this->m_all_tp) {
+  for (const auto tp : this->m_all_tp) {
     j["turnpoints"].push_back(tp->to_json());
   }
   return j;
 }
 
-const Time &Task::start() const { return this->m_task->start(); }
-const Time &Task::close() const { return this->m_task->close(); }
-
-const Time &TaskImpl::start() const { return this->m_sss->open(); }
-const Time &TaskImpl::close() const { return this->m_goal->close(); }
+const Time &Task::start() const { return this->m_task->m_sss->open(); }
+const Time &Task::close() const { return this->m_task->m_goal->close(); }

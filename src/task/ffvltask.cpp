@@ -57,5 +57,4 @@ FFVLTask::FFVLTask(const std::string &task_file) {
     }
     logging::debug({"[ TASK ]", this->m_all_tp.back()->to_string()});
   }
-  this->flatten();
 }

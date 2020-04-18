@@ -7,7 +7,8 @@
 #include <stdexcept>
 #include <string>
 
-Race::Race(const std::string &flight_dir, const std::string &task_file) {
+Race::Race(const std::string &flight_dir, const std::string &task_file)
+    : m_first_takeoff(23, 59, 59), m_last_landing(0, 0, 0) {
   // create task
   this->m_task = std::make_unique<Task>(task_file);
 
@@ -23,7 +24,11 @@ Race::Race(const std::string &flight_dir, const std::string &task_file) {
     if (boost::filesystem::is_regular_file(file)) {
       filename = file.path().string();
       try {
-        auto ptr = std::make_shared<RaceFlight>(filename);
+        auto ptr = std::make_shared<RaceFlight>(filename, *this->m_task);
+        this->m_first_takeoff =
+            std::min(this->m_first_takeoff, ptr->takeoff_time());
+        this->m_last_landing =
+            std::max(this->m_last_landing, ptr->landing_time());
         this->m_flights.push_back(ptr);
         logging::debug({"[ RACE ]", ptr->pilot()});
       } catch (const std::runtime_error &err) {
@@ -32,17 +37,23 @@ Race::Race(const std::string &flight_dir, const std::string &task_file) {
     }
   }
 
-  // score flights on task
-  for (auto f : this->m_flights) {
-    f->score(*this->m_task);
+  this->m_snapshots.reserve(this->m_flights.size());
+  for (Time t = this->m_first_takeoff; t <= this->m_last_landing; ++t) {
+    auto snap = std::make_shared<Snapshot>(t);
+    for (auto flight : this->m_flights) {
+      snap->add(flight->id(), flight->at(t));
+    }
+    this->m_snapshots.push_back(snap);
   }
+
+  logging::debug({"[ RACE ] initialized"});
 }
 
 void Race::save(const std::string &out) const {
   json j = this->to_json();
 
   if (out == "-" || out.empty()) {
-    std::cout << j.dump(4, ' ', false, json::error_handler_t::ignore)
+    std::cout << j.dump(4, ' ', false, json::error_handler_t::replace)
               << std::endl;
   } else {
     std::ofstream f;
@@ -51,29 +62,31 @@ void Race::save(const std::string &out) const {
       const std::string error = "could not open file '" + out + "'";
       throw std::runtime_error(error);
     }
-    f << j.dump(4, ' ', false, json::error_handler_t::ignore);
+    f << j.dump(4, ' ', false, json::error_handler_t::replace);
   }
 }
 
 json Race::to_json() const {
   json j;
   j["task"] = this->m_task->to_json();
-  j["snapshots"];
 
-  for (Time t = this->start(); t <= this->close(); ++t) {
-    for (auto flight : this->m_flights)
-      if (t >= flight->first_instant() && t <= flight->last_instant()) {
-        try {
-          j["snapshots"][t.to_string()][flight->id()] =
-              flight->at(t)->to_json();
-        } catch (const std::out_of_range &err) {
-          logging::debug(
-              {"[ RACE ] no point for", flight->id(), "at", t.to_string()});
-        }
-      }
+  for (const auto &snap : this->m_snapshots) {
+    j["snapshots"][snap->time().to_string()] = snap->to_json();
   }
+
   return j;
 }
 
-const Time &Race::start() const { return this->m_task->start(); }
-const Time &Race::close() const { return this->m_task->close(); }
+Snapshot::Snapshot(const Time &t) : m_time(t) {}
+
+void Snapshot::add(const std::string &id, const RaceStatus &status) {
+  this->m_status.push_back(std::make_pair(id, status));
+}
+
+json Snapshot::to_json() const {
+  json j;
+  for (const auto &p : this->m_status) {
+    j[p.first] = p.second.to_json();
+  }
+  return j;
+}

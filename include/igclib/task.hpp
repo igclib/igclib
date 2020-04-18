@@ -11,6 +11,7 @@
 typedef enum TaskFormat { XCTRACK, PWCA, FFVL, UNKOWN } TaskFormat;
 
 class TaskImpl {
+  friend class Task;
 
 public:
   TaskImpl(){};
@@ -18,13 +19,11 @@ public:
   std::size_t n_turnpoints() const { return this->m_all_tp.size(); }
   const std::vector<GeoPoint> &centers() const { return this->m_centers; };
   const std::vector<std::size_t> &radii() const { return this->m_radii; };
-  const Time &start() const;
-  const Time &close() const;
 
   json to_json() const;
 
 protected:
-  // flatten generates the centers and radii vectors of all turnpoints
+  // generates the centers and radii vectors of all turnpoints
   void flatten();
   std::vector<GeoPoint> m_centers;
   std::vector<std::size_t> m_radii;
@@ -63,10 +62,10 @@ public:
 
   const Time &start() const;
   const Time &close() const;
+  std::shared_ptr<Turnpoint> at(std::size_t idx) const;
 
 protected:
   void identify(const std::string &task_file);
-  void compute_optimized_route();
 
   std::string m_filename;
   Route m_route;

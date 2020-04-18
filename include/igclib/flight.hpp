@@ -13,6 +13,7 @@
 class Flight {
   typedef std::vector<std::pair<std::shared_ptr<Zone>, PointCollection>>
       infractions_t;
+  using sizepair = std::pair<std::size_t, std::size_t>;
 
 public:
   Flight(const std::string &igc_file);
@@ -20,8 +21,8 @@ public:
   void validate(const Airspace &airspace);
   void compute_score(/*TODO add rules ?*/);
   json to_json() const;
-  std::array<GeoPoint, 4> bbox(std::pair<std::size_t, std::size_t> pair) const;
-  double max_diagonal(std::pair<std::size_t, std::size_t> p) const;
+  std::array<GeoPoint, 4> bbox(sizepair pair) const;
+  double max_diagonal(sizepair p) const;
 
   // accessors
   std::size_t size() const;
@@ -44,15 +45,33 @@ protected:
   infractions_t m_infractions;
 };
 
-class RaceFlight : public Flight {
-public:
-  RaceFlight(const std::string &igc_file);
-  void score(const Task &task);
+/* RACEFLIGHT */
 
-  const Time &first_instant() const;
-  const Time &last_instant() const;
+class RaceStatus {
+public:
+  RaceStatus(){};
+  json to_json() const;
 
 protected:
-  Time m_first_instant;
-  Time m_last_instant;
+  std::shared_ptr<GeoPoint> m_position;
+  double goal_distance;
+};
+
+class RaceFlight : public Flight {
+public:
+  RaceFlight(const std::string &igc_file, const Task &task);
+  RaceStatus at(const Time &t) const;
+
+  const Time &takeoff_time() const;
+  const Time &landing_time() const;
+
+protected:
+  void validate(const Task &task);
+
+  Time m_takeoff;
+  Time m_landing;
+  Time m_track_on;
+  Time m_track_off;
+
+  std::map<Time, RaceStatus> m_status;
 };

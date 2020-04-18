@@ -15,6 +15,4 @@ PWCATask::PWCATask(const std::string &task_file) {
   f >> j;
   throw std::runtime_error("PWCA tasks are not implemented yet");
   logging::debug({this->m_all_tp.back()->to_string()});
-
-  this->flatten();
 }
