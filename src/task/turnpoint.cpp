@@ -29,8 +29,9 @@ json Takeoff::to_json() const {
 /** SSS **/
 
 SSS::SSS(const GeoPoint &center, const std::size_t &radius,
-         const std::string &name, const std::string &desc, const Time &open)
-    : Turnpoint(center, radius, name, desc), m_open(open) {}
+         const std::string &name, const std::string &desc, const Time &open,
+         bool exit)
+    : Turnpoint(center, radius, name, desc), m_open(open), m_exit(exit) {}
 
 std::string SSS::to_string() const {
   std::string res;
@@ -61,6 +62,12 @@ Turnpoint::Turnpoint(const GeoPoint &center, const std::size_t &radius,
 
 const GeoPoint &Turnpoint::center() const { return this->m_center; }
 const std::size_t &Turnpoint::radius() const { return this->m_radius; }
+
+// bool Turnpoint::validate(const GeoPoint &pos) {}
+
+bool Turnpoint::contains(const GeoPoint &pos) {
+  return pos.distance(this->m_center) <= this->m_radius;
+}
 
 std::string Turnpoint::to_string() const {
   std::string res;
@@ -137,6 +144,10 @@ json Goal::to_json() const {
   j["role"] = "GOAL";
   j["is_line"] = this->is_line();
   return j;
+}
+
+bool Goal::contains(const GeoPoint &pos) {
+  return Turnpoint::contains(pos) && true; // FIXME different check if line
 }
 
 bool Goal::is_line() const { return this->m_line; }

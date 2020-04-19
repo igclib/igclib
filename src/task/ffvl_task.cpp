@@ -23,24 +23,25 @@ FFVLTask::FFVLTask(const std::string &task_file) {
     std::string desc = t.at("description");
 
     if (t.at("role") == "takeoff") {
-      auto &&parsed = std::make_shared<Takeoff>(GeoPoint(lat, lon, alt), radius,
-                                                name, desc);
+      auto parsed = std::make_shared<Takeoff>(GeoPoint(lat, lon, alt), radius,
+                                              name, desc);
       this->m_takeoff = parsed;
       this->m_all_tp.push_back(parsed);
     } else if (t.at("role") == "start") {
       int sec_from_midnight = t.at("open");
-      Time &&open(sec_from_midnight);
-      auto &&parsed = std::make_shared<SSS>(GeoPoint(lat, lon, alt), radius,
-                                            name, desc, open);
+      Time open(sec_from_midnight);
+      auto parsed =
+          std::make_shared<SSS>(GeoPoint(lat, lon, alt), radius, name, desc,
+                                open, true); // FIXME FFVL start direction
       this->m_sss = parsed;
       this->m_all_tp.push_back(parsed);
     } else if (t.at("role") == "turnpoint") {
-      auto &&parsed = std::make_shared<Turnpoint>(GeoPoint(lat, lon, alt),
-                                                  radius, name, desc);
+      auto parsed = std::make_shared<Turnpoint>(GeoPoint(lat, lon, alt), radius,
+                                                name, desc);
       this->m_all_tp.push_back(parsed);
       this->m_tp.push_back(parsed);
     } else if (t.at("role") == "ess") {
-      auto &&parsed =
+      auto parsed =
           std::make_shared<ESS>(GeoPoint(lat, lon, alt), radius, name, desc);
       this->m_ess = parsed;
       this->m_all_tp.push_back(parsed);
@@ -48,9 +49,9 @@ FFVLTask::FFVLTask(const std::string &task_file) {
     } else if (t.at("role") == "goal") {
       bool line = t.at("finish") != "cylinder";
       int sec_from_midnight = t.at("close");
-      Time &&close(sec_from_midnight);
-      auto &&parsed = std::make_shared<Goal>(GeoPoint(lat, lon, alt), radius,
-                                             name, desc, close, line);
+      Time close(sec_from_midnight);
+      auto parsed = std::make_shared<Goal>(GeoPoint(lat, lon, alt), radius,
+                                           name, desc, close, line);
       this->m_goal = parsed;
       this->m_all_tp.push_back(parsed);
       this->m_tp.push_back(parsed);

@@ -29,13 +29,14 @@ XCTask::XCTask(const std::string &task_file) {
         this->m_all_tp.push_back(parsed);
       } else if (t.at("type") == "SSS") {
         json sss_windows = j.at("sss").at("timeGates");
+        bool exit = j.at("sss").at("direction") == "EXIT";
         if (sss_windows.size() > 1) {
           throw std::runtime_error(
               "Multiple SSS windows are not supported"); // TODO test
         }
         XCTaskTime open(std::string(sss_windows.front()));
         auto parsed = std::make_shared<SSS>(GeoPoint(lat, lon, alt), radius,
-                                            name, desc, open);
+                                            name, desc, open, exit);
         this->m_sss = parsed;
         this->m_all_tp.push_back(parsed);
       } else if (t.at("type") == "ESS") {

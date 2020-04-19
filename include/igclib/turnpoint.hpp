@@ -6,9 +6,11 @@
 
 class Turnpoint {
 public:
-  Turnpoint(){};
+  Turnpoint() = default;
   Turnpoint(const GeoPoint &center, const std::size_t &radius,
             const std::string &name, const std::string &desc);
+  // virtual bool validate(const GeoPoint &pos);
+  virtual bool contains(const GeoPoint &pos);
 
   // get
   const GeoPoint &center() const;
@@ -27,7 +29,7 @@ protected:
 
 class Takeoff : public Turnpoint {
 public:
-  Takeoff(){};
+  Takeoff() = default;
   Takeoff(const GeoPoint &center, const std::size_t &radius,
           const std::string &name, const std::string &desc);
 
@@ -38,9 +40,10 @@ public:
 
 class SSS : public Turnpoint {
 public:
-  SSS(){};
+  SSS() = default;
   SSS(const GeoPoint &center, const std::size_t &radius,
-      const std::string &name, const std::string &desc, const Time &open);
+      const std::string &name, const std::string &desc, const Time &open,
+      bool exit);
   const Time &open() const;
 
   // display
@@ -49,11 +52,12 @@ public:
 
 protected:
   Time m_open;
+  bool m_exit;
 };
 
 class ESS : public Turnpoint {
 public:
-  ESS(){};
+  ESS() = default;
   ESS(const GeoPoint &center, const std::size_t &radius,
       const std::string &name, const std::string &desc);
 
@@ -66,10 +70,11 @@ protected:
 
 class Goal : public Turnpoint {
 public:
-  Goal(){};
+  Goal() = default;
   Goal(const GeoPoint &center, const std::size_t &radius,
        const std::string &name, const std::string &desc, const Time &close,
        bool line);
+  bool contains(const GeoPoint &pos);
 
   // get
   bool is_line() const;

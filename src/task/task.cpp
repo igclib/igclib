@@ -1,3 +1,4 @@
+#include <boost/chrono/process_cpu_clocks.hpp>
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <igclib/json.hpp>
@@ -7,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-Task::Task(const std::string &task_file) {
+Task::Task(const std::string &task_file) : m_format(TaskFormat::UNKOWN) {
   this->identify(task_file);
   this->m_filename = boost::filesystem::path(task_file).filename().string();
   switch (this->m_format) {
@@ -31,15 +32,25 @@ Task::Task(const std::string &task_file) {
     break;
   }
 
-  this->m_task->flatten();
-  std::vector<GeoPoint> all_but_takeoff(this->m_task->centers().begin() + 1,
-                                        this->m_task->centers().end());
-  this->m_route = Route(this->m_task->centers().front(), all_but_takeoff,
-                        this->m_task->radii());
-}
+  // add all turnpoints except the takeoff
+  auto tp = this->end();
+  while (tp-- > this->begin() + 1) {
+    this->m_task->m_centers.push_front(tp->get()->center());
+    this->m_task->m_radii.push_front(tp->get()->radius());
+  }
 
-std::shared_ptr<Turnpoint> Task::at(std::size_t idx) const {
-  return this->m_task->m_all_tp.at(idx);
+  // compute the route with takeoff as initial position
+
+  this->m_route =
+      Route(this->takeoff()->center(), this->centers(), this->radii());
+
+  // finally add the takeoff
+  this->m_task->m_centers.push_front(tp->get()->center());
+  this->m_task->m_radii.push_front(tp->get()->radius());
+
+  logging::debug({"[ TASK ]",
+                  std::to_string(this->m_route.optimal_distance() / 1000),
+                  "km"});
 }
 
 // Identifies the format of the task file from known providers, based on
@@ -70,9 +81,9 @@ void Task::identify(const std::string &task_file) {
   }
 
   if (matching_formats > 1) {
-    throw std::runtime_error("File matches multiple possible formats");
+    throw std::runtime_error("file matches multiple possible formats");
   } else if (matching_formats < 1) {
-    throw std::runtime_error("File doesn't match any known format");
+    throw std::runtime_error("file doesn't match any known format");
   }
 }
 
@@ -95,13 +106,6 @@ void Task::save(const std::string &out) const {
       throw std::runtime_error(error);
     }
     f << j.dump(4);
-  }
-}
-
-void TaskImpl::flatten() {
-  for (const auto &tp : this->m_all_tp) {
-    this->m_centers.push_back(tp->center());
-    this->m_radii.push_back(tp->radius());
   }
 }
 

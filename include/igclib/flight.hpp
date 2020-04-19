@@ -47,14 +47,26 @@ protected:
 
 /* RACEFLIGHT */
 
+using FlightStatus = enum FlightStatus {
+  ON_TAKEOFF,
+  IN_FLIGHT,
+  IN_GOAL,
+  LANDED,
+  UNKNOWN,
+};
+
 class RaceStatus {
+
 public:
-  RaceStatus(){};
+  RaceStatus() = default;
+  RaceStatus(std::shared_ptr<GeoPoint> pos, double dist_to_goal,
+             const FlightStatus &status);
   json to_json() const;
 
 protected:
   std::shared_ptr<GeoPoint> m_position;
-  double goal_distance;
+  FlightStatus m_status;
+  double m_goal_distance;
 };
 
 class RaceFlight : public Flight {
@@ -74,4 +86,5 @@ protected:
   Time m_track_off;
 
   std::map<Time, RaceStatus> m_status;
+  std::vector<Time> m_tag_times;
 };

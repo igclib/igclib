@@ -8,25 +8,20 @@
 #include <string>
 #include <vector>
 
-typedef enum TaskFormat { XCTRACK, PWCA, FFVL, UNKOWN } TaskFormat;
+using Taskformat = enum TaskFormat { XCTRACK, PWCA, FFVL, UNKOWN };
 
 class TaskImpl {
   friend class Task;
 
 public:
-  TaskImpl(){};
-
-  std::size_t n_turnpoints() const { return this->m_all_tp.size(); }
-  const std::vector<GeoPoint> &centers() const { return this->m_centers; };
-  const std::vector<std::size_t> &radii() const { return this->m_radii; };
+  TaskImpl() = default;
 
   json to_json() const;
 
 protected:
-  // generates the centers and radii vectors of all turnpoints
-  void flatten();
-  std::vector<GeoPoint> m_centers;
-  std::vector<std::size_t> m_radii;
+  // centers and radii used by optimizer
+  std::deque<GeoPoint> m_centers;
+  std::deque<std::size_t> m_radii;
 
   // task elements
   std::shared_ptr<Takeoff> m_takeoff;
@@ -41,16 +36,19 @@ protected:
 
 class FFVLTask : public TaskImpl {
 public:
+  FFVLTask() = delete;
   FFVLTask(const std::string &task_file);
 };
 
 class XCTask : public TaskImpl {
 public:
+  XCTask() = delete;
   XCTask(const std::string &task_file);
 };
 
 class PWCATask : public TaskImpl {
 public:
+  PWCATask() = delete;
   PWCATask(const std::string &task_file);
 };
 
@@ -60,9 +58,24 @@ public:
   void save(const std::string &out) const;
   json to_json() const;
 
+  std::size_t n_turnpoints() const { return this->m_task->m_all_tp.size(); }
+  double length() const { return this->m_route.optimal_distance(); }
+
+  const std::deque<GeoPoint> &centers() const {
+    return this->m_task->m_centers;
+  };
+  const std::deque<std::size_t> &radii() const {
+    return this->m_task->m_radii;
+  };
+  std::shared_ptr<Takeoff> takeoff() const { return this->m_task->m_takeoff; }
+  std::shared_ptr<SSS> sss() const { return this->m_task->m_sss; }
+  std::shared_ptr<ESS> ess() const { return this->m_task->m_ess; }
+  std::shared_ptr<Goal> goal() const { return this->m_task->m_goal; }
+  auto begin() const { return this->m_task->m_all_tp.begin(); }
+  auto end() const { return this->m_task->m_all_tp.end(); }
+
   const Time &start() const;
   const Time &close() const;
-  std::shared_ptr<Turnpoint> at(std::size_t idx) const;
 
 protected:
   void identify(const std::string &task_file);
@@ -70,5 +83,6 @@ protected:
   std::string m_filename;
   Route m_route;
   std::shared_ptr<TaskImpl> m_task;
-  TaskFormat m_format = TaskFormat::UNKOWN;
+  TaskFormat m_format;
+  std::vector<Time> m_turnpoint_tags;
 };
