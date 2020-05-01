@@ -1,12 +1,10 @@
 #pragma once
 
 #include <deque>
-#include <dlib/optimization.h>
 #include <igclib/geopoint.hpp>
 #include <igclib/json.hpp>
+#include <optimization/bfgs.hpp>
 #include <vector>
-
-using vec = dlib::matrix<double, 0, 1>;
 
 // TODO TaskRoute and FlyRoute to limit unused computations for race ?
 class Route {
@@ -15,19 +13,19 @@ public:
   Route() = default;
   Route(const GeoPoint &position, const std::deque<GeoPoint> &centers,
         const std::deque<std::size_t> &radii);
+
   Route(const GeoPoint &position, const std::deque<GeoPoint> &centers,
-        const std::deque<std::size_t> &radii, const vec &init_vec);
-  double operator()(const vec &theta) const;
+        const std::deque<std::size_t> &radii, const Eigen::VectorXd &init_vec);
+
   double optimal_distance() const { return this->m_opt_distance; }
   const std::vector<double> &legs() const { return this->m_opt_legs; }
-  const vec &opt_vec() const { return this->m_opt_vec; }
-  static vec gen_init(std::size_t n);
+  const Eigen::VectorXd &opt_theta() const { return this->m_opt_theta; }
 
   json to_json() const;
 
 protected:
-  double disteval(const vec &theta) const;
   void optimize();
+  double disteval(const Eigen::VectorXd &theta) const;
 
   // current position
   GeoPoint m_position;
@@ -40,8 +38,7 @@ protected:
   std::vector<GeoPoint> m_opt_points;
 
   // optimized angle vector
-  std::vector<double> m_opt_theta;
-  vec m_opt_vec;
+  Eigen::VectorXd m_opt_theta;
 
   // leg distances
   std::vector<double> m_opt_legs;

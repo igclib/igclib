@@ -100,7 +100,9 @@ GeoPoint::GeoPoint(double lat, double lon, int alt, int agl) {
   this->lon = lon;
   this->alt = alt;
   this->agl = agl;
-  this->m_id = std::to_string(this->lat) + ":" + std::to_string(this->lon);
+  this->m_id =
+      std::to_string(this->lat) + ":" +
+      std::to_string(this->lon); // TODO maybe a printf version is faster*/
 }
 
 GeoPoint::GeoPoint(double lat, double lon, int alt) {

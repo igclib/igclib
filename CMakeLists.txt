@@ -19,7 +19,9 @@ project(igclib VERSION 0.1.1)
 configure_file("${PROJECT_SOURCE_DIR}/include/igclib/config.hpp.in" "${PROJECT_SOURCE_DIR}/include/igclib/config.hpp")
 
 # find boost libraries
-find_package(Boost COMPONENTS system filesystem chrono REQUIRED)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+
+find_package(Eigen)
 
 # disable third-party tests
 set(JSON_BuildTests OFF CACHE INTERNAL "")
@@ -30,7 +32,6 @@ set(USE_SYSTEM_CURL ON)
 add_subdirectory(third-party/json)
 add_subdirectory(third-party/cpr)
 add_subdirectory(third-party/geographiclib)
-add_subdirectory(third-party/dlib)
 
 # add source and tests
 add_subdirectory(src)

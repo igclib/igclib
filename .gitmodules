@@ -4,10 +4,6 @@
 [submodule "third-party/json"]
 	path = third-party/json
 	url = https://github.com/nlohmann/json.git
-
 [submodule "third-party/geographiclib"]
 	path = third-party/geographiclib
 	url = https://git.code.sf.net/p/geographiclib/code
-[submodule "third-party/dlib"]
-	path = third-party/dlib
-	url = https://github.com/davisking/dlib.git
