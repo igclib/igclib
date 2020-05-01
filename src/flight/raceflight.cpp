@@ -63,7 +63,7 @@ void RaceFlight::validate(const Task &task) {
   std::shared_ptr<GeoPoint> pos;
   RaceStatus status;
   Route route;
-  vec init_vec = Route::gen_init(remaining_centers.size());
+  Eigen::VectorXd init_vec = Eigen::VectorXd::Zero(remaining_centers.size());
   double dist_to_goal = task.length();
   const double TOL = 10;
 
@@ -82,7 +82,7 @@ void RaceFlight::validate(const Task &task) {
       status = RaceStatus(pos, dist_to_goal, FlightStatus::LANDED);
     } else if (!remaining_centers.empty()) {
       route = Route(*pos, remaining_centers, remaining_radii, init_vec);
-      init_vec = route.opt_vec();
+      init_vec = route.opt_theta();
 
       status =
           RaceStatus(pos, route.optimal_distance(), FlightStatus::IN_FLIGHT);

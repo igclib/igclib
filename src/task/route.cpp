@@ -1,25 +1,18 @@
-#include <dlib/optimization.h>
+#include <Eigen/Core>
 #include <igclib/geopoint.hpp>
 #include <igclib/logging.hpp>
 #include <igclib/route.hpp>
 #include <vector>
 
-vec Route::gen_init(std::size_t n) {
-  vec v(n);
-  for (std::size_t i = 0; i < n; ++i) {
-    v(i) = 0;
-  }
-  return v;
-}
-
 Route::Route(const GeoPoint &position, const std::deque<GeoPoint> &centers,
              const std::deque<std::size_t> &radii)
-    : Route(position, centers, radii, Route::gen_init(centers.size())) {}
+    : Route(position, centers, radii, Eigen::VectorXd::Zero(centers.size())) {}
 
 Route::Route(const GeoPoint &position, const std::deque<GeoPoint> &centers,
-             const std::deque<std::size_t> &radii, const vec &init_vec)
+             const std::deque<std::size_t> &radii,
+             const Eigen::VectorXd &init_vec)
     : m_position(position), m_centers(centers),
-      m_radii(radii), m_opt_points{position}, m_opt_vec(init_vec),
+      m_radii(radii), m_opt_points{position}, m_opt_theta(init_vec),
       m_opt_distance(0), m_center_distance(0) {
 
   if (centers.size() != radii.size()) {
@@ -27,13 +20,14 @@ Route::Route(const GeoPoint &position, const std::deque<GeoPoint> &centers,
   }
 
   this->optimize();
+
   GeoPoint pos(position);
   GeoPoint prev_center(position);
   GeoPoint proj;
   double opt_leg;
   double center_leg;
   for (std::size_t i = 0; i < this->m_centers.size(); ++i) {
-    proj = this->m_centers.at(i).project(this->m_opt_theta.at(i),
+    proj = this->m_centers.at(i).project(this->m_opt_theta(i),
                                          this->m_radii.at(i));
     this->m_opt_points.push_back(proj);
     center_leg = prev_center.distance(this->m_centers.at(i));
@@ -49,21 +43,7 @@ Route::Route(const GeoPoint &position, const std::deque<GeoPoint> &centers,
   }
 }
 
-double Route::operator()(const vec &theta) const {
-  return this->disteval(theta);
-}
-
-void Route::optimize() {
-
-  dlib::find_min_using_approximate_derivatives(
-      dlib::bfgs_search_strategy(), dlib::objective_delta_stop_strategy(),
-      *this, this->m_opt_vec, -1);
-
-  this->m_opt_theta =
-      std::vector<double>(this->m_opt_vec.begin(), this->m_opt_vec.end());
-}
-
-double Route::disteval(const vec &theta) const {
+double Route::disteval(const Eigen::VectorXd &theta) const {
   double distance = 0;
   GeoPoint pos = this->m_position;
   GeoPoint proj;
@@ -73,6 +53,14 @@ double Route::disteval(const vec &theta) const {
     pos = proj;
   }
   return distance;
+}
+
+void Route::optimize() {
+  auto f = [&, this](const Eigen::VectorXd &theta) {
+    return this->disteval(theta);
+  };
+  bfgs::optimizer<typeof f> o(f, this->m_opt_theta);
+  this->m_opt_theta = o.optimize().x;
 }
 
 json Route::to_json() const {

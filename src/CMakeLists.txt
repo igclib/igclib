@@ -12,7 +12,7 @@ target_link_libraries(lib_${BINARY} ${Boost_LIBRARIES})
 target_link_libraries(lib_${BINARY} ${CPR_LIBRARIES})
 target_link_libraries(lib_${BINARY} GeographicLib)
 target_link_libraries(lib_${BINARY} nlohmann_json::nlohmann_json)
-target_link_libraries(lib_${BINARY} dlib::dlib)
+target_link_libraries(lib_${BINARY} ${CERES_LIBRARIES})
 
 add_executable(${BINARY} ${SOURCES})
 target_link_libraries(${BINARY} lib_${BINARY})
