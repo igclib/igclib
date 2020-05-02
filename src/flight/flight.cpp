@@ -86,7 +86,8 @@ void Flight::process_B_record(const std::string &record) {
     }
     this->m_points.insert(t, p);
   } catch (const std::runtime_error &err) {
-    logging::debug({err.what()}); // todo handle time overflow errors separately
+    auto prefix = "[ FLIGHT " + this->m_file_name + " ]";
+    logging::debug({prefix, err.what()});
   }
 }
 

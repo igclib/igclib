@@ -2,6 +2,7 @@
 #include <igclib/flight.hpp>
 #include <igclib/json.hpp>
 #include <igclib/task.hpp>
+#include <mutex>
 #include <string>
 
 class Snapshot {
@@ -27,6 +28,8 @@ public:
   const Time &start() const;
   const Time &close() const;
 
+  void _build_flight(const std::string &filename);
+
 protected:
   Time m_first_takeoff;
   Time m_first_track_on;
@@ -36,4 +39,6 @@ protected:
   std::unique_ptr<Task> m_task;
   std::vector<std::shared_ptr<RaceFlight>> m_flights;
   std::vector<std::shared_ptr<Snapshot>> m_snapshots;
+
+  std::mutex _mutex;
 };

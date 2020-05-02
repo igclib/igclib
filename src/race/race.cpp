@@ -6,13 +6,14 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 Race::Race(const std::string &flight_dir, const std::string &task_file)
     : m_first_takeoff(23, 59, 59), m_last_landing(0, 0, 0) {
-  // create task
+  // parse task
   this->m_task = std::make_unique<Task>(task_file);
 
-  // create flights
+  // parse flights
   boost::filesystem::path p(flight_dir);
   if (!boost::filesystem::is_directory(p)) {
     const std::string err = flight_dir + " is not a directory";
@@ -20,23 +21,18 @@ Race::Race(const std::string &flight_dir, const std::string &task_file)
   }
 
   std::string filename;
+  std::vector<std::thread> jobs;
   for (const auto &file : boost::filesystem::directory_iterator(p)) {
     if (boost::filesystem::is_regular_file(file)) {
       filename = file.path().string();
-      try {
-        auto ptr = std::make_shared<RaceFlight>(filename, *this->m_task);
-        this->m_first_takeoff =
-            std::min(this->m_first_takeoff, ptr->takeoff_time());
-        this->m_last_landing =
-            std::max(this->m_last_landing, ptr->landing_time());
-        this->m_flights.push_back(ptr);
-        logging::debug({"[ RACE ]", ptr->pilot()});
-      } catch (const std::runtime_error &err) {
-        logging::debug({"[ RACE ] invalid flight :", err.what()});
-      }
+      jobs.emplace_back(&Race::_build_flight, this, filename);
     }
   }
+  for (auto &j : jobs) {
+    j.join();
+  }
 
+  // build snapshots
   this->m_snapshots.reserve(this->m_flights.size());
   for (Time t = this->m_first_takeoff; t <= this->m_last_landing; ++t) {
     auto snap = std::make_shared<Snapshot>(t);
@@ -47,6 +43,21 @@ Race::Race(const std::string &flight_dir, const std::string &task_file)
   }
 
   logging::debug({"[ RACE ] initialized"});
+}
+
+void Race::_build_flight(const std::string &filename) {
+  try {
+    auto ptr = std::make_shared<RaceFlight>(filename, *this->m_task);
+    this->_mutex.lock();
+    this->m_first_takeoff =
+        std::min(this->m_first_takeoff, ptr->takeoff_time());
+    this->m_last_landing = std::max(this->m_last_landing, ptr->landing_time());
+    this->m_flights.push_back(ptr);
+    logging::debug({"[ RACE ]", ptr->pilot(), ptr->race_time().to_string()});
+    this->_mutex.unlock();
+  } catch (const std::runtime_error &err) {
+    logging::debug({"[ RACE ] invalid flight :", err.what()});
+  }
 }
 
 void Race::save(const std::string &out) const {

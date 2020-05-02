@@ -63,7 +63,7 @@ void command_race(const std::string &flight_dir, const std::string &task_file,
   }
   try {
     Race race(flight_dir, task_file);
-    race.save(output);
+    // race.save(output);
   } catch (std::runtime_error &e) {
     logging::error({e.what()});
     exit(EXIT_FAILURE);

@@ -48,9 +48,6 @@ json RaceStatus::to_json() const {
   return j;
 }
 
-const Time &RaceFlight::takeoff_time() const { return this->m_takeoff; }
-const Time &RaceFlight::landing_time() const { return this->m_landing; }
-
 RaceStatus::RaceStatus(std::shared_ptr<GeoPoint> pos, double dist_to_goal,
                        const FlightStatus &status)
     : m_position(pos), m_status(status), m_goal_distance(dist_to_goal) {}
@@ -61,59 +58,85 @@ void RaceFlight::validate(const Task &task) {
   auto it = task.begin();
   std::shared_ptr<Turnpoint> current_tp = *it;
   std::shared_ptr<GeoPoint> pos;
-  RaceStatus status;
+  FlightStatus status;
   Route route;
-  Eigen::VectorXd init_vec = Eigen::VectorXd::Zero(remaining_centers.size());
   double dist_to_goal = task.length();
-  const double TOL = 10;
+  bool has_to_enter = task.sss()->is_enter();
 
   for (Time t = this->m_track_on; t <= this->m_track_off; ++t) {
-    // try to get the pilot position at t
+    // try to get the pilot position at current time
     try {
       pos = this->m_points.at(t);
     } catch (const std::out_of_range &err) {
-      status = RaceStatus(pos, dist_to_goal, FlightStatus::UNKNOWN);
+      status = FlightStatus::UNKNOWN;
     }
 
     // before takeoff and after landing, goal distances are not recomputed
     if (t < this->m_takeoff) {
-      status = RaceStatus(pos, dist_to_goal, FlightStatus::ON_TAKEOFF);
+      status = FlightStatus::ON_TAKEOFF;
     } else if (t > this->m_landing) {
-      status = RaceStatus(pos, dist_to_goal, FlightStatus::LANDED);
-    } else if (!remaining_centers.empty()) {
-      route = Route(*pos, remaining_centers, remaining_radii, init_vec);
-      init_vec = route.opt_theta();
+      status = FlightStatus::LANDED;
+    } else {
+      status = FlightStatus::IN_FLIGHT;
+      // if there are still turnpoints to validate
+      if (!remaining_centers.empty()) {
+        // first make sure the task is not closed
+        if (t > task.close()) {
+          // TODO maybe some status ?
+        } else {
 
-      status =
-          RaceStatus(pos, route.optimal_distance(), FlightStatus::IN_FLIGHT);
-      // can only validate takoff before start
-      if (t < task.start()) {
-        if (current_tp == task.takeoff()) {
-          this->m_tag_times.push_back(t);
-          current_tp = *(++it);
-          remaining_centers.pop_front();
-          remaining_radii.pop_front();
+          // route = Route(*pos, remaining_centers, remaining_radii, init_vec);
+          // init_vec = route.opt_theta();
+
+          // takeoff validation
+          if (current_tp == task.takeoff() && current_tp->contains(*pos)) {
+            this->m_tag_times.push_back(t);
+            current_tp = *(++it);
+            remaining_centers.pop_front();
+            remaining_radii.pop_front();
+          }
+
+          // start validation
+          else if (current_tp == task.sss() && t > task.start()) {
+            bool is_inside = current_tp->contains(*pos);
+            if ((has_to_enter && is_inside) || (!has_to_enter && !is_inside)) {
+              this->m_tag_times.push_back(t);
+              current_tp = *(++it);
+              remaining_centers.pop_front();
+              remaining_radii.pop_front();
+              has_to_enter = !current_tp->contains(*pos);
+            }
+          }
+          // validate next tp if border is crossed
+          else if (current_tp == task.ess() && current_tp->contains(*pos)) {
+            this->m_race_time = t - task.start();
+            this->m_tag_times.push_back(t);
+            current_tp = *(++it);
+            remaining_centers.pop_front();
+            remaining_radii.pop_front();
+          } else if (current_tp == task.goal() && current_tp->contains(*pos)) {
+            this->m_tag_times.push_back(t);
+            current_tp = *(++it);
+            remaining_centers.pop_front();
+            remaining_radii.pop_front();
+          } else {
+            bool is_inside = current_tp->contains(*pos);
+            if ((has_to_enter && is_inside) || (!has_to_enter && !is_inside)) {
+              this->m_tag_times.push_back(t);
+              current_tp = *(++it);
+              remaining_centers.pop_front();
+              remaining_radii.pop_front();
+              has_to_enter = !current_tp->contains(*pos);
+            }
+          }
         }
       }
-      // cannot validate anything after task close
-      else if (t > task.close()) {
-      }
-      // validate next tp if border is "close enough"
-      // TODO make validation in/out or out/in
+      // if no remaining turnpoints, pilot is in goal
       else {
-        if (route.legs().front() <= TOL) {
-          this->m_tag_times.push_back(t);
-          current_tp = *(++it);
-          remaining_centers.pop_front();
-          remaining_radii.pop_front();
-        }
+        status = FlightStatus::IN_GOAL;
+        dist_to_goal = 0;
       }
     }
-    // if no remaining turnpoints, pilot is in goal
-    else {
-      status = RaceStatus(pos, 0, FlightStatus::IN_GOAL);
-    }
-
-    this->m_status.emplace(t, status);
+    this->m_status.emplace(t, RaceStatus(pos, dist_to_goal, status));
   }
 }

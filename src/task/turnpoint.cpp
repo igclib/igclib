@@ -52,8 +52,6 @@ json SSS::to_json() const {
   return j;
 }
 
-const Time &SSS::open() const { return this->m_open; }
-
 /** TURNPOINT **/
 
 Turnpoint::Turnpoint(const GeoPoint &center, const std::size_t &radius,

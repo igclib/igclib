@@ -74,8 +74,9 @@ public:
   RaceFlight(const std::string &igc_file, const Task &task);
   RaceStatus at(const Time &t) const;
 
-  const Time &takeoff_time() const;
-  const Time &landing_time() const;
+  const Time &takeoff_time() const { return this->m_takeoff; }
+  const Time &landing_time() const { return this->m_landing; }
+  const Time &race_time() const { return this->m_race_time; }
 
 protected:
   void validate(const Task &task);
@@ -87,4 +88,5 @@ protected:
 
   std::map<Time, RaceStatus> m_status;
   std::vector<Time> m_tag_times;
+  Time m_race_time;
 };

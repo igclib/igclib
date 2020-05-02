@@ -68,9 +68,9 @@ public:
     return this->m_task->m_radii;
   };
   std::shared_ptr<Takeoff> takeoff() const { return this->m_task->m_takeoff; }
-  std::shared_ptr<SSS> sss() const { return this->m_task->m_sss; }
-  std::shared_ptr<ESS> ess() const { return this->m_task->m_ess; }
-  std::shared_ptr<Goal> goal() const { return this->m_task->m_goal; }
+  auto sss() const { return this->m_task->m_sss; }
+  auto ess() const { return this->m_task->m_ess; }
+  auto goal() const { return this->m_task->m_goal; }
   auto begin() const { return this->m_task->m_all_tp.begin(); }
   auto end() const { return this->m_task->m_all_tp.end(); }
 

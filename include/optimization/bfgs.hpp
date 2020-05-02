@@ -39,8 +39,6 @@ public:
 };
 
 const double epsilon = std::sqrt(std::numeric_limits<double>::epsilon());
-// use scipy's epsilon for reproducibility
-// const double epsilon = 1.4901161193847656e-08;
 template <typename T> class optimizer {
 public:
   optimizer() = delete;
@@ -60,7 +58,7 @@ public:
   */
   optimizer(T f, const Eigen::VectorXd &x0, bool retpath = false)
       : _objective(f), _n_params(x0.size()), _max_iter(200 * _n_params),
-        _x0(x0), _gtol(5), _nfev(0), _njev(0), _retpath(retpath){};
+        _x0(x0), _gtol(1e-5), _nfev(0), _njev(0), _retpath(retpath){};
 
   // set maximum iterations
   void max_iter(unsigned int iter) { _max_iter = iter; }

@@ -21,6 +21,7 @@ configure_file("${PROJECT_SOURCE_DIR}/include/igclib/config.hpp.in" "${PROJECT_S
 # find boost libraries
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 
+find_package(Threads REQUIRED)
 find_package(Eigen)
 
 # disable third-party tests

@@ -44,7 +44,9 @@ public:
   SSS(const GeoPoint &center, const std::size_t &radius,
       const std::string &name, const std::string &desc, const Time &open,
       bool exit);
-  const Time &open() const;
+  const Time &open() const { return this->m_open; };
+  bool is_exit() const { return this->m_exit; }
+  bool is_enter() const { return !this->m_exit; }
 
   // display
   std::string to_string() const;
