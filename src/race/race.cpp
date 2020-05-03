@@ -9,9 +9,7 @@
 #include <thread>
 
 Race::Race(const std::string &flight_dir, const std::string &task_file)
-    : m_first_takeoff(23, 59, 59), m_last_landing(0, 0, 0) {
-  // parse task
-  this->m_task = std::make_unique<Task>(task_file);
+    : _first_takeoff(23, 59, 59), _last_landing(0, 0, 0), _task(task_file) {
 
   // parse flights
   boost::filesystem::path p(flight_dir);
@@ -22,10 +20,23 @@ Race::Race(const std::string &flight_dir, const std::string &task_file)
 
   std::string filename;
   std::vector<std::thread> jobs;
+  std::mutex mutex;
   for (const auto &file : boost::filesystem::directory_iterator(p)) {
     if (boost::filesystem::is_regular_file(file)) {
       filename = file.path().string();
-      jobs.emplace_back(&Race::_build_flight, this, filename);
+      jobs.emplace_back(std::thread([&, filename] {
+        try {
+          auto ptr = std::make_shared<RaceFlight>(filename, _task);
+          std::lock_guard<std::mutex> lock(mutex);
+          _first_takeoff = std::min(_first_takeoff, ptr->takeoff_time());
+          _last_landing = std::max(_last_landing, ptr->landing_time());
+          _flights.push_back(ptr);
+          logging::debug(
+              {"[ RACE ]", ptr->pilot(), ptr->race_time().to_string()});
+        } catch (const std::runtime_error &err) {
+          logging::debug({"[ RACE ] invalid flight :", err.what()});
+        }
+      }));
     }
   }
   for (auto &j : jobs) {
@@ -33,31 +44,19 @@ Race::Race(const std::string &flight_dir, const std::string &task_file)
   }
 
   // build snapshots
-  this->m_snapshots.reserve(this->m_flights.size());
-  for (Time t = this->m_first_takeoff; t <= this->m_last_landing; ++t) {
+  _snapshots.reserve(_flights.size());
+  for (Time t = _first_takeoff; t <= _last_landing; ++t) {
     auto snap = std::make_shared<Snapshot>(t);
-    for (auto flight : this->m_flights) {
+    for (auto flight : _flights) {
       snap->add(flight->id(), flight->at(t));
     }
-    this->m_snapshots.push_back(snap);
+    _snapshots.push_back(snap);
   }
 
-  logging::debug({"[ RACE ] initialized"});
-}
-
-void Race::_build_flight(const std::string &filename) {
-  try {
-    auto ptr = std::make_shared<RaceFlight>(filename, *this->m_task);
-    this->_mutex.lock();
-    this->m_first_takeoff =
-        std::min(this->m_first_takeoff, ptr->takeoff_time());
-    this->m_last_landing = std::max(this->m_last_landing, ptr->landing_time());
-    this->m_flights.push_back(ptr);
-    logging::debug({"[ RACE ]", ptr->pilot(), ptr->race_time().to_string()});
-    this->_mutex.unlock();
-  } catch (const std::runtime_error &err) {
-    logging::debug({"[ RACE ] invalid flight :", err.what()});
-  }
+  logging::debug(
+      {"[ RACE ]", std::to_string(_flights.size()), "flights initialized"});
+  logging::debug({"[ RACE ] first takeoff", _first_takeoff.to_string()});
+  logging::debug({"[ RACE ] last landing", _last_landing.to_string()});
 }
 
 void Race::save(const std::string &out) const {
@@ -79,24 +78,22 @@ void Race::save(const std::string &out) const {
 
 json Race::to_json() const {
   json j;
-  j["task"] = this->m_task->to_json();
+  j["task"] = _task.to_json();
 
-  for (const auto &snap : this->m_snapshots) {
+  for (const auto &snap : _snapshots) {
     j["snapshots"][snap->time().to_string()] = snap->to_json();
   }
 
   return j;
 }
 
-Snapshot::Snapshot(const Time &t) : m_time(t) {}
-
 void Snapshot::add(const std::string &id, const RaceStatus &status) {
-  this->m_status.push_back(std::make_pair(id, status));
+  _status.emplace_back(id, status);
 }
 
 json Snapshot::to_json() const {
   json j;
-  for (const auto &p : this->m_status) {
+  for (const auto &p : _status) {
     j[p.first] = p.second.to_json();
   }
   return j;

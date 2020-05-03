@@ -5,6 +5,7 @@ A command-line tool for paragliding competitions and XC.
 ## Current Features
 
 - Airspace checking of flights against OpenAir files.
+- Task validation
 
 ## In Progress
 
@@ -13,7 +14,6 @@ A command-line tool for paragliding competitions and XC.
 
 ## Future features
 
-- Task validation
 - Race scoring
 
 ## Install

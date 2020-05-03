@@ -25,11 +25,15 @@ public:
   double max_diagonal(sizepair p) const;
 
   // accessors
-  std::size_t size() const;
-  const std::string &pilot() const;
-  const std::string &id() const;
-  const std::shared_ptr<GeoPoint> at(std::size_t index) const;
-  const std::shared_ptr<GeoPoint> at(const Time &time) const;
+  std::size_t size() const { return _points.size(); }
+  const std::string &pilot() const { return _pilot_name; }
+  const std::string &id() const { return _file_name; }
+  const std::shared_ptr<GeoPoint> at(std::size_t index) const {
+    return _points.at(index);
+  }
+  const std::shared_ptr<GeoPoint> at(const Time &time) const {
+    return _points.at(time);
+  }
 
 protected:
   void process_H_record(const std::string &record);
@@ -37,12 +41,12 @@ protected:
   double heuristic_free() const;
   template <class T> double optimize_xc(double lower_bound);
 
-  std::string m_pilot_name;
-  std::string m_file_name;
-  IGCTimeOffset m_timezone_offset;
-  XCInfo m_xcinfo;
-  PointCollection m_points;
-  infractions_t m_infractions;
+  std::string _pilot_name;
+  std::string _file_name;
+  IGCTimeOffset _timezone_offset;
+  XCInfo _xcinfo;
+  PointCollection _points;
+  infractions_t _infractions;
 };
 
 /* RACEFLIGHT */
@@ -64,9 +68,9 @@ public:
   json to_json() const;
 
 protected:
-  std::shared_ptr<GeoPoint> m_position;
-  FlightStatus m_status;
-  double m_goal_distance;
+  std::shared_ptr<GeoPoint> _position;
+  FlightStatus _status;
+  double _goal_distance;
 };
 
 class RaceFlight : public Flight {
@@ -74,19 +78,19 @@ public:
   RaceFlight(const std::string &igc_file, const Task &task);
   RaceStatus at(const Time &t) const;
 
-  const Time &takeoff_time() const { return this->m_takeoff; }
-  const Time &landing_time() const { return this->m_landing; }
-  const Time &race_time() const { return this->m_race_time; }
+  const Time &takeoff_time() const { return _takeoff; }
+  const Time &landing_time() const { return _landing; }
+  const Time &race_time() const { return _race_time; }
 
 protected:
   void validate(const Task &task);
 
-  Time m_takeoff;
-  Time m_landing;
-  Time m_track_on;
-  Time m_track_off;
+  Time _takeoff;
+  Time _landing;
+  Time _track_on;
+  Time _track_off;
 
-  std::map<Time, RaceStatus> m_status;
-  std::vector<Time> m_tag_times;
-  Time m_race_time;
+  std::map<Time, RaceStatus> _status;
+  std::vector<Time> _tag_times;
+  Time _race_time;
 };

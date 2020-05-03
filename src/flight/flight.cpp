@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <string>
 
-Flight::Flight(const std::string &igc_file) {
+Flight::Flight(const std::string &igc_file) : _pilot_name("unknown pilot") {
   // read and parse igc file
   std::ifstream f;
   f.open(igc_file);
@@ -25,9 +25,7 @@ Flight::Flight(const std::string &igc_file) {
     throw std::runtime_error(error);
   }
 
-  this->m_file_name =
-      boost::filesystem::path(igc_file).filename().stem().string();
-  this->m_pilot_name = "unknown pilot";
+  _file_name = boost::filesystem::path(igc_file).filename().stem().string();
 
   std::string line;
   std::size_t lineno = 0;
@@ -42,6 +40,7 @@ Flight::Flight(const std::string &igc_file) {
       case 'B':
         // fix records
         process_B_record(line);
+        break;
       default:
         // other records, not used yet
         break;
@@ -65,11 +64,11 @@ void Flight::process_H_record(const std::string &record) {
   const std::string record_code = record.substr(2, 3);
   if (record_code == "PLT") {
     size_t delim = record.find(':') + 1;
-    this->m_pilot_name = record.substr(delim);
-    util::trim(this->m_pilot_name);
+    _pilot_name = record.substr(delim);
+    util::trim(_pilot_name);
   } else if (record_code == "TZO") {
     size_t delim = record.find(':') + 1;
-    this->m_timezone_offset = IGCTimeOffset(record.substr(delim));
+    _timezone_offset = IGCTimeOffset(record.substr(delim));
   }
 }
 
@@ -77,34 +76,32 @@ void Flight::process_B_record(const std::string &record) {
   IGCTime &&t(record);
   IGCPoint &&p(record);
   try {
-    if (!this->m_timezone_offset.zero()) {
-      if (this->m_timezone_offset.is_negative()) {
-        t -= this->m_timezone_offset;
+    if (!_timezone_offset.zero()) {
+      if (_timezone_offset.is_negative()) {
+        t -= _timezone_offset;
       } else {
-        t += this->m_timezone_offset;
+        t += _timezone_offset;
       }
     }
-    this->m_points.insert(t, p);
+    _points.insert(t, p);
   } catch (const std::runtime_error &err) {
-    auto prefix = "[ FLIGHT " + this->m_file_name + " ]";
+    auto prefix = "[ FLIGHT " + _file_name + " ]";
     logging::debug({prefix, err.what()});
   }
 }
 
 // Returns the JSON serialization of a Flight
 json Flight::to_json() const {
-  json j = {{"pilot", this->m_pilot_name},
-            {"file", this->m_file_name},
-            {"infractions", {}}};
+  json j = {{"pilot", _pilot_name}, {"file", _file_name}, {"infractions", {}}};
 
   // airspace infractions
-  for (const auto &infraction : this->m_infractions) {
+  for (const auto &infraction : _infractions) {
     j["infractions"][infraction.first->name()] = infraction.first->to_json();
     j["infractions"][infraction.first->name()]["points"] =
         infraction.second.to_json();
   }
 
-  j["xc_info"] = this->m_xcinfo.to_json();
+  j["xc_info"] = _xcinfo.to_json();
 
   return j;
 }
@@ -129,11 +126,11 @@ void Flight::validate(const Airspace &airspace) {
   bool is_agl_validable = false;
 
   // retrieve the ground altitude for each point of the flight
-  if (airspace.needs_agl_checking > 0) {
+  if (airspace.needs_agl_checking() > 0) {
     if (getenv("ELEVATION_API_KEY")) {
       std::string key = getenv("ELEVATION_API_KEY");
       std::string api = "https://geolocalisation.ffvl.fr/elevation?key=" + key;
-      json data = this->m_points.latlon();
+      json data = _points.latlon();
       cpr::Body body(data.dump());
       cpr::Session session;
       session.SetVerifySsl(false);
@@ -146,7 +143,7 @@ void Flight::validate(const Airspace &airspace) {
         logging::debug({"Got API response"});
         data = json::parse(r.text);
         std::vector<double> altitudes = data.get<std::vector<double>>();
-        if (this->m_points.set_agl(altitudes)) {
+        if (_points.set_agl(altitudes)) {
           is_agl_validable = true;
         }
       } else if (r.status_code == 400) {
@@ -157,7 +154,7 @@ void Flight::validate(const Airspace &airspace) {
     } else {
       logging::warning(
           {"This airspace file contains",
-           std::to_string(airspace.needs_agl_checking),
+           std::to_string(airspace.needs_agl_checking()),
            "zones which need to be checked against ground altitude of the "
            "flight, but the environment variable 'ELEVATION_API_KEY' is not "
            "set. These zones will not be considered."});
@@ -165,7 +162,7 @@ void Flight::validate(const Airspace &airspace) {
   }
 
   // then validate intersections
-  airspace.infractions(this->m_points, this->m_infractions, is_agl_validable);
+  airspace.infractions(_points, _infractions, is_agl_validable);
 }
 
 void Flight::compute_score() {
@@ -220,7 +217,7 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
 double Flight::heuristic_free() const {
   // number of points used for tracklog approximation
   const std::size_t n_approx = 100;
-  const int step_ratio = this->m_points.size() / n_approx;
+  const int step_ratio = _points.size() / n_approx;
   std::size_t n_steps = 4;
   double candidate;
   double max_distance;
@@ -233,9 +230,9 @@ double Flight::heuristic_free() const {
     for (std::size_t i = 0; i < n_approx; ++i) {
       max_distance = 0;
       for (std::size_t j = 0; j < i; ++j) {
-        candidate = previous_distances.at(j) +
-                    this->m_points.at(i * step_ratio)
-                        ->distance(*this->m_points.at(j * step_ratio));
+        candidate =
+            previous_distances.at(j) +
+            _points.at(i * step_ratio)->distance(*_points.at(j * step_ratio));
         if (candidate > max_distance) {
           max_distance = candidate;
         }
@@ -248,26 +245,11 @@ double Flight::heuristic_free() const {
   return *std::max_element(next_distances.begin(), next_distances.end());
 }
 
-/** accessors **/
-
-const std::string &Flight::pilot() const { return this->m_pilot_name; }
-const std::string &Flight::id() const { return this->m_file_name; }
-
-const std::shared_ptr<GeoPoint> Flight::at(std::size_t index) const {
-  return this->m_points.at(index);
-}
-
-const std::shared_ptr<GeoPoint> Flight::at(const Time &time) const {
-  return this->m_points.at(time);
-}
-
-std::size_t Flight::size() const { return this->m_points.size(); }
-
 double Flight::max_diagonal(std::pair<std::size_t, std::size_t> p) const {
-  return this->m_points.max_diagonal(p.first, p.second);
+  return _points.max_diagonal(p.first, p.second);
 }
 
 std::array<GeoPoint, 4>
 Flight::bbox(std::pair<std::size_t, std::size_t> p) const {
-  return this->m_points.bbox(p.first, p.second);
+  return _points.bbox(p.first, p.second);
 }

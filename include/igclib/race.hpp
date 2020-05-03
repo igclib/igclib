@@ -7,15 +7,15 @@
 
 class Snapshot {
 public:
-  Snapshot(const Time &t);
+  Snapshot(const Time &t) : _time(t) {}
   void add(const std::string &id, const RaceStatus &status);
 
   json to_json() const;
-  const Time &time() const { return this->m_time; }
+  const Time &time() const { return _time; }
 
 protected:
-  Time m_time;
-  std::vector<std::pair<std::string, RaceStatus>> m_status;
+  Time _time;
+  std::vector<std::pair<std::string, RaceStatus>> _status;
 };
 
 class Race {
@@ -28,17 +28,13 @@ public:
   const Time &start() const;
   const Time &close() const;
 
-  void _build_flight(const std::string &filename);
-
 protected:
-  Time m_first_takeoff;
-  Time m_first_track_on;
-  Time m_last_landing;
-  Time m_last_track_off;
+  Time _first_takeoff;
+  Time _first_track_on;
+  Time _last_landing;
+  Time _last_track_off;
 
-  std::unique_ptr<Task> m_task;
-  std::vector<std::shared_ptr<RaceFlight>> m_flights;
-  std::vector<std::shared_ptr<Snapshot>> m_snapshots;
-
-  std::mutex _mutex;
+  Task _task;
+  std::vector<std::shared_ptr<RaceFlight>> _flights;
+  std::vector<std::shared_ptr<Snapshot>> _snapshots;
 };

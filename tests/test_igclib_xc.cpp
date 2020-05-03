@@ -4,7 +4,7 @@
 #include <iostream>
 
 int main() {
-  Flight f("data/flight/xc_col_agnel.igc");
+  Flight f("data/xc/col_agnel.igc");
 
   // pilot name
   json j = f.to_json();
