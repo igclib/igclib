@@ -32,19 +32,17 @@ Task::Task(const std::string &task_file) : m_format(TaskFormat::UNKOWN) {
     break;
   }
 
-  // add all turnpoints except the takeoff
+  // add all turnpoints except the first one
   auto tp = this->end();
   while (tp-- > this->begin() + 1) {
     this->m_task->m_centers.push_front(tp->get()->center());
     this->m_task->m_radii.push_front(tp->get()->radius());
   }
 
-  // compute the route with takeoff as initial position
+  // compute the route with first turnpoint as initial position
+  this->m_route = Route(tp->get()->center(), this->centers(), this->radii());
 
-  this->m_route =
-      Route(this->takeoff()->center(), this->centers(), this->radii());
-
-  // finally add the takeoff
+  // finally add the first turnpoint
   this->m_task->m_centers.push_front(tp->get()->center());
   this->m_task->m_radii.push_front(tp->get()->radius());
 
@@ -69,7 +67,8 @@ void Task::identify(const std::string &task_file) {
   }
 
   // XCTRACK traits
-  if (j.contains("taskType") && j.contains("earthcore")) {
+  if (j.contains("taskType") &&
+      (j.contains("earthcore") || j.contains("earthModel"))) {
     this->m_format = TaskFormat::XCTRACK;
     matching_formats++;
   }
@@ -111,10 +110,14 @@ void Task::save(const std::string &out) const {
 
 json TaskImpl::to_json() const {
   json j;
-  j["takeoff"] = this->m_takeoff->to_json();
+  if (this->m_takeoff) {
+    j["takeoff"] = this->m_takeoff->to_json();
+  }
   j["sss"] = this->m_sss->to_json();
   j["ess"] = this->m_ess->to_json();
-  j["goal"] = this->m_goal->to_json();
+  if (this->m_goal) {
+    j["goal"] = this->m_goal->to_json();
+  }
   for (const auto tp : this->m_all_tp) {
     j["turnpoints"].push_back(tp->to_json());
   }

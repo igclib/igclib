@@ -31,7 +31,7 @@ void command_xc(const std::string &flight_file,
       flight.compute_score();
     }
     flight.save(output);
-  } catch (std::runtime_error &e) {
+  } catch (const std::runtime_error &e) {
     logging::error({e.what()});
     exit(EXIT_FAILURE);
   }
@@ -63,7 +63,7 @@ void command_race(const std::string &flight_dir, const std::string &task_file,
   }
   try {
     Race race(flight_dir, task_file);
-    // race.save(output);
+    race.save(output);
   } catch (std::runtime_error &e) {
     logging::error({e.what()});
     exit(EXIT_FAILURE);
@@ -102,6 +102,8 @@ int main(int argc, char *argv[]) {
       logging::set_level(logging::verbosity::QUIET);
     } else if ((arg == "--verbose") || (arg == "-v")) {
       logging::set_level(logging::verbosity::DEBUG);
+    } else if ((arg == "--pretty") || (arg == "-p")) {
+      logging::set_pretty_print(true);
     }
   }
 
@@ -109,11 +111,11 @@ int main(int argc, char *argv[]) {
   arg = argv[1];
   if (arg == "version") {
     print_version();
-  } else if (arg == "xc") {
+  } else if (arg == "flightinfo") {
     command_xc(flight_file, airspace_file, output, force_xc);
-  } else if (arg == "opti") {
+  } else if (arg == "taskinfo") {
     command_opti(task_file, output);
-  } else if (arg == "race") {
+  } else if (arg == "raceinfo") {
     command_race(flight_file, task_file, output);
   } else {
     logging::error({"Unkown command", argv[1]});

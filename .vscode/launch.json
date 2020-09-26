@@ -10,7 +10,7 @@
         "xc",
         "--flight",
         //"tmp/flights/free_38870.igc",
-        "tests/data/xc/col_agnel.igc",
+        "tests/data/xc/col_agnel.igc"
         //"--airspace",
         //"tests/data/airspace/france_airspace.txt"
       ],
@@ -53,14 +53,14 @@
       ]
     },
     {
-      "name": "opti",
+      "name": "taskinfo",
       "type": "cppdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [
-        "opti",
+        "taskinfo",
         "--task",
-        "tests/data/task/ffvl_1.json",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/26/1952bf4b.xctsk",
         "-v"
       ],
       "stopAtEntry": false,
@@ -101,6 +101,6 @@
           "ignoreFailures": true
         }
       ]
-    },
+    }
   ]
 }

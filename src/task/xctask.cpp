@@ -13,7 +13,7 @@ XCTask::XCTask(const std::string &task_file) {
   json j;
   f >> j;
 
-  for (auto &t : j.at("turnpoints")) {
+  for (const auto &t : j.at("turnpoints")) {
     std::size_t radius = t.at("radius");
     double lat = t.at("waypoint").at("lat");
     double lon = t.at("waypoint").at("lon");
@@ -28,13 +28,16 @@ XCTask::XCTask(const std::string &task_file) {
         this->m_takeoff = parsed;
         this->m_all_tp.push_back(parsed);
       } else if (t.at("type") == "SSS") {
-        json sss_windows = j.at("sss").at("timeGates");
-        bool exit = j.at("sss").at("direction") == "EXIT";
-        if (sss_windows.size() > 1) {
-          throw std::runtime_error(
-              "Multiple SSS windows are not supported"); // TODO test
+        Time open(0, 0, 0);
+        if (j.at("sss").contains("timeGates")) {
+          json sss_windows = j.at("sss").at("timeGates");
+          if (sss_windows.size() > 1) {
+            throw std::runtime_error(
+                "Multiple SSS windows are not supported"); // TODO test
+          }
+          open = XCTaskTime(std::string(sss_windows.front()));
         }
-        XCTaskTime open(std::string(sss_windows.front()));
+        bool exit = j.at("sss").at("direction") == "EXIT";
         auto parsed = std::make_shared<SSS>(GeoPoint(lat, lon, alt), radius,
                                             name, desc, open, exit);
         this->m_sss = parsed;
@@ -47,8 +50,9 @@ XCTask::XCTask(const std::string &task_file) {
       }
     }
     // GOAL is the last turpoint of the array
-    else if (&t == &j.at("turnpoints").back()) {
-      bool line = j.at("goal").at("type") == "LINE";
+    else if (t == j.at("turnpoints").back()) {
+      bool line = j.contains("goal") && j.at("goal").contains("type") &&
+                  j.at("goal").at("type") == "LINE";
       XCTaskTime deadline(std::string(j.at("goal").at("deadline")));
       auto parsed = std::make_shared<Goal>(GeoPoint(lat, lon, alt), radius,
                                            name, desc, deadline, line);
