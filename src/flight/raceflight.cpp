@@ -5,12 +5,16 @@
 
 RaceFlight::RaceFlight(const std::string &igc_file, const Task &task)
     : Flight(igc_file) {
-  _track_on = _points.timepoints().cbegin()->first;
-  _takeoff = _track_on; // TODO identify takeoff with speed
-  _track_off = _points.timepoints().crbegin()->first;
-  _landing = _track_off; // TODO identify landing with speed
+  _track_on = m_points.timepoints().cbegin()->first;
+  m_takeoff = _track_on; // TODO identify takeoff with speed
+  _track_off = m_points.timepoints().crbegin()->first;
+  m_landing = _track_off; // TODO identify landing with speed
 
-  this->validate(task);
+  if (task.task_style() == TaskStyle::RACE_TO_GOAL) {
+    this->validate_race(task);
+  } else if (task.task_style() == TaskStyle::ELAPSED_TIME) {
+    this->validate_elapsed(task);
+  }
 }
 
 RaceStatus RaceFlight::at(const Time &t) const {
@@ -52,7 +56,86 @@ RaceStatus::RaceStatus(std::shared_ptr<GeoPoint> pos, double dist_to_goal,
                        const FlightStatus &status)
     : _position(pos), _status(status), _goal_distance(dist_to_goal) {}
 
-void RaceFlight::validate(const Task &task) {
+/**
+ * @brief Computes the best elasped time attempt on the given task
+ *
+ * @note This is only correct on a very specific use case, do not assume it
+ * handles every possible task
+ *
+ */
+void RaceFlight::validate_elapsed(const Task &task) {
+  std::shared_ptr<GeoPoint> prev_pos;
+  std::shared_ptr<GeoPoint> pos = m_points.cbegin()->second;
+  std::shared_ptr<SSS> sss = task.sss();
+  std::shared_ptr<ESS> ess = task.ess();
+
+  std::vector<std::vector<Time>> attempts;
+
+  bool has_to_enter = sss->is_enter();
+  bool is_inside = sss->contains(*pos);
+  bool prev_is_inside;
+  bool crossed_tp;
+
+  // identify all start crossings
+  for (auto it = m_points.cbegin(); it != m_points.cend(); ++it) {
+    prev_pos = pos;
+    prev_is_inside = is_inside;
+    pos = it->second;
+    is_inside = sss->contains(*pos);
+
+    crossed_tp = (prev_is_inside != is_inside);
+    if (crossed_tp) {
+      if ((has_to_enter && is_inside) || (!has_to_enter && !is_inside)) {
+        attempts.push_back({it->first});
+      }
+    }
+  }
+
+  // get first turnpoint after SSS
+  auto first_it = task.begin();
+  while (*first_it != sss) {
+    first_it++;
+  };
+  first_it++;
+
+  // for each start, compute time to ess
+  for (auto &attempt : attempts) {
+    auto current_tp = first_it;
+    Time t = attempt.front();
+    pos = m_points.at(t);
+    is_inside = current_tp->get()->contains(*pos);
+    has_to_enter = !is_inside;
+    while (t < m_landing) {
+      ++t;
+      prev_pos = pos;
+      prev_is_inside = is_inside;
+      pos = m_points.at(t);
+      is_inside = current_tp->get()->contains(*pos);
+      crossed_tp = (prev_is_inside != is_inside);
+      if (crossed_tp) {
+        if ((has_to_enter && is_inside) || (!has_to_enter && !is_inside)) {
+          attempt.push_back(t);
+          if (*current_tp == ess) {
+            break;
+          } else {
+            current_tp++;
+            has_to_enter = !current_tp->get()->contains(*pos);
+          }
+        }
+      }
+    }
+  }
+
+  std::vector<Time> conclusive_attempts;
+  for (const auto &attempt : attempts) {
+    if (attempt.size() == task.n_turnpoints()) {
+      conclusive_attempts.push_back(attempt.back() - attempt.front());
+    }
+  }
+  logging::debug({std::to_string(attempts.size())});
+}
+
+void RaceFlight::validate_race(const Task &task) {
   auto remaining_centers = task.centers();
   auto remaining_radii = task.radii();
   auto it = task.begin();
@@ -66,27 +149,27 @@ void RaceFlight::validate(const Task &task) {
   for (Time t = _track_on; t <= _track_off; ++t) {
     // try to get the pilot position at current time
     try {
-      pos = _points.at(t);
+      pos = m_points.at(t);
     } catch (const std::out_of_range &err) {
       status = FlightStatus::UNKNOWN;
     }
 
     // before takeoff and after landing, goal distances are not recomputed
-    if (t < _takeoff) {
+    if (t < m_takeoff) {
       status = FlightStatus::ON_TAKEOFF;
-    } else if (t > _landing) {
+    } else if (t > m_landing) {
       status = FlightStatus::LANDED;
     } else {
       status = FlightStatus::IN_FLIGHT;
       // if there are still turnpoints to validate
       if (!remaining_centers.empty()) {
         // first make sure the task is not closed
-        if (t > task.close()) {
+        if (task.has_close_time() && t > task.close()) {
           // TODO maybe some status ?
         } else {
 
-          // route = Route(*pos, remaining_centers, remaining_radii, init_vec);
-          // init_vec = route.opt_theta();
+          // route = Route(*pos, remaining_centers, remaining_radii,
+          // init_vec); init_vec = route.opt_theta();
 
           // takeoff validation
           if (current_tp == task.takeoff() && current_tp->contains(*pos)) {
@@ -139,4 +222,10 @@ void RaceFlight::validate(const Task &task) {
     }
     _status.emplace(t, RaceStatus(pos, dist_to_goal, status));
   }
+}
+
+json RaceFlight::to_json() const {
+  json j;
+  j["race_time"] = _race_time.to_string();
+  return j;
 }

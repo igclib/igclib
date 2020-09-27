@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <string>
 
-Flight::Flight(const std::string &igc_file) : _pilot_name("unknown pilot") {
+Flight::Flight(const std::string &igc_file) : m_pilot_name("unknown pilot") {
   // read and parse igc file
   std::ifstream f;
   f.open(igc_file);
@@ -25,7 +25,7 @@ Flight::Flight(const std::string &igc_file) : _pilot_name("unknown pilot") {
     throw std::runtime_error(error);
   }
 
-  _file_name = boost::filesystem::path(igc_file).filename().stem().string();
+  m_file_name = boost::filesystem::path(igc_file).filename().stem().string();
 
   std::string line;
   std::size_t lineno = 0;
@@ -59,16 +59,20 @@ Flight::Flight(const std::string &igc_file) : _pilot_name("unknown pilot") {
   }
 }
 
-// extracts pilot name and time offset
+/**
+ * @brief extracts pilot name and time offset from IGC H record
+ *
+ * @param record whole line starting with the H character
+ */
 void Flight::process_H_record(const std::string &record) {
   const std::string record_code = record.substr(2, 3);
   if (record_code == "PLT") {
     size_t delim = record.find(':') + 1;
-    _pilot_name = record.substr(delim);
-    util::trim(_pilot_name);
+    m_pilot_name = record.substr(delim);
+    util::trim(m_pilot_name);
   } else if (record_code == "TZO") {
     size_t delim = record.find(':') + 1;
-    _timezone_offset = IGCTimeOffset(record.substr(delim));
+    m_timezone_offset = IGCTimeOffset(record.substr(delim));
   }
 }
 
@@ -76,32 +80,40 @@ void Flight::process_B_record(const std::string &record) {
   IGCTime &&t(record);
   IGCPoint &&p(record);
   try {
-    if (!_timezone_offset.zero()) {
-      if (_timezone_offset.is_negative()) {
-        t -= _timezone_offset;
+    if (!m_timezone_offset.zero()) {
+      if (m_timezone_offset.is_negative()) {
+        t -= m_timezone_offset;
       } else {
-        t += _timezone_offset;
+        t += m_timezone_offset;
       }
     }
-    _points.insert(t, p);
+    m_points.insert(t, p);
   } catch (const std::runtime_error &err) {
-    auto prefix = "[ FLIGHT " + _file_name + " ]";
+    auto prefix = "[ FLIGHT " + m_file_name + " ]";
     logging::debug({prefix, err.what()});
   }
 }
 
-// Returns the JSON serialization of a Flight
+/**
+ * @brief returns a JSON serialization of the flight
+ */
 json Flight::to_json() const {
-  json j = {{"pilot", _pilot_name}, {"file", _file_name}, {"infractions", {}}};
+  json j = {
+      {"pilot", m_pilot_name}, {"file", m_file_name}, {"infractions", {}}};
 
   // airspace infractions
-  for (const auto &infraction : _infractions) {
+  for (const auto &infraction : m_infractions) {
     j["infractions"][infraction.first->name()] = infraction.first->to_json();
     j["infractions"][infraction.first->name()]["points"] =
         infraction.second.to_json();
   }
 
-  j["xc_info"] = _xcinfo.to_json();
+  j["xc_info"] = m_xcinfo.to_json();
+
+  const std::array<GeoPoint, 4> extent = m_points.bbox();
+  for (const GeoPoint &corner : extent) {
+    j["extent"].push_back(corner.to_json());
+  }
 
   return j;
 }
@@ -130,7 +142,7 @@ void Flight::validate(const Airspace &airspace) {
     if (getenv("ELEVATION_API_KEY")) {
       std::string key = getenv("ELEVATION_API_KEY");
       std::string api = "https://geolocalisation.ffvl.fr/elevation?key=" + key;
-      json data = _points.latlon();
+      json data = m_points.latlon();
       cpr::Body body(data.dump());
       cpr::Session session;
       session.SetVerifySsl(false);
@@ -143,7 +155,7 @@ void Flight::validate(const Airspace &airspace) {
         logging::debug({"Got API response"});
         data = json::parse(r.text);
         std::vector<double> altitudes = data.get<std::vector<double>>();
-        if (_points.set_agl(altitudes)) {
+        if (m_points.set_agl(altitudes)) {
           is_agl_validable = true;
         }
       } else if (r.status_code == 400) {
@@ -162,7 +174,7 @@ void Flight::validate(const Airspace &airspace) {
   }
 
   // then validate intersections
-  airspace.infractions(_points, _infractions, is_agl_validable);
+  airspace.infractions(m_points, m_infractions, is_agl_validable);
 }
 
 void Flight::compute_score() {
@@ -217,7 +229,7 @@ template <class T> double Flight::optimize_xc(double lower_bound) {
 double Flight::heuristic_free() const {
   // number of points used for tracklog approximation
   const std::size_t n_approx = 100;
-  const int step_ratio = _points.size() / n_approx;
+  const int step_ratio = m_points.size() / n_approx;
   std::size_t n_steps = 4;
   double candidate;
   double max_distance;
@@ -232,7 +244,7 @@ double Flight::heuristic_free() const {
       for (std::size_t j = 0; j < i; ++j) {
         candidate =
             previous_distances.at(j) +
-            _points.at(i * step_ratio)->distance(*_points.at(j * step_ratio));
+            m_points.at(i * step_ratio)->distance(*m_points.at(j * step_ratio));
         if (candidate > max_distance) {
           max_distance = candidate;
         }
@@ -246,10 +258,10 @@ double Flight::heuristic_free() const {
 }
 
 double Flight::max_diagonal(std::pair<std::size_t, std::size_t> p) const {
-  return _points.max_diagonal(p.first, p.second);
+  return m_points.max_diagonal(p.first, p.second);
 }
 
 std::array<GeoPoint, 4>
 Flight::bbox(std::pair<std::size_t, std::size_t> p) const {
-  return _points.bbox(p.first, p.second);
+  return m_points.bbox(p.first, p.second);
 }

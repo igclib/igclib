@@ -16,10 +16,6 @@ Task::Task(const std::string &task_file) : m_format(TaskFormat::UNKOWN) {
     logging::debug({"[ TASK ]", this->m_filename, "identified as XCTRACK"});
     this->m_task = std::make_shared<XCTask>(task_file);
     break;
-  case TaskFormat::PWCA:
-    logging::debug({"[ TASK ]", this->m_filename, "identified as PWCA"});
-    this->m_task = std::make_shared<PWCATask>(task_file);
-    break;
   case TaskFormat::FFVL:
     logging::debug({"[ TASK ]", this->m_filename, "identified as FFVL"});
     this->m_task = std::make_shared<FFVLTask>(task_file);
@@ -124,5 +120,12 @@ json TaskImpl::to_json() const {
   return j;
 }
 
-const Time &Task::start() const { return this->m_task->m_sss->open(); }
-const Time &Task::close() const { return this->m_task->m_goal->close(); }
+bool Task::has_close_time() const {
+  if (this->m_task->m_goal) {
+    return true;
+  }
+  return false;
+}
+
+const Time Task::start() const { return this->m_task->m_sss->open(); }
+const Time Task::close() const { return this->m_task->m_goal->close(); }

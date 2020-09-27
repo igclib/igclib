@@ -18,8 +18,8 @@ public:
   bool zero() const;
   Time &operator++();
   Time &operator--();
-  Time operator+(const Time &other);
-  Time operator-(const Time &other);
+  Time operator+(const Time &other) const;
+  Time operator-(const Time &other) const;
   Time &operator+=(const Time &other);
   Time &operator-=(const Time &other);
   Time &operator=(const Time &other);

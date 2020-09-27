@@ -60,11 +60,11 @@ Time &Time::operator=(const Time &other) {
   return *this;
 }
 
-Time Time::operator+(const Time &other) {
+Time Time::operator+(const Time &other) const {
   return Time(this->m_sec_from_midnight + other.m_sec_from_midnight);
 }
 
-Time Time::operator-(const Time &other) {
+Time Time::operator-(const Time &other) const {
   return Time(this->m_sec_from_midnight - other.m_sec_from_midnight);
 }
 

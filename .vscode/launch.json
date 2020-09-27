@@ -2,12 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "xc",
+      "name": "flightinfo",
       "type": "cppdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [
-        "xc",
+        "flightinfo",
         "--flight",
         //"tmp/flights/free_38870.igc",
         "tests/data/xc/col_agnel.igc"
@@ -87,6 +87,37 @@
         "tests/data/task/xctrack_1.xctsk",
         "--flight",
         "tests/data/race/1_all",
+        "-v"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "race_wr",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [
+        "raceinfo-wr",
+        "--tasks",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/27/62929db7.xctsk",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/27/634a076e.xctsk",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/27/da572fc9.xctsk",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/27/92a4d926.xctsk",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/27/b9f26693.xctsk",
+        "/home/arthurdent/dev/server/tmp/tasks/2020/09/27/ca2b73c2.xctsk",
+        "--flight",
+        "/tmp/upload_674152a99679b75d62e30e8f9bf68394",
         "-v"
       ],
       "stopAtEntry": false,

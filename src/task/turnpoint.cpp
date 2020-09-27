@@ -150,4 +150,4 @@ bool Goal::contains(const GeoPoint &pos) {
 
 bool Goal::is_line() const { return this->m_line; }
 
-const Time &Goal::close() const { return this->m_close; }
+const Time Goal::close() const { return this->m_close; }

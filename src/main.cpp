@@ -1,6 +1,7 @@
 #include <igclib/airspace.hpp>
 #include <igclib/config.hpp>
 #include <igclib/flight.hpp>
+#include <igclib/json.hpp>
 #include <igclib/logging.hpp>
 #include <igclib/race.hpp>
 #include <igclib/task.hpp>
@@ -13,7 +14,7 @@ void usage() { std::cerr << USAGE << std::endl; }
 
 void print_version() { std::cerr << VERSION << std::endl; }
 
-void command_xc(const std::string &flight_file,
+void flightinfo(const std::string &flight_file,
                 const std::string &airspace_file, const std::string &output,
                 bool force_xc) {
   if (flight_file.empty()) {
@@ -37,7 +38,7 @@ void command_xc(const std::string &flight_file,
   }
 }
 
-void command_opti(const std::string &task_file, const std::string &output) {
+void taskinfo(const std::string &task_file, const std::string &output) {
   if (task_file.empty()) {
     logging::error({"No task file provided"});
     exit(EXIT_FAILURE);
@@ -51,8 +52,8 @@ void command_opti(const std::string &task_file, const std::string &output) {
   }
 }
 
-void command_race(const std::string &flight_dir, const std::string &task_file,
-                  const std::string &output) {
+void raceinfo(const std::string &flight_dir, const std::string &task_file,
+              const std::string &output) {
   if (task_file.empty()) {
     logging::error({"No task file provided"});
     exit(EXIT_FAILURE);
@@ -70,6 +71,30 @@ void command_race(const std::string &flight_dir, const std::string &task_file,
   }
 }
 
+void raceinfo_wr(const std::string &flight,
+                 const std::vector<std::string> &tasks,
+                 const std::string &output) {
+  if (tasks.empty()) {
+    logging::error({"No task file provided"});
+    exit(EXIT_FAILURE);
+  }
+  if (flight.empty()) {
+    logging::error({"No flight provided"});
+    exit(EXIT_FAILURE);
+  }
+  try {
+    json j;
+    for (const auto &t : tasks) {
+      RaceFlight f(flight, t);
+      j[t] = f.to_json();
+    }
+    save_json(j, output);
+  } catch (std::runtime_error &e) {
+    logging::error({e.what()});
+    exit(EXIT_FAILURE);
+  }
+}
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     usage();
@@ -80,6 +105,7 @@ int main(int argc, char *argv[]) {
   std::string flight_file;
   std::string airspace_file;
   std::string task_file;
+  std::vector<std::string> task_files;
   std::string command;
   std::string output;
   bool force_xc = false; // TODO remove once xc optimization works
@@ -96,6 +122,11 @@ int main(int argc, char *argv[]) {
       output = argv[++i];
     } else if ((arg == "--task") && (i + 1 < argc)) {
       task_file = argv[++i];
+    } else if ((arg == "--tasks") && (i + 1 < argc)) {
+      while ((i + 1 < argc) && argv[i + 1][0] != '-') {
+        task_files.push_back(argv[i + 1]);
+        i++;
+      }
     } else if (arg == "--force_xc") {
       force_xc = true;
     } else if ((arg == "--quiet") || (arg == "-q")) {
@@ -112,11 +143,13 @@ int main(int argc, char *argv[]) {
   if (arg == "version") {
     print_version();
   } else if (arg == "flightinfo") {
-    command_xc(flight_file, airspace_file, output, force_xc);
+    flightinfo(flight_file, airspace_file, output, force_xc);
   } else if (arg == "taskinfo") {
-    command_opti(task_file, output);
+    taskinfo(task_file, output);
   } else if (arg == "raceinfo") {
-    command_race(flight_file, task_file, output);
+    raceinfo(flight_file, task_file, output);
+  } else if (arg == "raceinfo-wr") {
+    raceinfo_wr(flight_file, task_files, output);
   } else {
     logging::error({"Unkown command", argv[1]});
     usage();

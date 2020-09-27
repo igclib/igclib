@@ -13,6 +13,10 @@ XCTask::XCTask(const std::string &task_file) {
   json j;
   f >> j;
 
+  if (j.at("sss").at("type") == "ELAPSED-TIME") {
+    m_taskstyle = TaskStyle::ELAPSED_TIME;
+  }
+
   for (const auto &t : j.at("turnpoints")) {
     std::size_t radius = t.at("radius");
     double lat = t.at("waypoint").at("lat");
@@ -62,7 +66,6 @@ XCTask::XCTask(const std::string &task_file) {
       auto parsed = std::make_shared<Turnpoint>(GeoPoint(lat, lon, alt), radius,
                                                 name, desc);
       this->m_all_tp.push_back(parsed);
-      this->m_tp.push_back(parsed);
     }
     logging::debug({"[ TASK ]", this->m_all_tp.back()->to_string()});
   }

@@ -25,14 +25,14 @@ public:
   double max_diagonal(sizepair p) const;
 
   // accessors
-  std::size_t size() const { return _points.size(); }
-  const std::string &pilot() const { return _pilot_name; }
-  const std::string &id() const { return _file_name; }
+  std::size_t size() const { return m_points.size(); }
+  const std::string &pilot() const { return m_pilot_name; }
+  const std::string &id() const { return m_file_name; }
   const std::shared_ptr<GeoPoint> at(std::size_t index) const {
-    return _points.at(index);
+    return m_points.at(index);
   }
   const std::shared_ptr<GeoPoint> at(const Time &time) const {
-    return _points.at(time);
+    return m_points.at(time);
   }
 
 protected:
@@ -41,12 +41,12 @@ protected:
   double heuristic_free() const;
   template <class T> double optimize_xc(double lower_bound);
 
-  std::string _pilot_name;
-  std::string _file_name;
-  IGCTimeOffset _timezone_offset;
-  XCInfo _xcinfo;
-  PointCollection _points;
-  infractions_t _infractions;
+  std::string m_pilot_name;
+  std::string m_file_name;
+  IGCTimeOffset m_timezone_offset;
+  XCInfo m_xcinfo;
+  PointCollection m_points;
+  infractions_t m_infractions;
 };
 
 /* RACEFLIGHT */
@@ -78,15 +78,18 @@ public:
   RaceFlight(const std::string &igc_file, const Task &task);
   RaceStatus at(const Time &t) const;
 
-  const Time &takeoff_time() const { return _takeoff; }
-  const Time &landing_time() const { return _landing; }
-  const Time &race_time() const { return _race_time; }
+  const Time takeoff_time() const { return m_takeoff; }
+  const Time landing_time() const { return m_landing; }
+  const Time race_time() const { return _race_time; }
+
+  json to_json() const;
 
 protected:
-  void validate(const Task &task);
+  void validate_race(const Task &task);
+  void validate_elapsed(const Task &task);
 
-  Time _takeoff;
-  Time _landing;
+  Time m_takeoff;
+  Time m_landing;
   Time _track_on;
   Time _track_off;
 

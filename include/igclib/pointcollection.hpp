@@ -25,6 +25,8 @@ public:
   const std::vector<std::pair<double, double>> latlon() const;
   bool set_agl(const std::vector<double> &altitudes);
   json to_json() const;
+  auto cbegin() const { return m_timepoints.cbegin(); }
+  auto cend() const { return m_timepoints.cend(); }
 
   // range iterate over geopoints in PointCollection
   const geopoints_t &geopoints() const { return this->m_geopoints; }

@@ -25,14 +25,26 @@ const std::shared_ptr<GeoPoint> PointCollection::at(const Time &t) const {
   return this->m_timepoints.at(t);
 }
 
+/**
+ * @brief Computes the 2D bounding box of the whole point collection
+ *
+ * @return const std::array<GeoPoint, 4>
+ */
 const std::array<GeoPoint, 4> PointCollection::bbox() const {
   return this->bbox(0, this->size());
 }
 
+/**
+ * @brief Computes the 2D bounding box of a subset of the point collection
+ *
+ * @param start index of first point to consider
+ * @param end index of the last point to consifer
+ * @return const std::array<GeoPoint, 4>
+ */
 const std::array<GeoPoint, 4> PointCollection::bbox(std::size_t start,
                                                     std::size_t end) const {
   if (end > this->size()) {
-    throw std::runtime_error("Accessing point outside of collection");
+    throw std::runtime_error("accessing point outside of collection");
   }
 
   double min_lat = 90.0;
@@ -40,15 +52,16 @@ const std::array<GeoPoint, 4> PointCollection::bbox(std::size_t start,
   double min_lon = 180.0;
   double max_lon = -180;
 
-  for (auto it = this->geopoints().begin() + start;
-       it <= this->geopoints().begin() + end; ++it) {
+  const auto it_start = this->geopoints().cbegin() + start;
+  const auto it_end = this->geopoints().cbegin() + end;
+  for (auto it = it_start; it < it_end; ++it) {
     min_lat = std::min(it->get()->lat, min_lat);
     max_lat = std::max(it->get()->lat, max_lat);
     min_lon = std::min(it->get()->lon, min_lon);
     max_lon = std::max(it->get()->lon, max_lon);
   }
 
-  std::array<GeoPoint, 4> &&box = {
+  const std::array<GeoPoint, 4> box = {
       GeoPoint(min_lat, min_lon, 0, 0),
       GeoPoint(min_lat, max_lon, 0, 0),
       GeoPoint(max_lat, min_lon, 0, 0),

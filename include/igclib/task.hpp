@@ -8,13 +8,14 @@
 #include <string>
 #include <vector>
 
-using Taskformat = enum TaskFormat { XCTRACK, PWCA, FFVL, UNKOWN };
+using Taskformat = enum TaskFormat { XCTRACK, FFVL, UNKOWN };
+using TaskStyle = enum TaskStyle { RACE_TO_GOAL, ELAPSED_TIME };
 
 class TaskImpl {
   friend class Task;
 
 public:
-  TaskImpl() = default;
+  TaskImpl() : m_taskstyle(RACE_TO_GOAL) {}
 
   json to_json() const;
 
@@ -32,6 +33,8 @@ protected:
   // all tp
   std::vector<std::shared_ptr<Turnpoint>> m_all_tp;
   std::vector<std::shared_ptr<Turnpoint>> m_tp;
+
+  TaskStyle m_taskstyle;
 };
 
 class FFVLTask : public TaskImpl {
@@ -44,12 +47,6 @@ class XCTask : public TaskImpl {
 public:
   XCTask() = delete;
   XCTask(const std::string &task_file);
-};
-
-class PWCATask : public TaskImpl {
-public:
-  PWCATask() = delete;
-  PWCATask(const std::string &task_file);
 };
 
 class Task {
@@ -67,15 +64,18 @@ public:
   const std::deque<std::size_t> &radii() const {
     return this->m_task->m_radii;
   };
+
   std::shared_ptr<Takeoff> takeoff() const { return this->m_task->m_takeoff; }
+  TaskStyle task_style() const { return this->m_task->m_taskstyle; }
   auto sss() const { return this->m_task->m_sss; }
   auto ess() const { return this->m_task->m_ess; }
   auto goal() const { return this->m_task->m_goal; }
   auto begin() const { return this->m_task->m_all_tp.begin(); }
   auto end() const { return this->m_task->m_all_tp.end(); }
 
-  const Time &start() const;
-  const Time &close() const;
+  bool has_close_time() const;
+  const Time start() const;
+  const Time close() const;
 
 protected:
   void identify(const std::string &task_file);
@@ -84,5 +84,4 @@ protected:
   Route m_route;
   std::shared_ptr<TaskImpl> m_task;
   TaskFormat m_format;
-  std::vector<Time> m_turnpoint_tags;
 };
