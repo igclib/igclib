@@ -80,7 +80,7 @@ public:
 
   const Time takeoff_time() const { return m_takeoff; }
   const Time landing_time() const { return m_landing; }
-  const Time race_time() const { return _race_time; }
+  const Time race_time() const { return m_race_time; }
 
   json to_json() const;
 
@@ -91,9 +91,9 @@ protected:
   Time m_takeoff;
   Time m_landing;
   Time _track_on;
-  Time _track_off;
+  Time m_track_off;
 
   std::map<Time, RaceStatus> _status;
-  std::vector<Time> _tag_times;
-  Time _race_time;
+  std::vector<Time> m_tag_times;
+  Time m_race_time;
 };

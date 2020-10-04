@@ -25,6 +25,7 @@ public:
   Time &operator=(const Time &other);
 
   std::string to_string() const;
+  int to_seconds() const;
 
 protected:
   void check(int hour, int minute, int second) const;

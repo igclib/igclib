@@ -99,6 +99,11 @@ std::string Time::to_string() const {
   return timechar;
 }
 
+/**
+ * @brief Returns the number of seconds since midnight (00:00:00)
+ */
+int Time::to_seconds() const { return m_sec_from_midnight; }
+
 void Time::check(int hour, int minute, int second) const {
   if ((hour < 0) || (hour > 23)) {
     throw std::runtime_error("hour must be between 0 and 23");
