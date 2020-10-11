@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.7) # support apt compatibility
 
 enable_testing()
 
@@ -22,7 +22,7 @@ configure_file("${PROJECT_SOURCE_DIR}/include/igclib/config.hpp.in" "${PROJECT_S
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 find_package(Threads REQUIRED)
-find_package(Eigen)
+find_package(Eigen3 REQUIRED)
 
 # disable third-party tests
 set(JSON_BuildTests OFF CACHE INTERNAL "")
