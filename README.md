@@ -6,10 +6,10 @@ A command-line tool for paragliding competitions and XC.
 
 - Airspace checking of flights against OpenAir files.
 - Task validation
+- Task optimization
 
 ## In Progress
 
-- Task optimization
 - XC score computation
 
 ## Future features
@@ -18,7 +18,20 @@ A command-line tool for paragliding competitions and XC.
 
 ## Install
 
-See the [install wiki](https://github.com/igclib/igclib/wiki/Install)
+Two options :
+
+- Docker `docker run teobouvard/igclib`
+- Build from source, see the [install wiki](https://github.com/igclib/igclib/wiki/Install)
+
+## Deploy
+
+```
+docker build -f docker/Dockerfile.bare -t teobouvard/igclib:bare .
+docker push teobouvard/igclib:bare
+
+docker build -f docker/Dockerfile.node -t teobouvard/igclib:node .
+docker push teobouvard/igclib:node
+```
 
 ## Acknowledgements
 
