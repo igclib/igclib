@@ -10,7 +10,6 @@ install:release
 	#cmake --install build
 	cd build && make install
 
-
 build-dir:
 	mkdir -p build
 
@@ -37,3 +36,8 @@ profile-memory: debug
 memory-check:
 	valgrind -s --track-origins=yes build/src/igclib xc --flight tests/data/xc/col_agnel.igc --airspace tests/data/airspace/france_08_19.txt > /dev/null
 
+docker-publish:
+	docker build -f docker/Dockerfile.bare -t teobouvard/igclib:bare .
+	docker build -f docker/Dockerfile.node -t teobouvard/igclib:node .
+	docker push teobouvard/igclib:bare
+	docker push teobouvard/igclib:node

@@ -28,29 +28,28 @@ Task::Task(const std::string &task_file) : m_format(TaskFormat::UNKOWN) {
     break;
   }
 
-  // add all turnpoints except the first one
-  auto tp = this->end();
-  while (tp-- > this->begin() + 1) {
-    this->m_task->m_centers.push_front(tp->get()->center());
-    this->m_task->m_radii.push_front(tp->get()->radius());
+  for (const auto &tp : this->m_task->m_all_tp) {
+    this->m_task->m_centers.push_back(tp->center());
+    this->m_task->m_radii.push_back(tp->radius());
   }
 
-  // compute the route with first turnpoint as initial position
-  this->m_route = Route(tp->get()->center(), this->centers(), this->radii());
-
-  // finally add the first turnpoint
-  this->m_task->m_centers.push_front(tp->get()->center());
-  this->m_task->m_radii.push_front(tp->get()->radius());
+  this->m_route =
+      Route(this->centers().front(), this->centers(), this->radii());
 
   logging::debug({"[ TASK ]",
                   std::to_string(this->m_route.optimal_distance() / 1000),
                   "km"});
 }
 
-// Identifies the format of the task file from known providers, based on
-// distinctive traits. For now all supported task formats are JSON files. If
-// this was to change, it would be wise to implement a TaskIdentifier class
-// with the different cases.
+/**
+ * @brief Identifies the format of the task file from known providers
+ *
+ * Using format distinctive traits.For now all supported task formats are JSON
+ * files. If this was to change, it would be wise to implement a TaskIdentifier
+ * class with the different cases.
+ *
+ * @param task_file
+ */
 void Task::identify(const std::string &task_file) {
   std::size_t matching_formats = 0;
   std::ifstream f(task_file);

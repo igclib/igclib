@@ -1,9 +1,12 @@
 FROM ubuntu:latest
 
+# disable tzdata questions
+ARG DEBIAN_FRONTEND=noninteractive
+
 # Install igclib
 RUN apt-get update && \
-    apt-get install libssl-dev git cmake libboost-all-dev libeigen3-dev -y && \
-    ln -s /usr/include/eigen3/Eigen /usr/local/include/
+    apt-get install build-essential libssl-dev git cmake libboost-all-dev libeigen3-dev -y && \
+    ln -s /usr/include/eigen3/Eigen /usr/include/
 
 RUN git clone https://github.com/igclib/igclib.git --recurse-submodules && \
     mkdir igclib/build && \
