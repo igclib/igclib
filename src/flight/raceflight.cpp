@@ -214,7 +214,7 @@ json RaceFlight::to_json() const {
   json j;
   j["in_goal"] = m_in_goal;
   if (m_in_goal) {
-    j["race_time_sec"] = m_race_time.to_seconds();
+    j["race_time"] = m_race_time.to_seconds();
     for (const Time &t : m_tag_times) {
       j["tag_times"].push_back(t.to_seconds());
     }

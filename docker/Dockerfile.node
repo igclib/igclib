@@ -5,7 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Install igclib
 RUN apt-get update && \
-    apt-get install cmake libboost-all-dev libeigen3-dev -y && \
+    apt-get install build-essential cmake libboost-all-dev libeigen3-dev -y && \
     ln -s /usr/include/eigen3/Eigen /usr/include/
 
 RUN git clone https://github.com/igclib/igclib.git --recurse-submodules && \
