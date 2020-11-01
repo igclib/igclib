@@ -15,6 +15,8 @@ RaceFlight::RaceFlight(const std::string &igc_file, const Task &task)
   } else if (task.task_style() == TaskStyle::ELAPSED_TIME) {
     this->validate_elapsed(task);
   }
+
+  m_in_goal = m_tag_times.size() == task.n_turnpoints();
 }
 
 RaceStatus RaceFlight::at(const Time &t) const {
@@ -210,9 +212,12 @@ void RaceFlight::validate_race(const Task &task) {
 
 json RaceFlight::to_json() const {
   json j;
-  j["race_time_sec"] = m_race_time.to_seconds();
-  for (const Time &t : m_tag_times) {
-    j["tag_times"].push_back(t.to_seconds());
+  j["in_goal"] = m_in_goal;
+  if (m_in_goal) {
+    j["race_time_sec"] = m_race_time.to_seconds();
+    for (const Time &t : m_tag_times) {
+      j["tag_times"].push_back(t.to_seconds());
+    }
   }
   return j;
 }

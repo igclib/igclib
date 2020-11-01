@@ -96,4 +96,5 @@ protected:
   std::map<Time, RaceStatus> _status;
   std::vector<Time> m_tag_times;
   Time m_race_time;
+  bool m_in_goal;
 };
