@@ -6,9 +6,9 @@
 RaceFlight::RaceFlight(const std::string &igc_file, const Task &task)
     : Flight(igc_file) {
   _track_on = m_points.timepoints().cbegin()->first;
-  m_takeoff = _track_on; // TODO identify takeoff with speed
+  m_takeoff = _track_on; // TODO identify takeoff using speed
   m_track_off = m_points.timepoints().crbegin()->first;
-  m_landing = m_track_off; // TODO identify landing with speed
+  m_landing = m_track_off; // TODO identify landing using speed
 
   if (task.task_style() == TaskStyle::RACE_TO_GOAL) {
     this->validate_race(task);
@@ -59,6 +59,8 @@ void RaceFlight::validate_elapsed(const Task &task) {
     crossed_tp = (prev_is_inside != is_inside);
     if (crossed_tp) {
       if ((has_to_enter && is_inside) || (!has_to_enter && !is_inside)) {
+        // TODO count time before crossing as current strategy favours sparse
+        // tracklogs
         attempts.push_back({it->first});
       }
     }
@@ -78,11 +80,14 @@ void RaceFlight::validate_elapsed(const Task &task) {
     pos = m_points.at(t);
     is_inside = current_tp->get()->contains(*pos);
     has_to_enter = !is_inside;
-    while (t < m_landing) {
-      ++t;
+    while (++t < m_landing) {
       prev_pos = pos;
       prev_is_inside = is_inside;
-      pos = m_points.at(t);
+      try {
+        pos = m_points.at(t);
+      } catch (const std::out_of_range &err) {
+        continue;
+      }
       is_inside = current_tp->get()->contains(*pos);
       crossed_tp = (prev_is_inside != is_inside);
       if (crossed_tp) {

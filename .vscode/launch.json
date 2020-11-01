@@ -130,6 +130,32 @@
           "ignoreFailures": true
         }
       ]
+    },
+    {
+      "name": "race_wr_bug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [
+        "raceinfo-wr",
+        "--tasks",
+        "/home/arthurdent/dev/syrac/comps/ITA-2020/ITA-2020 - Task 1",
+        "--flight",
+        "/home/arthurdent/dev/syrac/comps/2020-italy-open-score/t1_20200802/joachim_oberhauser_2020-08-02_01.igc",
+        "-v"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }
