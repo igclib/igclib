@@ -1,0 +1,17 @@
+FROM alpine:latest
+
+# disable tzdata questions
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install igclib
+RUN apk add cmake make g++ boost-dev eigen-dev git
+
+apt-get install build-essential libssl-dev git cmake libboost-all-dev libeigen3-dev -y && \
+    ln -s /usr/include/eigen3/Eigen /usr/include/
+
+RUN git clone https://github.com/igclib/igclib.git --recurse-submodules && \
+    mkdir igclib/build && \
+    cd igclib/build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    make -j $(nproc) && \
+    make install
