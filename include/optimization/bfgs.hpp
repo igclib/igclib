@@ -58,7 +58,7 @@ public:
   */
   optimizer(T f, const Eigen::VectorXd &x0, bool retpath = false)
       : _objective(f), _n_params(x0.size()), _max_iter(200 * _n_params),
-        _x0(x0), _gtol(1e-5), _nfev(0), _njev(0), _retpath(retpath){};
+        _x0(x0), _gtol(1e-8), _nfev(0), _njev(0), _retpath(retpath){};
 
   // set maximum iterations
   void max_iter(unsigned int iter) { _max_iter = iter; }
@@ -403,7 +403,7 @@ private:
     // used for debugging fortran code
     // double res[] = {ginit, gtest, gx,    gy,    finit, fx,    fy,
     //                stx,   sty,   stmin, stmax, width, width1};
-    unsigned int maxiter = 5;
+    unsigned int maxiter = 100;
     for (unsigned int i = 0; i < maxiter; ++i) {
       // Obtain another function and derivative.
       f = phi(stp);
